@@ -8,10 +8,5 @@
 	</parent>
 	<artifactId>demo-web-new</artifactId>
 	<packaging>war</packaging>
-	<name>demo-web-new</name>
-	<dependencies>
-		<dependency>
-			<artifactId></artifactId>
-		</dependency>
-	</dependencies>
+	<name>demo-web-new</name>	
 </project>
