@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="workflowModelOaTask">
+	<typeAlias alias="BpmModelOataskPo" type="com.gitcloud.tankflow.model.po.BpmModelOataskPo" />
+	<!-- 根据参数查询列表 -->
+	<select id="findModelOataskListByParam" parameterClass="java.util.Map"  resultClass="BpmModelOataskPo">
+		<![CDATA[
+			 select 
+				 	OANODE_ID			oanodeId,              
+					OANODE_NAME			oanodeName,
+					OANODE_TYPE			oanodeType,
+					OANODE_STATE		oanodeState,
+					MODEL_ID			modelId,               
+					WF_NODE_ID			wfNodeId,               
+					KEY_WORD			keyWord,                 
+					MSG					msg,                 
+					URL					url        
+			 from  
+			 	BPM_MODEL_NODE_OA
+			 where 1 = 1
+		 ]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="oanodeId">
+		 		OANODE_ID= #oanodeId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="modelId">
+		 		MODEL_ID = #modelId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="wfNodeId">
+		 		WF_NODE_ID = #wfNodeId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+</sqlMap>

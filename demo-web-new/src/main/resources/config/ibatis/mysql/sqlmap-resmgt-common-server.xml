@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="resmgtGeneralServer">
+	<typeAlias alias="RmGeneralServerVo" type="com.git.cloud.resmgt.common.model.vo.RmGeneralServerVo"/>
+	<!-- 报警信息vo -->
+	<typeAlias alias="VCenterAlarmVo" type="com.git.cloud.resmgt.common.model.vo.VCenterAlarmVo"/>
+	<!-- 物理机、虚拟机信息po -->
+	<typeAlias alias="RmHostVmInfoPo" type="com.git.cloud.resmgt.common.model.po.RmHostVmInfoPo"/>
+	<!-- Datastore 信息PO -->
+	<typeAlias alias="CmDatastorePo" type="com.git.cloud.resmgt.common.model.po.CmDatastorePo"/>
+	<!-- 查询VM同步信息PO -->
+	<typeAlias alias="cmVmSynInfoPo" type="com.git.cloud.resmgt.common.model.po.CmVmSynInfoPo"/>
+	
+	<typeAlias alias="vmMonitorVo" type="com.git.cloud.resmgt.compute.model.vo.VmMonitorVo"/>
+	
+	<sql id="queryRmGeneralServer_select">
+		SELECT S.ID, S.SERVER_NAME serverName, S.TYPE type, D.DIC_NAME typeName, S.SERVER_IP serverIp, S.SUB_MASK subMask, 
+		S.GATEWAY gateway, S.DATACENTER_ID datacenterId, C.DATACENTER_CNAME datacenterName, S.USER_NAME userName, P.`PASSWORD` password
+	</sql>
+	<sql id="queryRmGeneralServer_count">
+		SELECT count(1)
+	</sql>
+	<sql id="queryRmGeneralServer_from">
+		FROM RM_GANERAL_SERVER S
+		LEFT JOIN ADMIN_DIC D ON S.TYPE = D.DIC_CODE AND D.DIC_TYPE_CODE='GANERAL_SERVER_TYPE'
+		LEFT JOIN RM_DATACENTER C ON S.DATACENTER_ID = C.ID AND C.IS_ACTIVE='Y'
+		LEFT JOIN CM_PASSWORD P ON P.RESOURCE_ID = S.ID
+		WHERE S.IS_ACTIVE='Y'
+	</sql>
+	<sql id="queryRmGeneralServer_where">
+		<isNotEmpty prepend="AND" property="serverName">
+			S.SERVER_NAME LIKE '%$serverName$%' 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="type">
+			S.TYPE = #type# 
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="serverIp">
+			S.SERVER_IP LIKE '%$serverIp$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="subMask">
+			S.SUB LIKE '%$subMask$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="gateway">
+			S.GATEWAY LIKE '%$gateway$%'
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="datacenterId">
+			S.DATACENTER_ID=#datacenterId#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="userName">
+			S.USER_NAME LIKE '%$userName$%'
+		</isNotEmpty>
+	</sql>
+	<select id="queryRmGeneralServer" parameterClass="java.util.Map" resultClass="RmGeneralServerVo">
+		<include refid="queryRmGeneralServer_select"/>
+		<include refid="queryRmGeneralServer_from"/>
+		<include refid="queryRmGeneralServer_where"/>
+		ORDER BY $sidx$ $sord$
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="queryRmGeneralServerCount" parameterClass="java.util.HashMap" resultClass="java.lang.Integer">
+		<include refid="queryRmGeneralServer_count"/>
+		<include refid="queryRmGeneralServer_from"/>
+		<include refid="queryRmGeneralServer_where"/>
+	</select>
+	
+	<insert id="insertGeneralServer" parameterClass="RmGeneralServerVo">
+		INSERT INTO RM_GANERAL_SERVER(ID, SERVER_NAME, TYPE, SERVER_IP, SUB_MASK, GATEWAY, IS_ACTIVE, DATACENTER_ID, USER_NAME) 
+		VALUES(#id#, #serverName#, #type#, #serverIp#, #subMask#, #gateway#, #isActive#, #datacenterId#, #userName#)
+	</insert>
+	<update id="deleteGeneralServerById" parameterClass="java.lang.String">
+		UPDATE RM_GANERAL_SERVER S SET S.IS_ACTIVE='N' WHERE S.ID=#id#
+	</update>
+	
+	<select id="queryRmGeneralServerById" parameterClass="java.lang.String" resultClass="RmGeneralServerVo">
+		<include refid="queryRmGeneralServer_select"/>
+		<include refid="queryRmGeneralServer_from"/>
+		AND S.ID = #id#
+	</select>
+	<update id="updateGeneralServer" parameterClass="RmGeneralServerVo">
+		UPDATE RM_GANERAL_SERVER S SET S.SERVER_NAME = #serverName#, S.TYPE= #type#, S.SERVER_IP= #serverIp#, S.SUB_MASK=#subMask#,
+		S.GATEWAY= #gateway#, S.DATACENTER_ID= #datacenterId#, S.USER_NAME = #userName# WHERE S.ID= #id#
+	</update>
+	
+	<select id="queryDataCenter" resultClass="java.util.HashMap">
+		SELECT d.id, d.DATACENTER_CNAME FROM RM_DATACENTER d WHERE d.IS_ACTIVE='Y'
+	</select>
+	
+	<select id="checkServerName" resultClass="java.lang.Integer">
+		SELECT count(1) FROM RM_GANERAL_SERVER s WHERE s.IS_ACTIVE='Y' 
+		<isNotEmpty prepend="AND" property="serverName">
+			s.SERVER_NAME=#serverName#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="id">
+			s.ID!=#id#
+		</isNotEmpty>
+	</select>
+	
+	<select id="queryAutoServerBydcId"  parameterClass="java.lang.String" resultClass="RmGeneralServerVo">
+	SELECT 
+	  S.server_IP as serverIp,
+	  S.user_name as userName,
+	  P.password as password
+	FROM
+	  RM_GANERAL_SERVER S
+	  LEFT JOIN CM_PASSWORD P ON P.RESOURCE_ID = S.ID
+	WHERE S.type = 'AUTOMATION_SERVER' 
+	  AND S.datacenter_id = #dcId# 
+	  AND S.IS_ACTIVE='Y'
+	</select>
+	<!-- 查询automation服务器信息 -->
+	<select id="findRmGeneralServerByType" parameterClass="java.lang.String" resultClass="RmGeneralServerVo">
+		SELECT
+			S.ID,
+			S.SERVER_NAME serverName,
+			S.TYPE type,
+			D.DIC_NAME typeName,
+			S.SERVER_IP serverIp,
+			S.SUB_MASK subMask,
+			S.GATEWAY gateway,
+			S.DATACENTER_ID datacenterId,
+			C.DATACENTER_CNAME datacenterName,
+			S.USER_NAME userName,
+			P.`PASSWORD` PASSWORD
+		FROM
+			RM_GANERAL_SERVER S
+		LEFT JOIN ADMIN_DIC D ON S.TYPE = D.DIC_CODE
+		AND D.DIC_TYPE_CODE = 'GANERAL_SERVER_TYPE'
+		LEFT JOIN RM_DATACENTER C ON S.DATACENTER_ID = C.ID
+		AND C.IS_ACTIVE = 'Y'
+		LEFT JOIN CM_PASSWORD P ON P.RESOURCE_ID = S.ID
+		WHERE
+			S.IS_ACTIVE = 'Y'
+		AND S.TYPE = #type#
+	</select>
+	<!-- 插入报警信息表 -->
+	<insert id="insertCmAlarm" parameterClass="java.util.List">
+		<![CDATA[ 
+		INSERT INTO `CM_ALARM` (
+		  `ID` ,
+		  `KEY` ,
+		  `TRIGGERED_TIME` ,
+		  `ENTITY_TYPE` ,
+		  `ENTITY_NAME` ,
+		  `ALRAM_KEY` ,
+		  `NAME` ,
+		  `DESCRIPTION` ,
+		  `SYSTEM_NAME` ,
+		  `ACKNOWLEDGED` ,
+		  `ACKNOWLEDGED_USER` ,
+		  `ACKNOWLEDGED_TIME` ,
+		  `LAST_MODIFIED_TIME` ,
+		  `LAST_MODIFIED_USER` ,
+		  `INSERT_TIME` ,
+		  `HOST_NAMES` ,
+		  `VM_NAMES` ,
+		  `VCENTER`
+		)
+		VALUES
+		]]>
+		<iterate conjunction=",">
+		<![CDATA[
+		(
+		  #boList[].id#,
+		  #boList[].key#,
+		  #boList[].triggeredTime#,
+		  #boList[].entityType#,
+		  #boList[].entityName#,
+		  #boList[].alarmKey#,
+		  #boList[].name#,
+		  #boList[].description#,
+		  #boList[].systemName#,
+		  #boList[].acknowledged#,
+		  #boList[].acknowledgedUser#,
+		  #boList[].acknowledgedTime#,
+		  #boList[].lastModifiedTime#,
+		  #boList[].lastModifiedUser#,
+		  #boList[].insertTime#,
+		  #boList[].hostNames#,
+		  #boList[].vmNames#,
+		  #boList[].vCenterUrl#
+		)
+		]]>
+		</iterate>
+	</insert>
+	<!-- 查询物理机和虚拟机的状态 -->
+	<select id="queryHostVMInfo" resultClass="RmHostVmInfoPo" parameterClass="java.util.HashMap" >
+	<![CDATA[ 
+		SELECT 
+            DEV.ID id,
+            DEV.DEVICE_NAME deviceName,
+            `HOST`.HOST_IP hostIp,
+            VM.HOST_ID vmHostId,
+            `HOST`.HOST_IP vmHostIp,
+            DEV.RUNNING_STATE runningState,
+            (CASE WHEN `HOST`.ID IS NULL THEN 0 ELSE 1 END) isHost
+        FROM 
+            CM_DEVICE DEV
+            LEFT JOIN
+            CM_HOST HOST
+            ON
+                DEV.ID = `HOST`.ID
+            LEFT JOIN
+            CM_VM VM
+            ON 
+                DEV.ID = VM.ID
+            LEFT JOIN
+            rm_nw_openstack_ip_address H_IP
+            ON
+                `HOST`.ID = H_IP.INSTANCE_ID
+            LEFT JOIN
+            rm_nw_openstack_ip_address VM_H_IP
+            ON  
+                VM.HOST_ID = VM_H_IP.INSTANCE_ID
+        WHERE
+            1 = 1
+		]]>
+			<isNotEmpty prepend="AND" property="hostIp">
+				`HOST`.HOST_IP = #hostIp#
+				AND
+				`HOST`.ID IS NOT NULL
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="deviceName">
+				DEV.DEVICE_NAME = #deviceName#
+				AND
+				`HOST`.ID IS NULL
+			</isNotEmpty>
+	</select>
+	<!-- 查询DataStore的信息 -->
+	<select id="queryDatastoreInfo" resultClass="CmDatastorePo" parameterClass="java.util.HashMap" >
+	<![CDATA[ 
+		SELECT * 
+        FROM
+        (
+        (SELECT 
+            DISK.ID id
+            ,DISK.NAME name
+            ,DEV.DEVICE_NAME hostName
+            ,H_IP.IP hostIp
+        FROM
+            CM_LOCAL_DISK DISK
+            INNER JOIN
+            CM_DEVICE DEV
+            ON
+            DISK.DEVICE_ID = DEV.ID
+            INNER JOIN
+            RM_NW_OPENSTACK_IP_ADDRESS H_IP
+            ON
+                DEV.ID = H_IP.INSTANCE_ID) 
+        UNION
+        (SELECT
+             DS.DATASTORE_ID id
+            ,DS.DATASTORE_NAME name
+            ,DEV.DEVICE_NAME hostName
+            ,H_IP.IP hostIp
+        FROM
+            CM_HOST_DATASTORE_REF REF
+            INNER JOIN
+            CM_DATASTORE DS
+            ON
+            REF.DATASTORE_ID = DS.DATASTORE_ID
+            INNER JOIN
+            CM_DEVICE DEV
+            ON
+            REF.HOST_ID = DEV.ID
+            INNER JOIN
+            RM_NW_OPENSTACK_IP_ADDRESS H_IP
+            ON
+                DEV.ID = H_IP.INSTANCE_ID) 
+        ) A
+        WHERE
+	]]>
+		name = #dsName#
+		AND
+		hostIp = #hIp#
+	</select>
+	<!-- 更新设备运行状态 -->
+	<update id="updateDeviceRunningState" parameterClass="java.util.HashMap">
+		UPDATE CM_DEVICE
+		SET RUNNING_STATE = #currentState#
+		WHERE ID = #deviceID#
+	</update>
+	<!-- 查询VM同步信息 -->
+	<select id="findVmSynInfoByManageIp" parameterClass="java.lang.String"
+	resultClass="cmVmSynInfoPo">
+		<![CDATA[
+		SELECT 
+			DEV.DEVICE_NAME vmName
+			,GROUP_CONCAT(rnoia.IP SEPARATOR ',') vmIp
+			,H.HOST_IP vmHostIp
+			,VM.CPU cpu
+			,VM.MEM mem
+			,VM.DISK disk
+			,CASE WHEN DISK.ID IS NULL THEN DS.DATASTORE_NAME ELSE DISK.`NAME` END dsName
+			,RC.ENAME rcName
+			,MGT.MANAGE_IP mgtName
+			,POOL.POOL_NAME poolName
+			,DEV.RUNNING_STATE state
+			,DEV.ID id
+			,VM.HOST_ID vmHostId
+			,CASE WHEN DISK.ID IS NULL THEN DS.DATASTORE_ID ELSE DISK.ID END dsID
+			,CASE WHEN DISK.ID IS NULL AND DS.DATASTORE_ID IS NULL THEN 2 
+				WHEN DS.DATASTORE_ID IS NOT NULL THEN 1  
+				WHEN DISK.ID IS NOT NULL THEN 0
+			END dsType
+		FROM 
+			RM_VM_MANAGE_SERVER MGT
+			LEFT JOIN	RM_CLUSTER RC	ON	MGT.ID = RC.MANAGE_SERVER
+			LEFT JOIN	RM_RES_POOL POOL	ON	RC.RES_POOL_ID = POOL.ID
+			LEFT JOIN	CM_HOST H	ON	RC.ID = H.CLUSTER_ID
+			INNER JOIN	CM_VM VM	ON	VM.HOST_ID = H.ID
+			INNER JOIN	CM_DEVICE DEV	ON	DEV.ID = VM.ID
+			INNER JOIN rm_nw_openstack_ip_address rnoia	ON	rnoia.INSTANCE_ID = DEV.ID			
+			LEFT JOIN	CM_LOCAL_DISK DISK	ON	VM.DATASTORE_ID = DISK.ID
+			LEFT JOIN	CM_DATASTORE DS	ON	VM.DATASTORE_ID = DS.DATASTORE_ID
+		WHERE	DEV.IS_ACTIVE = 'Y'
+			AND	DEV.DEVICE_STATUS = 'ONLINE' 
+			AND	MGT.MANAGE_IP = #manageIp#
+		GROUP BY	DEV.ID
+		ORDER BY	DEV.DEVICE_NAME
+		]]>
+	</select>
+	<!-- 更新虚拟机的datastore ID -->
+    <update id="updateVmDatastore" parameterClass="java.util.HashMap">
+		UPDATE CM_VM
+		SET DATASTORE_ID = #dsId#
+		WHERE 
+		  CM_VM.ID = #vmId#
+	</update>
+	<select id="getVmMonitor" resultClass="vmMonitorVo" parameterClass="java.util.HashMap">
+		select name,value, date_timestamp date from MONITOR_DATA where ip = #ip# and name = #name# and days = #days# order by date_timestamp
+	</select>
+</sqlMap>

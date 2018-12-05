@@ -1,0 +1,274 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="resource">
+	<resultMap class="com.git.cloud.resource.model.po.MachineInfoPo" id="MachineInfoPo">
+		<result property="dataCenter" column="dataCenter"/>
+		<result property="poolName" column="poolName"/>
+		<result property="cdpName" column="cdpName"/>
+		<result property="clusterName" column="clusterName"/>
+		<result property="hostName" column="DEVICE_NAME"/>
+		<result property="hostId" column="HOST_ID"/>
+		<result property="sn" column="SN"/>
+		<result property="platForm" column="PLATFORM_NAME"/>
+		<result property="virtualName" column="VIRTUAL_TYPE_NAME"/>
+		<result property="cpu" column="CPU"/>
+		<result property="mem" column="MEM"/>
+		<result property="controlTime" column="CONTROL_TIME_FORMAT"/>
+		<result property="ips" column="IPS"/>
+		<result property="manufacturer" column="DEVICE_MANUFACTURER"/>
+		<result property="model" column="DEVICE_MODEL"/>
+		<result property="hostId" column="HOST_ID"/>
+		<result property="status" column="CURRENT_STATUS"/>
+	</resultMap>
+	
+	<typeAlias alias="VmInfoPo" type="com.git.cloud.resource.model.po.VmInfoPo"/>
+	
+	<sql id="queryMachineInfoPo">
+		<![CDATA[
+		select DC.DATACENTER_CNAME dataCenter,PL.ID POOL_ID, PL.POOL_NAME poolName, 
+            PLT.PLATFORM_NAME, TP.VIRTUAL_TYPE_NAME, CLS.VM_DISTRI_TYPE,    D.DIC_NAME, CLS.ID CLUSTER_ID, CLS.CLUSTER_NAME clusterName, 
+            HST.ID HOST_ID, CD.DEVICE_NAME, HST.CPU, HST.MEM, CD.SN, CDM.DEVICE_MODEL, CDM.DEVICE_MANUFACTURER,
+            DATE_FORMAT(HST.CONTROL_TIME,'%Y-%m-%d %H:%i:%s') CONTROL_TIME_FORMAT, 
+            GROUP_CONCAT(IP.IP) GIP, GROUP_CONCAT(CONCAT_WS(': ',SUBSTRING(RLST.RM_IP_TYPE_NAME, -2), IP.IP) ORDER BY RLST.RM_IP_TYPE_NAME SEPARATOR ' <br/>') IPS, 
+            HST.IS_INVC, CASE HST.IS_INVC WHEN 'Y' THEN 'Y' ELSE 'N' END CURRENT_STATUS
+        from RM_DATACENTER DC 
+        JOIN RM_RES_POOL PL ON DC.ID = PL.DATACENTER_ID AND PL.IS_ACTIVE='Y'
+        JOIN RM_CLUSTER CLS ON PL.ID=CLS.res_pool_id AND CLS.IS_ACTIVE='Y'
+        LEFT JOIN RM_PLATFORM PLT ON CLS.PLATFORM_TYPE = PLT.PLATFORM_CODE AND PLT.IS_ACTIVE='Y'
+        LEFT JOIN RM_VIRTUAL_TYPE TP ON CLS.VM_TYPE = TP.VIRTUAL_TYPE_CODE AND TP.IS_ACTIVE='Y'
+        LEFT JOIN ADMIN_DIC D ON CLS.VM_DISTRI_TYPE = D.DIC_CODE AND DIC_TYPE_CODE='VM_DISTRI_TYPE'
+        JOIN CM_HOST HST ON CLS.ID = HST.CLUSTER_ID 
+        LEFT JOIN CM_DEVICE CD ON HST.ID = CD.ID AND CD.IS_ACTIVE = 'Y'
+        LEFT JOIN CM_DEVICE_MODEL CDM ON CD.DEVICE_MODEL_ID = CDM.ID AND CDM.IS_ACTIVE = 'Y'
+        LEFT JOIN rm_nw_openstack_ip_address IP ON CD.ID = IP.INSTANCE_ID
+        LEFT JOIN RM_NW_RULE_LIST RLST ON IP.USE_REL_CODE = RLST.USE_CODE AND RLST.IS_ACTIVE='Y'
+        WHERE DC.IS_ACTIVE='Y' AND (HST.IS_INVC='Y')
+		]]>
+	</sql>
+	<sql id="queryMachineGroupBy">
+		GROUP BY DC.DATACENTER_CNAME, PL.ID, CP.ID,  CLS.ID, HST.ID
+	</sql>
+	
+	<select id="queryMachineInfoPoList" resultMap="MachineInfoPo" parameterClass="java.util.Map">
+		<include refid="queryMachineInfoPo"/> 
+		<isNotEmpty prepend="AND" property="dataCenter">
+			DC.ID = #dataCenter#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="poolName">
+			PL.ID = #poolName#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="cdpName">
+			CP.ID = #cdpName#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="clusterName">
+			CLS.ID = #clusterName#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="platForm">
+			CLS.PLATFORM_TYPE = #platForm#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="virtualName">
+			CLS.VM_TYPE = #virtualName#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="hostName">
+			CD.DEVICE_NAME like CONCAT('%',#hostName#,'%')
+		</isNotEmpty>
+		<include refid="queryMachineGroupBy"/>
+		
+		ORDER BY
+		<isNotEmpty property="sidx">
+		$sidx$ $sord$,
+		</isNotEmpty>
+		DC.DATACENTER_CNAME, PL.ID, CP.ID,  CLS.ID, HST.ID 	limit #startIndex# ,#pageSize#
+	</select>
+	<select id="queryMachineInfoPoCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		select count(1) from (
+			<include refid="queryMachineInfoPo"/>
+			<isNotEmpty prepend="AND" property="dataCenter">
+				DC.ID = #dataCenter#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="poolName">
+				PL.ID = #poolName#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="cdpName">
+				CP.ID = #cdpName#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="clusterName">
+				CLS.ID = #clusterName#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="platForm">
+				CLS.PLATFORM_TYPE = #platForm#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="virtualName">
+				CLS.VM_TYPE = #virtualName#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="hostName">
+				CD.DEVICE_NAME like CONCAT('%',#hostName#,'%')
+			</isNotEmpty>
+			<include refid="queryMachineGroupBy"/>
+		) TMP
+	</select>
+	
+	<select id="queryMachineInfo" resultMap="MachineInfoPo" parameterClass="java.lang.String">
+		<include refid="queryMachineInfoPo"/>
+		AND	HST.ID = #hostId#
+		<include refid="queryMachineGroupBy"/>
+	</select>
+	
+	<sql id="queryVmInfoPo">
+		<![CDATA[
+		SELECT
+            DC.DATACENTER_CNAME dataCenter,
+            PL.ID POOL_ID,
+            PL.POOL_NAME poolName,
+            PLT.PLATFORM_NAME platForm,
+            TP.VIRTUAL_TYPE_NAME virtualName,
+            CLS.VM_DISTRI_TYPE,
+            D.DIC_NAME,
+            CLS.ID CLUSTER_ID,
+            CLS.CLUSTER_NAME clusterName,
+            HST.ID hostId,
+            HCD.DEVICE_NAME hostName,
+            VM.ID vmId,
+            CD.DEVICE_NAME vmName,
+            DU.CNAME deployUnit,
+            INFO.CNAME appSystem,
+            CD.SN,
+            VM.CPU,
+            VM.MEM,
+            VM.ONLINE_TIME onlineTimme,
+            AD.DIC_NAME cStatus,
+            GROUP_CONCAT(DISTINCT IP.IP) GIP,
+            te. NAME AS tenantName,
+            GROUP_CONCAT(
+                DISTINCT CONCAT_WS(
+                    ': ',
+                    SUBSTRING(RLST.RM_IP_TYPE_NAME, - 2),
+                    IP.IP
+                )
+                ORDER BY
+                    RLST.RM_IP_TYPE_NAME SEPARATOR ' <br/>'
+            ) IPS
+            FROM
+                RM_DATACENTER DC
+            JOIN RM_RES_POOL PL ON DC.ID = PL.DATACENTER_ID
+            AND PL.IS_ACTIVE = 'Y'
+            JOIN RM_CLUSTER CLS ON PL.ID = CLS.RES_POOL_ID
+            AND CLS.IS_ACTIVE = 'Y'
+            LEFT JOIN RM_PLATFORM PLT ON CLS.PLATFORM_TYPE = PLT.PLATFORM_ID
+            AND PLT.IS_ACTIVE = 'Y'
+            LEFT JOIN RM_VIRTUAL_TYPE TP ON CLS.VM_TYPE = TP.VIRTUAL_TYPE_ID
+            AND TP.IS_ACTIVE = 'Y'
+            LEFT JOIN ADMIN_DIC D ON CLS.VM_DISTRI_TYPE = D.DIC_CODE
+            AND DIC_TYPE_CODE = 'VM_DISTRI_TYPE'
+            JOIN CM_HOST HST ON CLS.ID = HST.CLUSTER_ID
+            JOIN CM_DEVICE HCD ON HST.ID = HCD.ID
+            AND HCD.IS_ACTIVE = 'Y'
+            JOIN CM_VM VM ON VM.HOST_ID = HST.ID  
+            JOIN CM_DEVICE CD ON VM.ID = CD.ID and CD.IS_ACTIVE = 'Y'
+            AND CD.IS_ACTIVE = 'Y'
+            LEFT JOIN ADMIN_DIC AD ON CD.DEVICE_STATUS = AD.DIC_CODE
+            AND AD.DIC_TYPE_CODE = 'DEVICE_STATUS'
+            LEFT JOIN APP_DU DU ON VM.DU_ID = DU.DU_ID
+            AND DU.IS_ACTIVE = 'Y'
+            LEFT JOIN APP_INFO INFO ON DU.APP_ID = INFO.APP_ID
+            LEFT JOIN RM_NW_OPENSTACK_IP_ADDRESS IP ON VM.ID = IP.instance_id
+            LEFT JOIN RM_NW_RULE_LIST RLST ON IP.USE_REL_CODE = RLST.USE_CODE
+            AND RLST.IS_ACTIVE = 'Y'
+            LEFT JOIN BM_SR_RR_VM_REF vmref ON vmref.device_id = VM.id
+            LEFT JOIN BM_SR_RRINFO bmsr ON bmsr.rrinfo_id = vmref.rrinfo_id
+            LEFT JOIN CLOUD_SERVICE SERV ON bmsr.service_id = SERV.service_id
+            LEFT JOIN CLOUD_TENANT te ON te.id = VM.TENANT_ID
+
+		]]>
+	</sql>
+	<sql id="queryVmInfoGroupBy">
+		GROUP BY DC.DATACENTER_CNAME, PL.ID, CP.ID,  CLS.ID, HST.ID, VM.ID
+	</sql>
+	<select id="queryVmInfoPoList" resultClass="VmInfoPo" parameterClass="java.util.Map">
+		<include refid="queryVmInfoPo"/>
+		<dynamic prepend="WHERE">
+			<isNotEmpty prepend="AND" property="appSystem">
+				INFO.APP_ID = #appSystem#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="deployUnit">
+				VM.DU_ID = #deployUnit#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="platForm">
+			 	CLS.PLATFORM_TYPE = #platForm#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="virtualName">
+				CLS.VM_TYPE = #virtualName#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="vmIP">
+				IP.IP like CONCAT('%',#vmIP#,'%')
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="vmName">
+				CD.DEVICE_NAME like CONCAT('%',#vmName#,'%')
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="tenantId">
+				VM.TENANT_ID = #tenantId#
+			</isNotEmpty>
+		</dynamic>
+		<include refid="queryVmInfoGroupBy"/>
+		
+		ORDER BY
+		<isNotEmpty property="sidx">
+		$sidx$ $sord$,
+		</isNotEmpty>
+		DC.DATACENTER_CNAME, PL.ID, CP.ID,  CLS.ID, INFO.APP_ID, DU.DU_ID, HST.ID, VM.ID	limit #startIndex# ,#pageSize#
+	</select>
+	<select id="queryVmInfoPoCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+		select count(1) from (
+			<include refid="queryVmInfoPo"/>
+			<dynamic prepend="WHERE">
+				<isNotEmpty prepend="AND" property="appSystem">
+					INFO.APP_ID = #appSystem#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="deployUnit">
+					VM.DU_ID = #deployUnit#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="platForm">
+				 	CLS.PLATFORM_TYPE = #platForm#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="virtualName">
+					CLS.VM_TYPE = #virtualName#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="vmIP">
+					IP.IP like CONCAT('%',#vmIP#,'%')
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="vmName">
+					CD.DEVICE_NAME like CONCAT('%',#vmName#,'%')
+				</isNotEmpty>
+			</dynamic>
+			<include refid="queryVmInfoGroupBy"/>
+		) TMP
+	</select>
+	
+	<select id="queryVmInfo" resultClass="VmInfoPo" parameterClass="java.lang.String">
+		<include refid="queryVmInfoPo"/>
+		WHERE VM.ID = #vmId#
+		<include refid="queryVmInfoGroupBy"/>
+	</select>
+	
+	<select id="queryPool" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		select ID, POOL_NAME from RM_RES_POOL WHERE POOL_TYPE='COMPUTE' AND IS_ACTIVE='Y'
+		<isNotEmpty property="dataCenterId" prepend="AND">
+			DATACENTER_ID = #dataCenterId#  
+		</isNotEmpty>
+	</select>
+	<select id="queryCluster" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		SELECT ID, CLUSTER_NAME FROM RM_CLUSTER WHERE IS_ACTIVE='Y'
+		<isNotEmpty prepend="AND" property="poolId">
+			RES_POOL_ID = #poolId#
+		</isNotEmpty>
+	</select>	
+	
+	<select id="queryDeployUnit" resultClass="java.util.HashMap" parameterClass="java.util.Map">
+		SELECT DU_ID, CNAME FROM APP_DU WHERE IS_ACTIVE='Y'
+		<isNotEmpty prepend="AND" property="appId">
+			APP_ID = #appId#
+		</isNotEmpty>
+		ORDER BY CNAME
+	</select>
+</sqlMap>	

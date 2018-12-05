@@ -1,0 +1,24 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="bill-package" extends="icms-package" namespace="/bill">
+	
+	</package>
+	<package name="bill-query" extends="bill-package" namespace="/bill/query">
+		<action name="indexAct" class="billAction" method="index">
+				<result name="success">/pages/bill/bill.jsp</result>
+		</action>
+		<action name="queryList" class="billAction" method="list"></action>
+		<action name="detailList" class="billAction" method="detailList"></action>
+		<action name="voucherList" class="billAction" method="voucherList"></action>
+		<action name="fundSerialList" class="billAction" method="fundSerialList"></action>
+		<action name="queryTenantBalancePage" class="billAction" method="queryTenantBalancePage"></action>
+		<action name="accountRecharge" class="billAction" method="accountRecharge"></action>
+		<!-- 查询计费审批信息 -->
+		<action name="queryBmSrRrinfoPriceApproval" class="billAction" method="queryBmSrRrinfoPriceApproval"/>	
+		<action name="queryPriceStrategyById" class="billAction" method="queryPriceStrategyById"/>	
+		<action name="queryTotalInvoicePage" class="billAction" method="queryTotalInvoicePage"/>	
+	</package>
+</struts>

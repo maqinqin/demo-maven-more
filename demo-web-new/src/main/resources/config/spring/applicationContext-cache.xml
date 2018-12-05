@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	<bean id="cacheFactory" class="com.git.cloud.cache.CacheFactoryBean">
+		<property name="provider" ref="ehCacheProvider" />
+	</bean>
+	<bean id="ehCacheProvider" class="com.git.cloud.cache.EHCacheProvider"/>
+	<bean id="CacheUtil" class="com.git.cloud.cache.CacheUtil" init-method="init" lazy-init="false">
+		<property name="cacheFactory" ref="cacheFactory" />
+		<property name="sysMenuCacheName">
+			<value>sysMenuCacheName</value>
+		</property>
+	</bean>
+</beans>

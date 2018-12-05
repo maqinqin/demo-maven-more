@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<!-- 字典管理 -->
+	<bean id="dicAction" class="com.git.cloud.dic.action.DicAction"
+		scope="prototype">
+		<property name="dicService" ref="dic_service" />
+	</bean>
+	<bean id="dicDao" class="com.git.cloud.dic.dao.impl.DicDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="dic_service" class="com.git.cloud.dic.service.impl.DicServiceImpl">
+		<property name="dicDao" ref="dicDao" />
+	</bean>
+</beans>

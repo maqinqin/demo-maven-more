@@ -1,0 +1,257 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{padding:0; margin:0; font-size:12px; font-family:"微软雅黑"; background:#EFEEF3;}
+h1,h2,h3,h4,p,ul,li,dl,dt,dd,img,input{padding:0; margin:0; list-style:none; border:none;}
+/*-------------整个工作台外框的样式------------------*/
+.Workbench_wrap{
+	width:99.4%;
+	overflow:hidden;
+	padding:0.2%;
+	background:#F1F4F6;
+	margin-bottom:30px;
+}
+
+
+/*---------------我的工作台的标题样式---------------------*/
+.WorkBt{
+	padding: 6px 20px 8px 20px;
+	margin-bottom:3px;
+	font-size: 16px;
+	font-weight:normal;
+	color: #999;
+	
+}
+	
+.WorkBt small{
+	margin: 0px;
+	font-size: 12px;
+	font-weight: 400;
+	color: #888;
+	line-height: 18px;
+}
+
+.WorkBtBg{
+    display:inline;
+	color: #3e3e3e;
+	font-size:14px;
+	border-left:3px solid #18a689;
+	padding-left:8px;
+	/* border-radius: 2px;
+	margin-right: 5px;
+	background-color: #18a689; */
+	
+}
+
+.WorkSmallBtBg{
+	padding:16px 0 16px 14px;
+	margin:10px 0;
+	display:inline;
+}
+/*-------------我的工作台中仪表盘的外框样式------------------*/
+.WorkPho{
+	/* Padding-top:10px; */ 
+	padding-bottom:20px;
+	margin-top:0px;
+	margin-bottom:30px;
+	background:#fff;
+	position:relative;
+	margin-left:16px;
+	margin-right:16px;
+	box-shadow: 0 1px 4px rgba(0,0,0,.05);
+	/* border: 1px solid #d9d9d9; */
+}
+.WorkPho_bt{
+	font-size:14px;
+	color:#3e3e3e;
+	/* background:#e4eaec;  */
+	font-weight:bold;
+}
+
+.WorkPho_bt .bt{
+	display:inline-block;
+	margin:15px 10px;
+	padding-left:12px;
+	/* height:20px;
+	line-height:20px; */
+	/* border-left:3px solid #18a689; */
+	font-size:14px;
+	color:#58666e;
+}
+.WorkPho_con{
+	width:100%;
+	overflow:hidden;
+	padding:15px 0 8px 0 ;
+	
+}
+.WorkPho_con li{
+	width:20%;
+	height:20%;
+	margin-left:3.7%;
+	padding:20px 0 24px 0;
+	display:inline-block;
+	background:none; 
+	border:1px solid #F9FAFB;
+	border-radius:20px;
+	-moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -o-border-radius: 20px;
+	position:relative;
+	margin-bottom:35px;
+    vertical-align: middle;
+}
+
+.WorkPho_con .pho{
+	width:80%;
+	height:80%;
+	padding-top:3%;
+	margin:0 auto;
+	z-index:999;
+} 
+.WorkPho_con .pho img{
+	width:100%;
+	height:30%;
+}
+.WorkPho_bottom{
+	width:20%;
+	height:11px;
+	position:absolute;
+	right:3%;
+	bottom:-4px;
+}	
+.tip{
+	height:24px;
+	width:70%;
+	line-height:24px;
+	margin:0 auto;
+	background:#7C8396;
+	text-align:center;
+	color:#fff;
+	font-size:12px;
+	display:block;
+	position:absolute;
+	bottom:-16px;
+	left:15%;
+	border-radius:20px;
+	-moz-border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -o-border-radius: 20px;
+}
+/*-------------我的工作台中仪表盘中鼠标经过的tip的样式------------------*/
+.CurTip{
+	border-color:#f6ad54;
+	background:#f6ad54;
+	}
+.WorkPho_con span.tipnone{
+	background:#dfeaef;
+	}
+/*-------------我的工作台中仪表盘框中的Tab菜单的样式------------------*/	
+.WorkPho .tabBt{
+	/* background:url(../images/TabBt_bg.png) no-repeat top left; */
+	position:absolute;
+	/* left:200px; */
+	right:5px;
+	top:12px;
+	z-index:999;
+}
+.tabBt_list{
+	/* height:31px;
+	width:130px;
+	line-height:31px; */
+	padding: 10px 18px;
+	float:left;
+	font-size:12px;
+	color: #58666e;
+	text-align:center;
+	cursor:pointer;
+	border-radius: 3px 3px 0 0;
+	margin-right:5px;
+	/* border-left:1px solid #d9d9d9; */
+	/* background:url(../images/TabBt_list_bg.png) no-repeat;	 */
+	
+}
+.last{
+	background:url(../images/TabBt_listLast_bg.png) no-repeat;
+}
+/*-------------我的工作台中仪表盘框中的Tab菜单的样式-鼠标点击的样式------------------*/
+.tabCur{
+	background:url(../images/TabBt_listCur_bg.png) no-repeat; 
+	margin-top:1px;
+}	
+
+/*-------------我的工作台中数据表的样式------------------*/
+.TableWarp{
+	overflow:hidden;
+	width:100%;
+	margin:0px auto 0;
+}
+.Table_Left,.Table_Right{
+	width:46%;
+	float:left;
+	padding:0px 10px 10px 15px;
+	margin-left:16px;
+	margin-right:0;
+}
+.Table_Right{
+	/* width:47%; */
+	float:right;
+	margin-right:16px;
+	margin-left:0;
+}
+.TableWarp .WorkPho_bottom{
+	width:40%;
+}
+table{
+	width:98%;
+	margin:0px auto 0;
+	height:auto;
+	
+}
+
+/* .TableWarp table{
+	border:1px solid #d9d9d9;
+} */
+.Table_Right table tr,.Table_Left table tr{
+	height:33px;  
+	/* background:#ebeff0;  */
+	color:#666;
+	cursor:pointer;
+}
+.Table_Right table td,.Table_Left table td{
+	height:33px;  
+	line-height:33px;  
+	border-bottom: 1px solid #f3f3f3;
+	font-size:12px; 
+	padding-left:5px; 
+}
+table td.nur{
+	width:30px; 
+	line-height:30px; 
+	text-align:center; 
+	border-right:4px solid #fff; 
+	padding-left:0; color:#fff; 
+	background:#bec2ce;
+} 
+.table_bt td{ 
+	background:#e4eaec; 
+	color:#58666e; 
+	font-weight:bold;
+}
+.table_bt td.nur{
+	background:#7c8395; 
+	font-weight:bold;
+}
+table td a:link,table td a:visited{
+	text-decoration:underline; 
+	color:#939da9; 
+}
+table tr.cur{ 
+	background:#f4ad53; 
+	color:#fff;
+}
+table tr.cur td.nur{
+	background:#7c8496;
+}
+table tr.cur a{
+	color:#fff;
+}

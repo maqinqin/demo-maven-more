@@ -1,0 +1,22 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-storage-package" extends="icms-package" namespace="/resmgt-storage">
+	</package>
+	<package name="resmgt-storage-pool" extends="resmgt-storage-package" namespace="/resmgt-storage/pool">
+		<action name="findSePoolRuleByTypeAct" class="sePoolRuleAction" method="findSePoolRuleByType"/>
+		<action name="saveSePoolRuleCellAct" class="sePoolRuleAction" method="saveSePoolRuleCell"/>
+		
+		<action name="seAvailabilityInit" class="sePoolRuleAction" method="init">
+			<result name="success">/pages/resmgt/storage/seAvailability.jsp</result>
+		</action>
+		<action name="sePerformanceInit" class="sePoolRuleAction" method="init">
+			<result name="success">/pages/resmgt/storage/sePerformance.jsp</result>
+		</action>
+		<action name="seNasLevelInit" class="sePoolRuleAction" method="init">
+			<result name="success">/pages/resmgt/storage/seNasLevel.jsp</result>
+		</action>
+	</package>
+</struts>

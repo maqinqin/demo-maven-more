@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+		
+<sqlMap  namespace="checkSecureArea">
+<typeAlias alias="rmNwSecureVo" type="com.git.cloud.resmgt.network.model.vo.RmNwSecureVo" />
+<typeAlias alias="rmNwSecurePo" type="com.git.cloud.resmgt.network.model.po.RmNwSecurePo" />
+
+<!-- 初始化参数安全区域 -->
+<sql id="selectSecureAreaList">
+		
+	SELECT
+	a.SECURE_AREA_ID as  secureAreaId,
+	a.SECURE_AREA_NAME as secureAreaName,
+	a.IS_ACTIVE as isActive
+	,a.SECURE_AREA_TYPE secureAreaType
+	,DIC1.DIC_NAME secureAreaTypeName
+	FROM RM_NW_SECURE_AREA a
+	LEFT JOIN ADMIN_DIC DIC1 ON
+	DIC1.DIC_TYPE_CODE='SECURE_AREA_TYPE' AND DIC1.DIC_CODE=a.SECURE_AREA_TYPE
+	WHERE a.IS_ACTIVE='Y'
+			<dynamic prepend=" and ">
+			<isNotEmpty property="secureAreaName" prepend="and">
+				a.SECURE_AREA_NAME like concat('%', #secureAreaName#, '%')
+			</isNotEmpty>
+			</dynamic>		
+</sql>
+	<select id="selectSecureTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectSecureAreaList" />
+		) as recordTable
+	</select>
+	<select id="selectSecurePage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectSecureAreaList" />
+		$_orderby$ 
+		limit #startIndex# ,#pageSize#
+		
+   </select>
+
+<!-- 安全区域 -->
+  <insert  id="insertSecureArea" parameterClass="rmNwSecurePo">
+  INSERT INTO RM_NW_SECURE_AREA
+  (SECURE_AREA_ID,SECURE_AREA_NAME,IS_ACTIVE,SECURE_AREA_TYPE)VALUES(#secureAreaId#,#secureAreaName#,#isActive#,#secureAreaType#)
+  </insert>
+    <select  id="getSecureAreaById" parameterClass="java.util.Map" resultClass="rmNwSecurePo">
+         SELECT 
+			SECURE_AREA_ID as  secureAreaId,
+            SECURE_AREA_NAME as secureAreaName
+		,SECURE_AREA_TYPE as secureAreaType
+             FROM RM_NW_SECURE_AREA  WHERE IS_ACTIVE='Y' AND SECURE_AREA_ID=#secureAreaId#
+  </select>
+<update id="updateSecureArea" parameterClass="rmNwSecurePo">
+    UPDATE  RM_NW_SECURE_AREA
+         <dynamic prepend="set">
+             <isNotEmpty prepend="," property="secureAreaName">
+				SECURE_AREA_NAME = #secureAreaName#
+		   </isNotEmpty>
+			 <isNotEmpty prepend="," property="secureAreaType">
+				 SECURE_AREA_TYPE = #secureAreaType#
+			 </isNotEmpty>
+		</dynamic>
+	   WHERE SECURE_AREA_ID=#secureAreaId#
+</update>
+<!-- 在安全层下查找是否有子层 -->
+<select id="findSecureAreaSon" parameterClass="java.lang.String"  resultClass="rmNwSecureVo">
+	  <![CDATA[ 
+	 
+	  SELECT 
+	  m.SECURE_AREA_ID  FROM RM_NW_SECURE_AREA r
+	   LEFT JOIN RM_NW_SECURE_TIER m 
+	   ON r.SECURE_AREA_ID=m.SECURE_AREA_ID  WHERE r.SECURE_AREA_ID=#secureAreaId# AND m.IS_ACTIVE='Y'
+	   ]]>
+</select> 
+<!-- 查看安全层是不是正被计算资源池占用 -->	
+ <select id="findSecurePool" parameterClass="java.lang.String"  resultClass="rmNwSecureVo">
+	  <![CDATA[ SELECT  h.SECURE_AREA_TYPE 
+	   FROM  RM_RES_POOL p 
+	   LEFT  JOIN  RM_HOST_RES_POOL  h 
+	   USING (ID) WHERE p.POOL_TYPE='COMPUTE' AND h.SECURE_AREA_TYPE=#secureAreaId# 
+	   ]]>
+</select>
+<!-- 查看安全层是不是正被服务器角色占用 --> 
+ <select id="findSecureAppDu" parameterClass="java.lang.String"  resultClass="rmNwSecureVo">
+	  <![CDATA[ 
+	  SELECT 
+	   SECURE_AREA_CODE  FROM APP_DU
+	   WHERE SECURE_AREA_CODE=#secureAreaId#  AND  IS_ACTIVE='Y'
+	   ]]>
+</select>
+<!-- 查看安全层是不是被网络使用 -->
+ <select id="findSecureNetIp" parameterClass="java.lang.String"  resultClass="rmNwSecureVo">
+	  <![CDATA[ 
+	 SELECT SECURE_AREA_ID FROM rm_nw_openstack_virtual_network  WHERE  SECURE_AREA_ID=#secureAreaId# AND IS_ACTIVE='Y'
+	   ]]>
+</select>
+<!-- 验证成功后删除安全区域 -->
+ <update id="updateSecureAreaById" parameterClass="rmNwSecurePo">
+	 <![CDATA[
+	 UPDATE RM_NW_SECURE_AREA SET IS_ACTIVE='N' WHERE SECURE_AREA_ID = #secureAreaId#
+	 ]]>
+	</update>
+  <!-- 安全层 -->
+ <sql id="selectSecureTierList">
+		
+			SELECT 
+			SECURE_TIER_ID as  secureTierId,
+            SECURE_TIER_NAME as secureTierName,
+             SECURE_AREA_ID as secureAreaId,
+             IS_ACTIVE as isActive FROM RM_NW_SECURE_TIER
+             WHERE IS_ACTIVE='Y' AND  SECURE_AREA_ID = #secureAreaId#
+			
+			
+</sql>
+<select id="selectSecureTierTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectSecureTierList" />
+		) as recordTable
+</select>
+<select id="selectSecureTierPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectSecureTierList" />
+		$_orderby$ 
+		limit #startIndex# ,99
+</select>
+ <insert  id="insertSecureTier" parameterClass="rmNwSecureVo">
+    INSERT INTO RM_NW_SECURE_TIER 
+    (SECURE_TIER_ID,SECURE_TIER_NAME,SECURE_AREA_ID,IS_ACTIVE)
+    VALUES(#secureTierId#,#secureTierName#,#secureAreaId#,#isActive#)
+  </insert>
+   <select  id="getSecureTierById" parameterClass="java.util.Map" resultClass="rmNwSecureVo">
+       SELECT 
+       SECURE_TIER_ID as secureTierId,
+       SECURE_TIER_NAME as secureTierName,
+       SECURE_AREA_ID as secureAreaId 
+       FROM  RM_NW_SECURE_TIER  
+        WHERE IS_ACTIVE='Y' AND SECURE_TIER_ID=#secureTierId#
+         
+  </select>
+<update id="updateSecureTier" parameterClass="rmNwSecureVo">
+    UPDATE  RM_NW_SECURE_TIER
+         <dynamic prepend="set">
+             <isNotEmpty prepend="," property="secureTierName">
+				SECURE_TIER_NAME = #secureTierName#
+		   </isNotEmpty>
+	</dynamic>
+	   WHERE SECURE_TIER_ID=#secureTierId#
+</update>
+ <!-- 安全层下是不是正被服务器角色占用 -->
+ <select id="findSecureTierAppDu" parameterClass="java.lang.String"  resultClass="rmNwSecureVo">
+	  <![CDATA[ 
+	  SELECT SEVURE_TIER_CODE as sevureTierCode
+	   FROM APP_DU WHERE SEVURE_TIER_CODE=#secureTierId#  AND IS_ACTIVE='Y'
+	   ]]>
+ </select> 
+  <!-- 安全层下是不是正被计算资源池占用 -->
+ <select id="findSecureTierPool" parameterClass="java.lang.String"  resultClass="rmNwSecureVo">
+	  <![CDATA[ 
+	    SELECT  h.SECURE_LAYER 
+	   FROM  RM_RES_POOL p 
+	   LEFT  JOIN  RM_HOST_RES_POOL  h 
+	   USING (ID) WHERE p.POOL_TYPE='COMPUTE' AND h.SECURE_LAYER=#secureTierId# 
+	   ]]>
+ </select> 
+ 
+ <update id="seureTierById" parameterClass="rmNwSecureVo">
+	 <![CDATA[
+	  UPDATE  RM_NW_SECURE_TIER
+	  SET
+		IS_ACTIVE = #isActive#
+	  WHERE  SECURE_TIER_ID = #secureTierId#
+	 ]]>
+	</update>
+</sqlMap>	

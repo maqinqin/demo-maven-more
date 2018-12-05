@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"   
+  "http://ibatis.apache.org/dtd/sql-map-config-2.dtd"> 
+<sqlMapConfig>
+
+	<settings
+	cacheModelsEnabled="true"
+	enhancementEnabled="true"
+	lazyLoadingEnabled="true"
+	
+	maxRequests="100"
+	maxSessions="100"
+	maxTransactions="150"/>
+	
+	
+	<sqlMap resource="config/ibatis/mysql/common/sqlmap-general.xml" />
+	<sqlMap resource="config/ibatis/mysql/common/sqlmap-page.xml" />
+	<sqlMap resource="config/ibatis/mysql/common/sqlmap-taglib.xml" />
+	
+	<sqlMap resource="config/ibatis/mysql/sqlmap-shiro.xml" />  
+	<sqlMap resource="config/ibatis/mysql/sqlmap-appmgt.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-handler-sa.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-vmrc.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-policy-compute.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-policy-ip.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-report.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-common-1.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-common.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-compute.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-network.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-network-converge.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-network-use.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-storage.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-diagram.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-sys-resource.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-sys-role.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-sys-user.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-sys-organization.xml" />
+
+	<sqlMap resource="config/ibatis/mysql/request/sqlmap-request-operate.xml" />
+	<sqlMap resource="config/ibatis/mysql/request/sqlmap-request-query.xml" />
+	<sqlMap resource="config/ibatis/mysql/request/sqlmap-request-other.xml" />
+		
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-cloud-service-3.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-cloud-service-attr-Sel.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-cloud-service-attr.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-cloud-service-flowRef.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-cloud-service.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-script-model.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-script-package.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-script-param.xml" />
+	<sqlMap resource="config/ibatis/mysql/cloudservice/sqlmap-script.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-dic.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-log.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-check-param.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resource.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-common-server.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-common-datacenter.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-common-platform.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-cm-route.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-network-secureArea.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-network-rule.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-certificate-validate.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-compute.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-excel.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-appmgt.xml"/>
+	<!--查询设备类型及运行状态  -->
+	<sqlMap resource="config/ibatis/mysql/sqlmap-resmgt-common-device.xml"/>
+	<sqlMap resource="config/ibatis/mysql/sqlmap-notification.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-virtual-switch.xml" />
+	
+	<sqlMap resource="config/ibatis/mysql/sqlmap-handler-se.xml" />
+	<!-- tenant  -->
+	<sqlMap resource="config/ibatis/mysql/sqlmap-tenant-autho.xml" />
+	<sqlMap resource="config/ibatis/mysql/sqlmap-tenant-quota.xml" /> 
+	<sqlMap resource="config/ibatis/mysql/ADMIN_PARAM.xml" />
+	<sqlMap resource="config/ibatis/mysql/SYS_MAIL_MSG.xml" />
+	<sqlMap resource="config/ibatis/mysql/SYS_MAIL_MSG_HIS.xml" />
+	<sqlMap resource="config/ibatis/mysql/RM_VM_MANAGE_SERVER.xml" />
+	
+	<sqlMap resource="config/ibatis/mysql/handler/sqlmap-firewall-automation.xml" />
+	<!-- 定时任务表 -->
+	<sqlMap resource="config/ibatis/mysql/sqlmap-TimingTask.xml" />
+	<sqlMap resource="config/ibatis/mysql/CLOUD_PROJECT.xml" />
+	<sqlMap resource="config/ibatis/mysql/CM_VM_GROUP.xml" />
+	<sqlMap resource="config/ibatis/mysql/RM_NW_OPENSTACK_VIRTUAL_ROUTER.xml" />
+	<sqlMap resource="config/ibatis/mysql/RM_NW_OPENSTACK_SECURITY_GROUPS.xml" />
+	<sqlMap resource="config/ibatis/mysql/RM_NW_SECURITY_GROUPS_DEVICE_REF.xml" />
+</sqlMapConfig>

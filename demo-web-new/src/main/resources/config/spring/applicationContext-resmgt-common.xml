@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<bean id="cmDeviceDAO" class="com.git.cloud.resmgt.common.dao.impl.CmDeviceDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmDeviceServiceImpl" class="com.git.cloud.resmgt.common.service.impl.CmDeviceServiceImpl">
+		<property name="rmClusterDAO" ref="rmClusterDAO" />
+		<property name="icmDeviceDAO" ref="cmDeviceDAO" />
+		<property name="iIpAllocToDeviceService" ref="ipAllocToDeviceImpl" />
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+		<property name="cmPasswordDAO" ref="cmPasswordDAO"/>
+		<property name="rmDCDAO" ref="rmDatacenterDAO"/>
+		<property name="rmVmMgServerDAO" ref="rmVmManageServerDAO"/>
+		<property name="rmVmTypeDAO" ref="rmVmTypeDAO"/>
+		<property name="cmHostDAO" ref="cmHostDAO"/>
+		<property name="vmLicenseDAO" ref="vmLicenseDAO"/>
+		<property name="rmResPoolDAO" ref="rmResPoolDAO" />
+		<property name="rmGeneralServerDAO" ref="rmGeneralServerDAO" />	
+<!-- 		<property name="pmHandlerService" ref="pmHandlerServiceImpl" />	 -->
+ 	    <property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl" />
+ 		<property name="computePolicyService" ref="computePolicyService" /> 
+ 		<property name="openstackSynckDao" ref="openstackSynckDao" /> 
+	</bean>
+	
+	<bean id="cmDeviceAction" class="com.git.cloud.resmgt.common.action.CmDeviceAction" scope="prototype">
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="computDiagramService" ref="resComputeDiagramServiceImpl" />
+		<property name="cmMacServiceImpl" ref="cmMacServiceImpl" />
+		<property name="processInstanceService" ref="processInstanceServiceImpl" />
+		<property name="icmMacService" ref="cmMacServiceImpl"/>
+		<!-- <property name="parameterService" ref="paramService" /> -->
+		 <property name="parameterServiceImpl" ref="parameterServiceImpl"/>
+		<property name="vmControllers" ref="vmControllers" />
+		<property name="notiServiceImpl" ref="noti_service" />
+		<property name="cmHostDatastoreRefServiceImpl" ref="cmHostDatastoreRefServiceImpl" />
+		<property name="automationService" ref="automationServiceImpl"/>
+	</bean>
+	
+	<bean id="rmVmManageServerDAO" class="com.git.cloud.resmgt.common.dao.impl.RmVmManageServerDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="rmVmManageServerServiceImpl" class="com.git.cloud.resmgt.common.service.impl.RmVmManageServerServiceImpl">
+		<property name="iRmVmManageServerDAO" ref="rmVmManageServerDAO" />
+	</bean>
+	
+	<bean id="rmVmManageServerAction" class="com.git.cloud.resmgt.common.action.RmVmManageServerAction" scope="prototype">
+		<property name="iRmVmManageServerService" ref="rmVmManageServerServiceImpl" />
+	</bean>
+	<!-- 物理机管理 -->
+	<bean id="rmPhysicalMacManageServerAction" class="com.git.cloud.resmgt.common.action.RmPhysicalMacManageServerAction" scope="prototype">
+		<property name="cmHostServiceImpl" ref="cmHostServiceImpl" />
+		<property name="cmDeviceServiceImpl" ref="cmDeviceServiceImpl" />
+		<property name="pmHandlerServiceImpl" ref="pmHandlerServiceImpl" />
+	</bean>
+	<bean id="cmSeatDAO" class="com.git.cloud.resmgt.common.dao.impl.CmSeatDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmSeatServiceImpl" class="com.git.cloud.resmgt.common.service.impl.CmSeatServiceImpl">
+		<property name="iCmSeatDAO" ref="cmSeatDAO" />
+		<property name="rmDatacenterDAO" ref="rmDatacenterDAO" />
+	</bean>
+	
+	<bean id="cmSeatAction" class="com.git.cloud.resmgt.common.action.CmSeatAction" scope="prototype">
+		<property name="iCmSeatService" ref="cmSeatServiceImpl" />
+	</bean>
+	
+	<!-- datacenter -->
+	<bean id="rmDatacenterDAO" class="com.git.cloud.resmgt.common.dao.impl.RmDatacenterDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="rmDataCenterService" class="com.git.cloud.resmgt.common.service.impl.RmDatacenterServiceImpl">
+		<property name="rmDatacenterDAO" ref="rmDatacenterDAO" />
+	</bean>
+	
+	<bean id="dataCenterAction" class="com.git.cloud.resmgt.common.action.RmDatacenterAction" scope="prototype">
+		<property name="rmDataCenterService" ref="rmDataCenterService" />
+	</bean>
+	
+	
+	<bean id="vCenterAlarmServiceImpl" class="com.git.cloud.resmgt.common.service.impl.VCenterAlarmServiceImpl" />
+	<bean id="syncVmInfoServiceImpl" class="com.git.cloud.resmgt.common.service.impl.SyncVmInfoServiceImpl" />
+	<bean id="cmHostServiceImpl" class="com.git.cloud.resmgt.common.service.impl.CmHostServiceImpl">
+		<property name="cmHostDao" ref="cmHostDAO" />
+		<property name="rmDatacenterDAO" ref="rmDatacenterDAO" />
+		<property name="rmGeneralServerDAO" ref="rmGeneralServerDAO" />
+		<property name="ipAllocToDeviceImpl" ref="ipAllocToDeviceImpl" />
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+	</bean>
+	<bean id="cmHostDAO" class="com.git.cloud.resmgt.common.dao.impl.CmHostDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmVmDAO" class="com.git.cloud.resmgt.common.dao.impl.CmVmDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmPasswordDAO" class="com.git.cloud.resmgt.common.dao.impl.CmPasswordDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmHostDatastoreRefDAO" class="com.git.cloud.resmgt.common.dao.impl.CmHostDatastoreRefDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="rmVmTypeDAO" class="com.git.cloud.resmgt.common.dao.impl.RmVmTypeDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	
+	<bean id="vmLicenseDAO" class="com.git.cloud.resmgt.common.dao.impl.RmVmwareLicenseDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="resComputeDiagramDAO" class="com.git.cloud.resmgt.common.dao.impl.ResComputeDiagramDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="resComputeDiagramServiceImpl" class="com.git.cloud.resmgt.common.service.impl.ResComputeDiagramServiceImpl">
+		<property name="resComputeDiagramDAO" ref="resComputeDiagramDAO" />
+	</bean>
+	
+	<!-- rmplatform -->
+	<bean id="rmPlatformDAO" class="com.git.cloud.resmgt.common.dao.impl.RmPlatformDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="rmPlatformService" class="com.git.cloud.resmgt.common.service.impl.RmPlatformServiceImpl">
+		<property name="rmPlatformDAO" ref="rmPlatformDAO" />
+	</bean>
+	
+	<bean id="rmPlatformAction" class="com.git.cloud.resmgt.common.action.RmPlatformAction" scope="prototype">
+		<property name="rmPlatformService" ref="rmPlatformService" />
+	</bean>
+	<!-- 路由信息维护 -->
+	 <!-- DAO -->
+	 <bean id="cmRouteDAOImpl" class="com.git.cloud.resmgt.common.dao.impl.CmRouteDAO" scope="singleton">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- SERVICE -->
+	<bean id="cmRouteServiceImpl" class="com.git.cloud.resmgt.common.service.impl.CmRouteServiceImpl" scope="singleton">
+		<property name="cmRouteDAOImpl" ref="cmRouteDAOImpl" />
+	</bean>
+	<!-- ACTION -->
+	<bean id="cmRouteAction" class="com.git.cloud.resmgt.common.action.CmRouteAction" scope="prototype">
+         <property name="cmRouteServiceImpl" ref="cmRouteServiceImpl"/>
+	</bean>
+	
+	<!-- 我的工作台数据中心计算资源 -->
+	<bean id="showDateCenterAction" class="com.git.cloud.workbench.action.WorkBenchAction" scope="prototype">
+		<property name="iDateCenterService" ref="dateCenterServiceImpl" />
+	</bean>
+	
+	<bean id="dateCenterServiceImpl" class="com.git.cloud.workbench.service.impl.DateCenterServiceImpl">
+		<property name="iDateCenterDAO" ref="iDateCenterDAO" />
+	</bean>
+	
+	<bean id="iDateCenterDAO" class="com.git.cloud.workbench.dao.impl.DateCenterDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	 <!--我的工作台资源池计算资源  -->
+	<bean id="showResourcePoolAction" class="com.git.cloud.workbench.action.ResourcePoolAction" scope="prototype">
+		<property name="iResourcePoolService" ref="resourcePoolService" />
+	</bean>
+	<bean id="resourcePoolService" class="com.git.cloud.workbench.service.impl.ResourcePoolServiceImpl">
+		<property name="iCommonDAO" ref="comDAO" />
+	</bean>
+	<bean id="rmHostAction" class="com.git.cloud.resmgt.compute.action.RmHostAction" scope="prototype">
+	</bean>
+	<bean id="vmControllers" class="com.git.cloud.resmgt.compute.handler.VmControllerServiceImpl" scope="prototype">
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="vmwareControllerService" ref ="VMWareControllerService" />
+		<property name="kvmControllerService" ref ="KVMControllerService" />
+		<property name="powerControlService" ref ="VmControllerServicePOWERVMImpl" />
+		<property name="openstackControllerService" ref ="vmControllerServiceOpenstackImpl" />
+		<property name="powerVcControllerService" ref ="vmControllerServicePowerVcImpl" /> 
+		<property name="notiServiceImpl" ref="noti_service" />
+		<property name="cmVmDAO" ref="cmVmDAO" />
+	</bean>
+	<bean id="rmHostService" class="com.git.cloud.resmgt.compute.service.impl.RmHostServiceImpl" scope="prototype">
+		<property name="ipAllocService" ref="IpAllocService" />
+		<property name="hostControllerServiceImpl" ref="HostControllerServiceImpl" />
+		<property name="notiServiceImpl" ref="noti_service" />
+		<property name="cmHostDao" ref="cmHostDAO" />
+		<property name="deployunitServiceImpl" ref="deployunitServiceImpl" />
+		<property name="appMagServiceImpl" ref="appMagServiceImpl" />
+		<property name="deployunitDaoImpl" ref="deployunitDaoImpl" />
+	</bean>
+	<bean id="HostControllerServiceImpl" class="com.git.cloud.resmgt.compute.handler.HostControllerServiceImpl" scope="prototype">
+	</bean>
+	
+	<bean id="HostControllerServiceVMWareImpl" class="com.git.cloud.resmgt.compute.handler.HostControllerServiceVMWareImpl" scope="prototype">
+		<property name="rmVmMgServerDAO" ref="rmVmManageServerDAO"/>
+		<property name="cmHostDAO" ref="cmHostDAO"/>
+		<property name="automationService" ref="automationServiceImpl" />
+	</bean>
+	<bean id="hostControllerServicePowerImpl" class="com.git.cloud.resmgt.compute.handler.HostControllerServicePowerImpl" scope="prototype">
+	</bean>
+	<bean id="VMWareControllerService" class="com.git.cloud.resmgt.compute.handler.VmControllerServiceVMWareImpl" scope="prototype">
+		<property name="cmHostDAO" ref="cmHostDAO"/>
+		<property name="rmVmMgServerDAO" ref="rmVmManageServerDAO"/>
+		<property name="cmPasswordDAO" ref="cmPasswordDAO"/>
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+		<property name="rmDCDAO" ref="rmDatacenterDAO"/>
+		<property name="automationService" ref="automationServiceImpl" />
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="icmDeviceDAO" ref="cmDeviceDAO" />
+	    <property name="iIpAllocToDeviceService" ref="ipAllocToDeviceImpl" />
+	</bean>
+	<bean id="KVMControllerService" class="com.git.cloud.resmgt.compute.handler.VmControllerServiceKVMImpl">
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="icmDeviceDAO" ref="cmDeviceDAO" />
+	    <property name="iIpAllocToDeviceService" ref="ipAllocToDeviceImpl" />
+	    <property name="iRmHostDao" ref="iRmHostDao" />
+	</bean>
+	<bean id="VmControllerServicePOWERVMImpl" class ="com.git.cloud.resmgt.compute.handler.VmControllerServicePOWERVMImpl" scope="prototype">
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="icmDeviceDAO" ref="cmDeviceDAO" />
+	    <property name="iIpAllocToDeviceService" ref="ipAllocToDeviceImpl" />
+	</bean>
+	<bean id="vmControllerServiceOpenstackImpl" class ="com.git.cloud.resmgt.compute.handler.VmControllerServiceOpenstackImpl" scope="prototype"/>
+	<bean id="vmControllerServicePowerVcImpl" class ="com.git.cloud.resmgt.compute.handler.VmControllerServicePowerVcImpl" scope="prototype"/> 
+	<bean id="iRmHostDao" class="com.git.cloud.resmgt.compute.dao.impl.RmHostDao">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="ClusterServiceImpl" class="com.git.cloud.resmgt.compute.handler.ClusterServiceImpl">
+		<property name="rmClusterDAO" ref="rmClusterDAO" />
+		<property name="icmDeviceDAO" ref="cmDeviceDAO" />
+	</bean>
+	<bean id="IpAllocService" class="com.git.cloud.policy.service.impl.IpAllocToDeviceNewImpl">
+		<property name="rmNwRuleDao" ref="rmNwRuleDao" />
+	</bean>
+	<bean id="scanDeviceStatusServiceImpl" class="com.git.cloud.resmgt.compute.handler.ScanDeviceStatusServiceImpl">
+		<property name="cmHostDAO" ref="cmHostDAO"/>
+		<property name="rmVmMgServerDAO" ref="rmVmManageServerDAO"/>
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+		<property name="rmDatacenterDAO" ref="rmDatacenterDAO" />
+		<property name="automationService" ref="automationServiceImpl" />
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="vmwareControllerService" ref ="VMWareControllerService" />
+		<property name="kvmControllerService" ref ="KVMControllerService" />
+		<property name="cmPasswordDAO" ref="cmPasswordDAO"/>
+		<property name="vmControllers" ref="vmControllers" />
+	</bean>
+	<bean id="pmHandlerServiceImpl" class="com.git.cloud.resmgt.compute.handler.PmHandlerServiceImpl">
+ 		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+ 		<property name="rmDatacenterDAO" ref="rmDatacenterDAO" />
+ 		<property name="notiServiceImpl" ref="noti_service" />
+	</bean>
+	<bean id="CmVmServiceImpl" class="com.git.cloud.resmgt.common.service.impl.CmVmServiceImpl">
+		<property name="cmVmDAO" ref="cmVmDAO" />
+		<property name="appMagServiceImpl" ref="appMagServiceImpl" />
+		<property name="deployunitDaoImpl" ref="deployunitDaoImpl" />
+	</bean>
+	<!-- 关联表CmHostDatastoreRef -->
+	<bean id="cmHostDatastoreRefAction" class="com.git.cloud.resmgt.common.action.CmHostDatastoreRefAction" scope="prototype">
+		<property name="cmHostDatastoreRefServiceImpl" ref="cmHostDatastoreRefServiceImpl" />
+	</bean>
+	<bean id="cmHostDatastoreRefServiceImpl" class="com.git.cloud.resmgt.common.service.impl.CmHostDatastoreRefServiceImpl" scope="prototype">
+		<property name="cmHostDatastoreRefDAO" ref="cmHostDatastoreRefDAO" />
+	</bean>
+	<bean id="cmLocalDiskDAO" class="com.git.cloud.resmgt.common.dao.impl.CmLocalDiskDAO">
+	</bean>
+</beans>

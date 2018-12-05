@@ -1,0 +1,576 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="handler-se">
+
+	<typeAlias alias="bizParamInstPo" type="com.git.cloud.handler.po.BizParamInstPo" />
+	<typeAlias alias="devicePo" type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="seatPo" type="com.git.cloud.resmgt.common.model.po.CmSeatPo" />
+	<typeAlias alias="SePoolRule"
+			type="com.git.cloud.resmgt.storage.model.po.SePoolLevelRulePo" />
+	<typeAlias alias="storageSuPo" type="com.git.cloud.handler.automation.se.po.StorageSuPo" />
+	<typeAlias alias="storagePo" type="com.git.cloud.handler.automation.se.po.StoragePo" />
+	
+	<typeAlias alias="fabricPo" type="com.git.cloud.handler.automation.se.po.FabricPo" />
+	
+	<typeAlias alias="StorageDevice"
+		type="com.git.cloud.resmgt.storage.model.vo.StorageDeviceVo" />
+		
+	<typeAlias alias="fabricVo"
+		type="com.git.cloud.handler.automation.se.vo.FabricVo" />
+		
+	<typeAlias alias="vsanPo"
+		type="com.git.cloud.handler.automation.se.po.VsanPo" />
+	<typeAlias alias="storageMgrVo"
+		type="com.git.cloud.handler.automation.se.vo.StorageMgrVo" />
+	<typeAlias alias="storageFCPortGrpPo"
+		type="com.git.cloud.handler.automation.se.po.StorageFCPortGroupPo" />
+		
+	<typeAlias alias="fcsPo"
+		type="com.git.cloud.handler.automation.se.po.FcsPo" />
+
+	<typeAlias alias="switchPo"
+		type="com.git.cloud.handler.automation.se.po.CmSwitchPo" />
+		
+	<typeAlias alias="cmLun"
+		type="com.git.cloud.handler.automation.se.po.CmLun" />
+		
+	<typeAlias alias="storageFCPortGroupPo"
+		type="com.git.cloud.handler.automation.se.po.StorageFCPortGroupPo" />
+		
+	<typeAlias alias="storageSuAppRefPo" type="com.git.cloud.handler.automation.se.po.RmStorageSuAppRefPo" />
+	<select id="findStorageModelBySN" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		<![CDATA[
+			select devM.DEVICE_MODEL
+				from
+   				 	CM_DEVICE dev,
+    				CM_DEVICE_MODEL devM
+				WHERE
+			    	dev.sn = #sn#
+			        and dev.DEVICE_MODEL_ID = devM.id
+		]]>
+	</select>
+	
+	<select id="findResPoolLevel" parameterClass= "java.util.Map" resultClass="java.lang.String">
+		<![CDATA[
+		 select CELL_VALUE from SE_POOL_LEVEL_RULE 
+		  where 1=1 
+		  and condition_one like concat('%',#availability_level#,'%')
+		  and condition_two like concat('%',#performance_level#,'%') 
+		  and rule_type= #ruleType#
+		]]>
+	</select>
+	
+	<select id="findPerformanceInfo" parameterClass="java.util.HashMap" resultClass="SePoolRule">
+		<![CDATA[
+		 select se.id as id,
+		   se.cell_value as cellValue,
+		   se.condition_one as conditionOne,
+		   se.condition_two as conditionTwo,
+		   se.rule_type as ruleType,
+		   se.tr_id as trId,
+		   se.td_id as tdId,
+		   se.cell_id as cellId
+		    from
+	SE_POOL_LEVEL_RULE se where rule_type = #ruleType#
+	and condition_one=#conditionOne#
+	ORDER BY td_id
+		]]>
+	</select>
+	
+	<select id="findAvailabilityInfo" parameterClass="java.util.HashMap" resultClass="SePoolRule">
+		<![CDATA[
+		 select se.id as id,
+		   se.cell_value as cellValue,
+		   se.condition_one as conditionOne,
+		   se.condition_two as conditionTwo,
+		   se.rule_type as ruleType,
+		   se.tr_id as trId,
+		   se.td_id as tdId,
+		   se.cell_id as cellId
+		    from
+	SE_POOL_LEVEL_RULE se where rule_type = #ruleType#
+	and condition_one=#conditionOne#
+	and condition_two=#conditionTwo#
+		]]>
+	</select>
+	
+	<select id="findDeviceByChildPoolId" parameterClass="java.lang.String" resultClass="devicePo">
+		<![CDATA[
+			 select 
+			    dev.SN as sn, dev.seat_id as seatId
+			from
+			    CM_DEVICE dev,
+			    CM_STORAGE se
+			where
+			    se.STORAGE_CHILD_POOL_ID = #childePoolId#
+			        and dev.ID = se.id
+			]]>
+	</select>
+	<select id="findSeatIdByDeviceId" parameterClass="java.lang.String" resultClass="devicePo">
+		<![CDATA[
+			 select 
+			    dev.seat_id as seatId
+			from
+			    CM_DEVICE dev
+			where dev.ID = #deviceId#
+			]]>
+	</select>
+	<select id="findSeatById"  parameterClass="java.lang.String" resultClass="seatPo"> 
+	<![CDATA[   
+      	select id as id,seat_code as seatCode,parent_code as parentCode from CM_SEAT where id=#seatId# and is_active = 'Y';
+        ]]>
+	</select>
+	<select id="findAppAndDuIdBySrIdRrInfoId"  parameterClass="java.util.Map" resultClass="java.util.HashMap"> 
+	<![CDATA[   
+		select sr.app_id, sr_rr.du_id 
+			from BM_SR sr, BM_SR_RRINFO sr_rr       
+		where 1 = 1
+			and sr.sr_id = #srId#
+			and sr_rr.rrinfo_id = #rrinfoId#
+			and sr.sr_id = sr_rr.sr_id
+        ]]>
+	</select>
+	<!-- 
+	<select id="findSeTypeInfoBySrRrinfoId"  parameterClass="java.util.Map" resultClass="java.util.List"> 
+	<![CDATA[   
+		select se.ha_type as HA_TYPE_CODE ,se.platform_type as PLATFORM_TYPE_CODE
+		  from BM_SR_RRINFO rr, CLOUD_SERVICE_SET se_set, CLOUD_SERVICE se 
+		  where 1 = 1 
+		  and rr.service_set_id = se_set.service_set_id 
+		  and se.service_id = se_set.service_id 
+		  and rr.rrinfo_id = #rrinfoId# 
+        ]]>
+	</select>
+	 -->
+	 
+	 <select id="findHAPlatTypeInfoBySrRrinfoId"  parameterClass="java.util.Map" resultClass="java.util.HashMap"> 
+		<![CDATA[   
+			  SELECT se.ha_type AS HA_TYPE_CODE ,rp.PLATFORM_CODE AS PLATFORM_TYPE_CODE
+			  FROM BM_SR_RRINFO rr,  CLOUD_SERVICE se, RM_PLATFORM rp
+			  WHERE 1 = 1 
+			  AND rr.SERVICE_ID = se.SERVICE_ID
+				AND se.PLATFORM_TYPE = rp.PLATFORM_ID
+			  AND rr.rrinfo_id = #rrinfoId#
+	     ]]>
+	</select>
+	
+	<select id="findSeTypeInfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap"> 
+	<![CDATA[   
+			SELECT p.`PARAM_KEY`,p.`PARAM_VALUE` 
+			FROM BM_SR_SE_PARAM p , BM_SR_SE_TYPE t
+			WHERE 1=1
+				AND p.`SR_SE_TYPE_ID` = t.`ID`
+				AND t.`CLUSTER_TYPE` = #CLUSTER_TYPE#
+				AND t.`DATA_APP_TYPE` = #DATA_APP_TYPE#
+				AND t.`OS_NAME` = #OS_NAME#
+				AND t.`IS_ACTIVE`='Y'
+				AND p.`IS_ACTIVE` = 'Y'
+        ]]>
+	</select>
+	
+	<select id="findDuInfo"  parameterClass="java.util.Map" resultClass="java.util.HashMap"> 
+	<![CDATA[   
+			select du.SERVICE_TYPE_CODE as DU_TYPE_CODE, du.ENAME as DU_NAME
+			from
+			    BM_SR_RRINFO rr,
+			    APP_DU du
+			where
+			    rr.du_id = du.du_id
+			        and rr.rrinfo_id = #rrinfoId#
+        ]]>
+	</select>
+	
+		<select id="findApplicationLevel"  parameterClass="java.util.Map" resultClass="java.util.HashMap"> 
+	<![CDATA[   
+			select 
+			    comp.sys_level_code as APP_LEVEL_CODESYS_LEVEL_CODE
+			from
+			    BM_SR_RRINFO rr,
+			    APP_DU du,
+			    APP_INFO comp
+			where
+			    rr.du_id = du.du_id
+			        and comp.app_id = du.app_id
+			        and rr.rrinfo_id = #rrinfoId#
+        ]]>
+	</select>
+
+	<!--  -->
+	<select id="se.getSuByPool" parameterClass="hashMap" resultClass="storageSuPo">
+		<![CDATA[
+		   SELECT 
+			  su.ID AS suId,
+			  su.STORAGE_CHILD_RES_POOL_ID AS storageChildResPoolId,
+			  su.FABRIC1_ID AS fabricName1,
+			  su.FABRIC2_ID AS fabricName2,
+			  su.STORAGEMGR_ID AS storageMgrId,
+			  su.IS_ACTIVE AS isActive 
+			FROM
+			  RM_STORAGE_SU su 
+			WHERE 1 = 1 
+			  AND su.STORAGE_CHILD_RES_POOL_ID = #poolId#
+			  AND su.IS_ACTIVE = 'Y' 
+		]]>
+	</select>
+	
+	
+	<select id="se.findSeMgrInfoBySu" parameterClass="hashMap" resultClass="storageMgrVo">
+		<![CDATA[
+		    SELECT                      
+				 mgr.MANAGER_IP AS managerIp,
+				 mgr.NAMESPACE AS namespace,
+				 pw.USER_NAME   AS userName,
+				 pw.PASSWORD   AS password
+			FROM RM_STORAGE_SU su, CM_STORAGE_MGR mgr, CM_PASSWORD pw
+			WHERE 1 = 1
+				 AND su.STORAGEMGR_ID = mgr.ID
+				 AND pw.RESOURCE_ID = mgr.ID
+				 AND su.id = #suId#;
+		]]>
+	</select>
+	
+	
+	<select id="se.findSeMgrInfoByMap" parameterClass="hashMap" resultClass="storageMgrVo">
+		
+		    SELECT                      
+				 mgr.MANAGER_IP AS managerIp,                    
+				 mgr.NAMESPACE AS namespace, 
+				 mgr.PORT AS port,                       
+				 pw.USER_NAME   AS userName,                         
+				 pw.PASSWORD   AS password                
+			FROM CM_STORAGE_MGR mgr, CM_PASSWORD pw  
+			WHERE 1 = 1     
+			
+			 <dynamic prepend=" and ">
+				<isNotEmpty property="managerId" prepend=" and ">
+					mgr.ID = #managerId#
+				</isNotEmpty>
+			</dynamic>   
+			
+			 <dynamic prepend=" and ">
+				<isNotEmpty property="typeCode" prepend=" and ">
+					mgr.TYPE_CODE = #typeCode#
+				</isNotEmpty>
+			</dynamic> 
+			<dynamic prepend=" and ">
+				<isNotEmpty property="deviceId" prepend=" and ">
+					mgr.DEVICE_ID = #deviceId#
+				</isNotEmpty>
+			</dynamic>                                   
+				 AND pw.RESOURCE_ID = mgr.ID      
+		
+	</select>
+	<select id="se.findSwitchMgrInfoByFabric" parameterClass="hashMap" resultClass="storageMgrVo">
+		<![CDATA[
+		    SELECT                      
+				 mgr.MANAGER_IP AS managerIp,
+				 mgr.PORT AS port,
+				 mgr.NAMESPACE AS namespace,
+				 pw.USER_NAME   AS userName,
+				 pw.PASSWORD   AS password
+			FROM CM_FABRIC f, CM_STORAGE_MGR mgr, CM_PASSWORD pw  
+			WHERE 1 = 1                                         
+				 AND f.STORAGEMGR_ID = mgr.ID           
+				 AND pw.RESOURCE_ID = mgr.ID          
+				 AND f.FABRIC_ID = #fabricId#;
+		]]>
+	</select>
+	<select id = "se.findStoragetDevVoBySn" parameterClass="hashMap" resultClass="StorageDevice">
+		
+		SELECT 
+			dev.ID as id,
+			dev.SN as sn,
+			devModel.REMARK as remark,
+			devModel.DEVICE_MODEL as deviceModel
+		FROM
+			CM_DEVICE AS dev LEFT JOIN CM_DEVICE_MODEL AS devModel ON dev.DEVICE_MODEL_ID = devModel.ID
+		WHERE 
+			dev.SN = #sn#
+	
+	</select>
+	
+	
+	<select id="se.getSuPoById" parameterClass="hashMap" resultClass="storageSuPo">
+		<![CDATA[
+		   SELECT 
+			  su.ID AS suId,
+			  su.STORAGE_CHILD_RES_POOL_ID AS storageChildResPoolId,
+			  su.FABRIC1_ID AS fabricId1,
+			  su.FABRIC2_ID AS fabricId2,
+			  su.STORAGEMGR_ID AS storageMgrId,
+			  su.IS_ACTIVE AS isActive 
+			FROM
+			  RM_STORAGE_SU su 
+			WHERE 1 = 1 
+			  AND su.ID = #suId#
+			  AND su.IS_ACTIVE = 'Y' 
+		]]>
+	</select>
+	
+	<select id="se.querySuBySn" parameterClass="java.lang.String" resultClass="storageSuPo">
+	
+		SELECT 
+		  su.ID AS suId,
+		  su.FABRIC1_ID AS fabricId1,
+		  su.FABRIC2_ID as fabricId2 ,
+		  su.STORAGE_CHILD_RES_POOL_ID as storageChildResPoolId,
+		  su.STORAGEMGR_ID as storageMgrId
+		FROM
+		  RM_STORAGE_SU su,
+		  CM_DEVICE dev,
+		  CM_STORAGE se 
+		WHERE 1 = 1 
+		  AND dev.SN = $sn$
+		  AND dev.ID = se.ID 
+		  AND su.STORAGE_CHILD_RES_POOL_ID = se.STORAGE_CHILD_POOL_ID  
+	</select>
+	
+	<select id="se.getFabricVoById" parameterClass="hashMap" resultClass="fabricVo">
+	 SELECT 
+	 	f.FABRIC_ID AS fabricId,
+		f.FABRIC_NAME AS fabricName,
+		m.ID AS managerId,
+		m.MANAGER_TYPE_CODE AS managerTypeCode
+	 FROM CM_FABRIC f,CM_STORAGE_MGR m
+	 WHERE 1=1
+	 AND f.STORAGEMGR_ID = m.ID
+	 AND f.FABRIC_ID = #fabricId#;
+	</select>
+	
+	<select id="se.getFabricPoMgrId" parameterClass="hashMap" resultClass="fabricPo">
+		 SELECT 
+		 	f.FABRIC_ID AS fabricId,
+			f.FABRIC_NAME AS fabricName
+		 FROM CM_FABRIC f
+		 WHERE 1=1
+		 AND f.STORAGEMGR_ID = #storageMgrId#;
+	</select>
+	
+	<select id="se.getFabricPoByName" parameterClass="hashMap" resultClass="fabricPo">
+	 SELECT 
+	 	f.FABRIC_ID AS fabricId,
+		f.FABRIC_NAME AS fabricName
+	 FROM CM_FABRIC f
+	 WHERE 1=1
+	 AND f.FABRIC_NAME = #fabricName#;
+	</select>
+	
+	<select id="se.getVsanPoByParams" parameterClass="hashMap" resultClass="vsanPo">
+		 SELECT 
+		  v.ID AS id,
+		  v.VSAN_NAME AS vsanName,
+		  v.FABRIC_ID AS fabricId,
+		  v.ACTIVE_ZONESET AS activeZoneset 
+		FROM
+		  CM_VSAN v 
+		WHERE 1 = 1 
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="vsanName" prepend=" and ">
+				v.VSAN_NAME = #vsanName# 
+			</isNotEmpty>
+		</dynamic>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="fabricId" prepend=" and ">
+				v.FABRIC_ID = #fabricId#
+			</isNotEmpty>
+		</dynamic>
+		  AND v.IS_ACTIVE = 'Y' 
+	</select>
+	<select id="se.getLastFCPortGroup" parameterClass="hashMap" resultClass="storagePo">
+		SELECT 
+		  s.FCPORT_GROUP_NUM AS fcportGroupNum 
+		FROM
+		  CM_STORAGE s,
+		  CM_STORAGE_FCPORT fcp 
+		WHERE s.ID = fcp.DEVICE_ID 
+		  AND fcp.SN = #sn#
+		  AND fcp.IS_ACTIVE = 'Y' 
+	</select>
+	
+	<select id = "se.getSeFCPortList" parameterClass = "hashMap" resultClass="storageFCPortGrpPo">
+		SELECT 
+		  fcp.ID AS id,
+		  fcp.STORAGE_NAME AS storageName,
+		  fcp.SN AS sn,
+		  fcp.FCPORT AS fcport,
+		  fcp.FCPORT_GROUP_NUM AS fcportGroupNum,
+		  fcp.PWWN AS pwwn,
+		  fcp.DEVICE_ID AS deviceId
+		FROM
+		  CM_STORAGE_FCPORT fcp 
+		  WHERE 1=1
+		  and fcp.SN = #sn#
+		  and fcp.IS_ACTIVE = 'Y'
+	</select>
+	
+	
+	<select id = "se.getFcsPoListByFabricName" parameterClass = "hashMap" resultClass="fcsPo">
+		SELECT 
+		  h.ID AS hbaFCRuleId,
+		  h.FCS AS fcs,
+		  h.FCPORT AS fcPortName,
+		  h.FCPORT_GROUP_NUM AS portGroup,
+		  h.FABRIC_NAME AS fabricName,
+		  h.FABRIC_ID AS fabricId
+		FROM
+		  CM_HBAFCRULE h 
+		  WHERE 1=1
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="fabricName" prepend=" and ">
+				h.FABRIC_NAME = #fabricName#
+			</isNotEmpty>
+		</dynamic>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="fcs" prepend=" and ">
+				h.FCS = #fcs#
+			</isNotEmpty>
+		</dynamic>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="fcPortName" prepend=" and ">
+				h.FCPORT = #fcPortName#
+			</isNotEmpty>
+		</dynamic>
+		  AND h.IS_ACTIVE = 'Y'
+	</select>
+	
+	
+	
+	<select id = "se.getSwitchList" parameterClass = "hashMap" resultClass="switchPo">
+		SELECT 
+		  s.ID AS switchId,
+		  s.FABRIC_ID AS fabricId,
+		  s.SWITCH_NAME AS switchName,
+		  s.IP AS ip,
+		  s.IS_CORE AS isCore
+		FROM
+		  CM_SWITCH s 
+		WHERE 1 = 1 
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="isCore" prepend=" and ">
+		  		s.IS_CORE = #isCore# 
+			</isNotEmpty>
+		</dynamic>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="fabricId" prepend=" and ">
+				s.FABRIC_ID = #fabricId#
+			</isNotEmpty>
+		</dynamic>
+		  AND s.IS_ACTIVE = 'Y'
+	</select>
+	
+	
+	
+	
+	<select id = "se.getLunList" parameterClass = "hashMap" resultClass="cmLun">
+		  SELECT l.LUN_ID AS lunId,
+			l.LUN_NAME AS lunName,
+			l.STORAGE_ID AS storageId,
+			l.LUN_STATUS AS lunStatus,
+			l.LUN_PATH AS lunPath,
+			l.LUN_ASSIGN_TIME AS lunAssignTime,
+			l.LUN_SELECT_TIME AS lunSelectTime
+		  FROM CM_LUN l
+		  WHERE 1=1
+<!-- 		  AND l.STORAGE_ID = '' -->
+<!-- 		  AND l.LUN_NAME ='' -->
+<!-- 		  AND l.LUN_STATUS ='' -->
+<!-- 		  AND l.IS_ACTIVE = '' -->
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="storageId" prepend=" and ">
+		  		l.STORAGE_ID = #storageId# 
+			</isNotEmpty>
+		</dynamic>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="lunName" prepend=" and ">
+				l.LUN_NAME = #lunName#
+			</isNotEmpty>
+		</dynamic>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="lunStatus" prepend=" and ">
+				l.LUN_STATUS = #lunStatus#
+			</isNotEmpty>
+		</dynamic>
+		  AND l.IS_ACTIVE = 'Y'
+	</select>
+	
+	<select id = "findLunByPath" parameterClass = "hashMap" resultClass="cmLun">
+		  SELECT l.LUN_ID AS lunId,
+			l.LUN_NAME AS lunName,
+			l.LUN_PATH AS lunPath,
+			l.LUN_TYPE AS lunType,
+			l.STORAGE_ID AS storageId,
+			l.LUN_STATUS AS lunStatus
+		  FROM CM_LUN l
+		  WHERE l.LUN_PATH = #lunPath#
+	</select>
+	
+	<update id = "se.batchUpdateLun" parameterClass="list">
+		begin
+		<iterate conjunction="">
+			update CM_LUN l set
+				l.`LUN_STATUS` = #[].lunStatus#,
+				l.LUN_ASSIGN_TIME =#[].lunAssignTime#
+			where l.LUN_ID = #[].lunId#
+		</iterate>
+		end
+	</update>
+	
+	<update id = "se.updateLunStatusAndType" parameterClass="cmLun">
+		update CM_LUN l set l.LUN_STATUS = #lunStatus#, l.LUN_TYPE = #lunType#, l.USED_RESOURCE_ID = #usedResourceId# where l.LUN_ID = #lunId#
+	</update>
+	
+	<update id = "se.updateLunName" parameterClass="cmLun">
+		update CM_LUN l set l.LUN_NAME = #lunName# where l.LUN_ID = #lunId#
+	</update>
+
+	<select id="se.getUsedLunsByResourceIds" parameterClass="hashMap" resultClass="cmLun">
+		<![CDATA[
+			SELECT DISTINCT l.LUN_ID lunId, l.STORAGE_ID storageId, l.LUN_PATH lunPath, l.LUN_TYPE lunType, l.LUN_STATUS lunStatus
+			  FROM BM_SR_RR_VM_REF r, BM_SR_RRINFO sr, BM_SR s, CM_LUN l
+			 WHERE r.RRINFO_ID = sr.RRINFO_ID
+			   AND sr.SR_ID = s.SR_ID
+			   AND r.RRINFO_ID = l.USED_RESOURCE_ID
+			   AND s.SR_TYPE_MARK in ('VS', 'SA')
+			   AND l.LUN_STATUS = '1'
+   			   AND l.IS_ACTIVE = 'Y'
+			   AND r.DEVICE_ID in ($deviceIds$)
+			 ORDER BY l.LUN_ID
+		]]>
+	</select>
+   
+	<select id="se.getFcportInfoByMap" parameterClass="hashMap" resultClass="storageFCPortGroupPo">
+		SELECT 
+		  fcp.FCPORT AS fcport
+		FROM
+		  CM_STORAGE_FCPORT fcp 
+		WHERE 1=1 
+		  AND fcp.IS_ACTIVE = 'Y' 
+		  AND fcp.PWWN = #wwn#
+	</select>
+	
+	<insert id="se.suSave" parameterClass="storageSuAppRefPo">
+		<![CDATA[
+			INSERT INTO RM_STORAGE_SU_APP_REF(ID, SU_ID, APP_ID, DU_TYPE) VALUES(#appStorageId#, #suId#, #appId#, #duType#)
+		]]>
+	</insert>
+	<select id="se.getNASMgrLoginInfo" parameterClass="hashMap" resultClass="nasInfo">
+		<![CDATA[
+			SELECT
+		    pw.USER_NAME userName,
+		    pw.`PASSWORD` pwd,
+		    ip.IP serverIp
+		FROM
+		    CM_DEVICE d,
+		    rm_nw_openstack_ip_address ip,
+		    CM_PASSWORD pw
+		WHERE
+		    1 = 1
+		AND d.sn = #nasSn#
+		AND d.id = pw.resource_id
+		AND d.id = ip.INSTANCE_ID
+		AND d.is_active = 'Y'
+		]]>
+	</select>
+</sqlMap>

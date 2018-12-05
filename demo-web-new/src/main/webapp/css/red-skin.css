@@ -1,0 +1,106 @@
+@charset "utf-8";
+/* CSS Document */
+.logo{
+	/*background-image: linear-gradient(to bottom,#f1f1f1,#f9f9f9) !important;
+	border-right:1px solid #d1dede !important; 
+	background:#fff !important; */
+	}
+.headerWrap {
+background-image: linear-gradient(to bottom,#f6f6f6,#efefef) !important;
+border-bottom: 1px solid #e7e7e7 !important;
+border-left: 1px solid #fff !important;
+box-shadow: 0 -2px 8px 1px #999 !important;
+/* background:#f3f7fa !important; */
+}
+.menu1 .current1{background: #a71e32 !important;}
+.headerWrap .logo img {
+    width: 70% !important;
+    height: auto !important;
+    background-size: 100% 100%;
+    margin: 5px 20px;
+    }
+.menu2 li.cur {background: #a71e32 !important;}
+.menu2 li a:hover i.menu2-circle {
+    background: #a71e32 !important;
+}
+.i-red{color:#a71e32 !important}
+
+.sitNav li:hover {
+    background: #fff !important;
+}
+.sitNav li {
+    border-left: 1px solid #ddd !important;
+}
+.Workbench_wrap {background: #f8f8f8 !important;}
+.WorkBtBg {
+    border-left: 3px solid #a71e32 !important;}
+.aColor,.aColor1{ color: #a71e32 !important;}
+ .aColor:hover,.aColor1:hover{
+    color: #711622 !important;
+}
+ #resourceUl>li:first-child{
+      /*   background-image: url(../images/TabBt_listCur_bg.png) ; */
+      background:#fff;
+      color:#a71e32;
+    }
+#NewestCreateTab tr:hover{
+        background-color: #fcf5f5 ;
+      
+    }
+#NewestWaitDealTab tr:hover{
+        background-color: #fcf5f5;
+    }
+
+.ui-state-hover a, .ui-state-hover a:hover {
+    color: #a71e32 !important;
+}
+.ui-jqgrid tr.ui-row-ltr td a:hover {
+    color: #a71e32 !important;
+}
+.ui-jqgrid tr.ui-row-ltr td a:link, .ui-jqgrid tr.ui-row-ltr td a:visited {
+    color: #a71e32 !important;
+}
+.btn:hover {
+    background: #323641 !important;
+    border-bottom: 3px solid #323641 !important;
+    border-top: 1px solid transparent !important;
+    border-right: 1px solid transparent !important;
+    border-left: 1px solid transparent !important;
+}
+.btn {
+    border: 1px solid transparent !important;
+    background-color: #484e5e !important;
+    border-bottom: 3px solid #323641 !important;
+    color: #FFF;
+    transition: border-color 0.1s ease-in-out 0s,background-color 0.1s ease-in-out 0s;
+}
+.btnDel:hover {
+   background: #841727 !important;
+    border-bottom: 3px solid #841727 !important;
+    border-top: 1px solid transparent !important;
+    border-right: 1px solid transparent !important;
+    border-left: 1px solid transparent !important;
+}
+.btnDel {
+     border: 1px solid transparent;
+    background-color: #a71e32 !important;
+    border-bottom: 3px solid #841727 !important;
+    color: #FFF;
+    transition: border-color 0.1s ease-in-out 0s,background-color 0.1s ease-in-out 0s;
+}
+button.btn{height:26px !important;}
+li.BtRlVmCur, li.BtVRCur, li.BtCur {color:#a71e32 !important}
+.ui-dialog .ui-dialog-titlebar {
+    background-color: #323641 !important;
+}
+.current:link, .uc-radio .current:visited, .uc-radio .current:hover{background: #a71e32;}
+.main1 a:link, .main1 a:visited {
+    color: #a71e32;
+}
+#tabs .default_color{
+	background: #d6dfe2;
+}
+#tabs .chosen_color{
+	color: #fff;
+	background: #A01830;
+}

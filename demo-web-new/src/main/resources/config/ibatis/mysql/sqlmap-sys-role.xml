@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="sys-role">
+	<typeAlias alias="SysRolePo" type="com.git.cloud.sys.model.po.SysRolePo" />
+	<typeAlias alias="SysRoleVo" type="com.git.cloud.sys.model.vo.SysRoleVo" />
+	<typeAlias alias="SysMenuRolePo" type="com.git.cloud.sys.model.po.SysMenuRolePo" />
+	<typeAlias alias="sysUserPo" type="com.git.cloud.sys.model.po.SysUserPo" />
+	<typeAlias alias="SysMenuPo" type="com.git.cloud.sys.model.po.SysMenuPo" />
+	<typeAlias alias="SysUserRole" type="com.git.cloud.sys.model.po.SysUserRole" />
+	
+	<resultMap id="sysMenuResult" class="SysMenuPo">
+		<result property="id" column="ID" />
+		<result property="menuName" column="MENU_NAME" />
+		<result property="menuCode" column="MENU_CODE" />
+		<result property="menuDesc" column="MENU_DESC" />
+		<result property="menuUrl" column="MENU_URL" />
+		<result property="parent.id" column="PARENT_ID" />
+		<result property="orderId" column="ORDER_ID" />
+		<result property="resourceType" column="RESOURCE_TYPE" />
+		<result property="isActive" column="IS_ACTIVE" />
+		<result property="menuId" column="MENU_ID" />
+		<result property="roleId" column="ROLE_ID" />
+	</resultMap>
+	
+<!--   查询所有的role信息记录 -->
+	<sql id="selectSysRoleList">
+		<![CDATA[
+		 select 
+			 ROLE_ID as roleId,
+			 ROLE_NAME as roleName,
+			 REMARK as remark,
+			 IS_ACTIVE as isActive 
+		 from 
+		 	SYS_ROLE 
+		 where IS_ACTIVE='Y' 
+		 ]]>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="roleName" prepend=" and ">
+				ROLE_NAME LIKE '%$roleName$%'
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="findSysRoleTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectSysRoleList"/>
+        ) as recordTable
+    </select>
+    <select id="findSysRolePage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectSysRoleList"/>$_orderby$ limit #startIndex# ,#pageSize#
+    </select>
+    
+    <select id="findSysRolePoByRoleId" parameterClass="java.lang.String" resultClass="SysRolePo">
+		<![CDATA[
+			SELECT 
+				ROLE_ID AS roleId,
+				ROLE_NAME AS roleName,
+				IS_ACTIVE AS isActive,
+				REMARK AS remark 
+			FROM 
+				SYS_ROLE 
+			WHERE 
+				ROLE_ID = #roleId#
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+    
+    <insert id="saveSysRolePo" parameterClass="SysRolePo">
+		<![CDATA[
+			INSERT INTO SYS_ROLE(ROLE_ID ,ROLE_NAME ,IS_ACTIVE,REMARK,CREATE_USER,CREATE_DATETIME,UPDATE_USER,UPDATE_DATETIME) VALUES(#roleId#,#roleName#,#isActive#,#remark#,#createUser#,#createDateTime#,#updateUser#,#updateDateTime#)
+		]]>
+	</insert>
+	
+	<update id="updateSysRolePo" parameterClass="SysRolePo">
+		<![CDATA[
+			UPDATE 
+				SYS_ROLE 
+			SET 
+				ROLE_NAME=#roleName# ,
+				IS_ACTIVE=#isActive# ,
+				REMARK=#remark# ,
+				UPDATE_USER=#updateUser# ,
+				UPDATE_DATETIME=#updateDateTime#  
+			WHERE ROLE_ID = #roleId#
+		]]>
+	</update>
+	
+	<delete id="deleteSysRolePoByRoleId" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE 
+				SYS_ROLE 
+			SET 
+				IS_ACTIVE= 'N' 
+			WHERE ROLE_ID = #roleId#
+		]]>
+	</delete>
+	
+		<!-- 检查新增的角色名是否已存在 -->
+	<select id="findRoleNumByRoleName" parameterClass="SysRolePo" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+			SYS_ROLE
+		WHERE
+			ROLE_NAME=#roleName# AND IS_ACTIVE='Y'
+	</select>
+	
+		<!--角色菜单信息begin-->
+	<insert id="saveSysMenuRolePo"   parameterClass="SysMenuRolePo">  
+      INSERT INTO SYS_MENU_ROLE(ROLE_ID,MENU_ID) VALUES (#roleId#,#menuId#)  
+	</insert> 
+	<delete id="deleteSysMenuRolePoByRoleId"  parameterClass="java.lang.String">
+		DELETE  FROM SYS_MENU_ROLE WHERE ROLE_ID = #roleId#
+	</delete>
+	<select id="findSysMenuPoByRoleId"  parameterClass="java.lang.String" resultMap="sysMenuResult">
+		SELECT 
+			* 
+		FROM
+		  	SYS_MENU a 
+		LEFT JOIN SYS_MENU_ROLE b  
+		ON a.ID=b.MENU_ID
+		AND b.ROLE_ID=#role_id#
+		WHERE a.IS_ACTIVE="Y" 
+		ORDER BY a.ORDER_ID
+	</select>
+	
+		<!--   查询指定角色下的用户列表 -->
+	<sql id="selectRoleUserList">
+		<![CDATA[
+		 SELECT 
+			 u.user_id AS userId,
+			 u.first_name AS firstName,
+			 u.last_name AS lastName,
+			 u.login_name AS loginName,
+			 u.email AS email,
+			 u.phone AS phone 
+		 FROM 
+		 	 SYS_USER u 
+		 WHERE 
+		 	  EXISTS (SELECT uro.user_id FROM SYS_USER_ROLE uro WHERE uro.role_id = #roleId# and u.user_id = uro.user_id ) 
+		 	  AND u.is_active='Y'
+		 ]]>
+			order by convert(u.FIRST_NAME using gbk)  ASC
+	</sql>
+	
+	<select id="findRoleUserTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRoleUserList"/>
+        ) as recordTable
+    </select>
+    
+    <select id="findRoleUserPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRoleUserList"/> limit #startIndex# ,#pageSize#
+    </select>
+    
+    <select id="findSysUserByRoleId"  parameterClass="java.lang.String" resultClass="sysUserPo">
+		 SELECT 
+			 u.user_id AS userId,
+			 u.first_name AS firstName,
+			 u.last_name AS lastName,
+			 u.login_name AS loginName,
+			 u.email AS email,
+			 u.phone AS phone 
+		 FROM 
+		 	 SYS_USER u 
+		 WHERE 
+		 	  EXISTS (SELECT uro.user_id FROM SYS_USER_ROLE uro WHERE uro.role_id = #roleId# and u.user_id = uro.user_id ) 
+		 	  AND u.is_active='Y'
+		 ORDER BY u.create_datetime DESC 
+	</select>
+    
+<!-- 	进行角色删除时查询是否被删除角色与用户有关系数据 -->
+	<select id="findSysUserRoleByRoleId"  parameterClass="java.lang.String" resultClass="SysUserRole">
+		SELECT USER_ID as userId,ROLE_ID as roleId FROM SYS_USER_ROLE WHERE ROLE_ID  = #roleId#
+	</select>
+	<!--角色菜单信息end-->
+	
+</sqlMap>

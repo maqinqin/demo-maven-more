@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="computepolicy">
+	<typeAlias alias="RmVmParamPo" type="com.git.cloud.policy.model.po.RmVmParamPo" />
+	<typeAlias alias="RmVmParamVo" type="com.git.cloud.policy.model.vo.RmVmParamVo" />
+	<!-- 虚机分配参数 -->
+	
+	<select id="findRmVmParamPoById" parameterClass="java.lang.String" resultClass="RmVmParamPo">
+		<![CDATA[
+			SELECT PARAM_ID as paramId ,OBJECT_TYPE as objectType ,OBJECT_ID as objectId ,PARAM_TYPE as paramType, VALUE as value ,IS_ACTIVE as isActive FROM RM_VM_PARAM WHERE IS_ACTIVE='Y' and PARAM_ID = #paramId#
+		]]>
+	</select>
+	<select id="queryPools" resultClass="java.util.HashMap">
+		SELECT CONCAT_WS('/',CENTER.DATACENTER_CNAME,POOL.POOL_NAME) name,POOL.ID id  FROM RM_RES_POOL POOL, RM_DATACENTER CENTER 
+		WHERE POOL.POOL_TYPE='COMPUTE'  AND POOL.IS_ACTIVE='Y' AND POOL.DATACENTER_ID=CENTER.ID AND CENTER.IS_ACTIVE='Y'
+	</select>
+	<select id="findRmVmParamPosByParam" parameterClass="RmVmParamPo" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(1) FROM RM_VM_PARAM WHERE IS_ACTIVE='Y' and OBJECT_TYPE = #objectType# and PARAM_TYPE = #paramType# 
+		]]>
+		<isNotEmpty prepend="and" property="objectId">
+			  OBJECT_ID = #objectId#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="paramId">
+			  PARAM_ID != #paramId#
+		</isNotEmpty>
+	</select>
+	
+	<sql id="findRmVmParamPos">
+		SELECT
+			PARAM_ID AS paramId,
+			OBJECT_TYPE AS objectType,
+			DIC.DIC_NAME AS objectTypeName,
+			OBJECT_ID AS objectId,
+			CONCAT_WS(
+				'/',
+				CENTER.DATACENTER_CNAME,
+				POOL.POOL_NAME
+			) AS objectName,
+			PARAM_TYPE AS paramType,
+			DIC1.DIC_NAME AS paramTypeName,
+			VALUE AS VALUE,
+			PARAM.IS_ACTIVE AS isActive
+		FROM
+			RM_VM_PARAM PARAM,
+			ADMIN_DIC DIC,
+			ADMIN_DIC DIC1,
+			RM_RES_POOL POOL,
+			RM_DATACENTER CENTER
+		WHERE
+			DIC.DIC_TYPE_CODE = 'CLOUD_OBJECT_TYPE_TYPE'
+		AND DIC.DIC_CODE = PARAM.OBJECT_TYPE
+		AND DIC1.DIC_TYPE_CODE = 'CLOUD_PARAM_TYPE_TYPE'
+		AND DIC1.DIC_CODE = PARAM.PARAM_TYPE
+		AND PARAM.IS_ACTIVE = 'Y'
+		AND POOL.ID = PARAM.OBJECT_ID
+		AND POOL.IS_ACTIVE = 'Y'
+		AND CENTER.ID = POOL.DATACENTER_ID
+		AND CENTER.IS_ACTIVE = 'Y'
+		<isNotEmpty prepend="AND" property="objectType">
+			 PARAM.OBJECT_TYPE=#objectType#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="objectId">
+			 PARAM.OBJECT_ID=#objectId#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="paramType">
+			 PARAM.PARAM_TYPE=#paramType#
+		</isNotEmpty>
+	UNION
+        SELECT
+            PARAM_ID AS paramId,
+            OBJECT_TYPE AS objectType,
+            DIC.DIC_NAME AS objectTypeName,
+            OBJECT_ID AS objectId,
+            CONCAT_WS(
+                '/ ',
+                CENTER.DATACENTER_CNAME,
+                POOL.POOL_NAME
+            ) AS objectName,
+            PARAM_TYPE AS paramType,
+            DIC1.DIC_NAME AS paramTypeName,
+    
+        VALUE
+            AS
+        VALUE
+            ,
+            PARAM.IS_ACTIVE AS isActive
+        FROM
+            RM_VM_PARAM PARAM,
+            ADMIN_DIC DIC,
+            ADMIN_DIC DIC1,
+            RM_RES_POOL POOL,
+            RM_DATACENTER CENTER
+        WHERE
+            DIC.DIC_TYPE_CODE = 'CLOUD_OBJECT_TYPE_TYPE'
+        AND DIC.DIC_CODE = PARAM.OBJECT_TYPE
+        AND DIC1.DIC_TYPE_CODE = 'CLOUD_PARAM_TYPE_TYPE'
+        AND DIC1.DIC_CODE = PARAM.PARAM_TYPE
+        AND PARAM.IS_ACTIVE = 'Y'
+        AND POOL.DATACENTER_ID = CENTER.ID
+        AND POOL.IS_ACTIVE = 'Y'
+        AND CENTER.IS_ACTIVE = 'Y'
+		<isNotEmpty prepend="AND" property="objectType">
+			 PARAM.OBJECT_TYPE=#objectType#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="objectId">
+			  PARAM.OBJECT_ID=#objectId#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="paramType">
+			 PARAM.PARAM_TYPE=#paramType#
+		</isNotEmpty>
+	UNION
+		SELECT
+			PARAM_ID AS paramId,
+			OBJECT_TYPE AS objectType,
+			DIC.DIC_NAME AS objectTypeName,
+			OBJECT_ID AS objectId,
+			OBJECT_ID AS objectName,
+			PARAM_TYPE AS paramType,
+			DIC1.DIC_NAME AS paramTypeName,
+
+		VALUE
+			AS
+		VALUE
+			,
+			PARAM.IS_ACTIVE AS isActive
+		FROM
+			RM_VM_PARAM PARAM,
+			ADMIN_DIC DIC,
+			ADMIN_DIC DIC1
+		WHERE
+			DIC.DIC_TYPE_CODE = 'CLOUD_OBJECT_TYPE_TYPE'
+		AND DIC.DIC_CODE = PARAM.OBJECT_TYPE
+		AND DIC1.DIC_TYPE_CODE = 'CLOUD_PARAM_TYPE_TYPE'
+		AND DIC1.DIC_CODE = PARAM.PARAM_TYPE
+		AND PARAM.IS_ACTIVE = 'Y'
+		AND (
+			PARAM.OBJECT_ID IS NULL
+			OR PARAM.OBJECT_ID = ''
+			OR PARAM.OBJECT_ID = '1'
+		)
+			<isNotEmpty prepend="AND" property="objectType">
+				 PARAM.OBJECT_TYPE=#objectType#   
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="paramType">
+				 PARAM.PARAM_TYPE=#paramType#
+			</isNotEmpty>
+		
+		ORDER BY $sidx$ $sord$ 
+	</sql>
+	<select id="findRmVmParamPoList" parameterClass="java.util.Map"  resultClass="RmVmParamVo">
+		<include refid="findRmVmParamPos"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="findRmVmParamPoCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="findRmVmParamPos"/>
+        ) as recordTable
+	</select>
+	
+	<insert id="saveRmVmParamPo" parameterClass="RmVmParamPo">
+		<![CDATA[
+			INSERT INTO RM_VM_PARAM(PARAM_ID ,OBJECT_TYPE ,OBJECT_ID,PARAM_TYPE, VALUE,IS_ACTIVE) VALUES(#paramId#,#objectType#,#objectId# ,#paramType#,#value# ,#isActive#)
+		]]>
+	</insert>
+	
+	<update id="updateRmVmParamPo" parameterClass="RmVmParamPo">
+		<![CDATA[
+			UPDATE RM_VM_PARAM SET OBJECT_TYPE=#objectType# ,OBJECT_ID=#objectId# ,PARAM_TYPE=#paramType# ,VALUE=#value#  WHERE PARAM_ID = #paramId#
+		]]>
+	</update>
+	
+	<select id="findParamValue" parameterClass="java.util.Map" resultClass="java.lang.String">
+		<![CDATA[
+			SELECT VALUE as value FROM RM_VM_PARAM WHERE IS_ACTIVE='Y' and OBJECT_TYPE = #objectType#  and PARAM_TYPE = #paramType#
+		]]>
+		<isNotEmpty prepend=" and " property="objectId">
+			OBJECT_ID = #objectId#
+		</isNotEmpty>
+	</select>
+	
+	<!-- <delete id="deleteRmVmParamPoById" parameterClass="java.lang.String">
+		<![CDATA[
+			DELETE FROM RM_VM_PARAM WHERE PARAM_ID = #paramId#
+		]]>
+	</delete> -->
+	<update id="deleteRmVmParamPoById" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE RM_VM_PARAM SET IS_ACTIVE='N'  WHERE PARAM_ID = #paramId#
+		]]>
+	</update>
+	
+	<!-- 分配规则 -->
+	<typeAlias alias="RmVmRulesPo" type="com.git.cloud.policy.model.po.RmVmRulesPo" />
+	<typeAlias alias="RmVmRulesVo" type="com.git.cloud.policy.model.vo.RmVmRulesVo" />
+	
+	<select id="findRmVmRulesPoById" parameterClass="java.lang.String" resultClass="RmVmRulesPo">
+		<![CDATA[
+			SELECT RULES_ID as rulesId ,SORT_OBJECT as sortObject ,SORT_TYPE as sortType ,IS_ACTIVE as isActive FROM RM_VM_RULES WHERE IS_ACTIVE='Y' and RULES_ID  = #rulesId# 
+		]]>
+	</select>
+	
+	<sql id="findRmVmRulesPos">
+		<![CDATA[
+			SELECT RULES_ID as rulesId ,SORT_OBJECT as sortObject ,DIC.DIC_NAME as sortObjectName, SORT_TYPE as sortType , DIC1.DIC_NAME as sortTypeName ,IS_ACTIVE as isActive  FROM RM_VM_RULES RULES,ADMIN_DIC DIC ,ADMIN_DIC DIC1 WHERE DIC.DIC_TYPE_CODE='CLOUD_SORT_OBJECT_TYPE' AND DIC.DIC_CODE=RULES.SORT_OBJECT AND DIC1.DIC_TYPE_CODE='SORT_TYPE' AND DIC1.DIC_CODE=RULES.SORT_TYPE  AND IS_ACTIVE='Y'
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="sortObject" prepend=" and ">
+				SORT_OBJECT = #sortObject#
+			</isNotEmpty>
+		</dynamic> 
+		ORDER BY $sidx$ $sord$
+	</sql>
+	<select id="findRmVmRulesPoList" parameterClass="java.util.Map"  resultClass="RmVmRulesVo">
+		<include refid="findRmVmRulesPos"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="findRmVmRulesPoCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="findRmVmRulesPos"/>
+        ) as recordTable
+	</select>
+	
+	<insert id="saveRmVmRulesPo" parameterClass="RmVmRulesPo">
+		<![CDATA[
+			INSERT INTO RM_VM_RULES(RULES_ID,SORT_OBJECT,SORT_TYPE,IS_ACTIVE) VALUES(#rulesId#,#sortObject#,#sortType# ,#isActive#)
+		]]>
+	</insert>
+	
+	<select id="findRmVmRulesPos"   resultClass="RmVmRulesPo">
+		<![CDATA[
+			SELECT RULES_ID as rulesId ,SORT_OBJECT as sortObject , SORT_TYPE as sortType ,IS_ACTIVE as isActive  FROM RM_VM_RULES  WHERE  IS_ACTIVE='Y'
+		]]>
+	</select>
+	
+	<update id="updateRmVmRulesPo" parameterClass="RmVmRulesPo">
+		<![CDATA[
+			UPDATE RM_VM_RULES SET SORT_OBJECT=#sortObject# ,SORT_TYPE=#sortType#   WHERE RULES_ID = #rulesId#
+		]]>
+	</update>
+	
+	<update id="deleteRmVmRulesPoById" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE RM_VM_RULES SET IS_ACTIVE='N'   WHERE RULES_ID = #rulesId#
+		]]>
+	</update>
+	<!-- 虚机分配策略 -->
+	<typeAlias alias="policyResultVo" type="com.git.cloud.policy.model.vo.PolicyInfoVo"/>
+	<typeAlias alias="requsetResInfoVo" type="com.git.cloud.policy.model.vo.RequsetResInfoVo"/>
+
+	
+	<select id="findResByReqRes" parameterClass="requsetResInfoVo" resultClass="policyResultVo">
+			SELECT COUNT(VM.ID) AS vmNum,IFNULL(HOST.CPU,0) AS cpu,SUM(IF(VMDEV.ID IS NULL, IFNULL(VM.CPU, 0),0)) AS usedCpu,
+				IFNULL(HOST.MEM, 0) AS totalMem, SUM(IF(VMDEV.ID IS NULL, IFNULL(VM.MEM, 0),0)) AS usedMem,
+				HOSTPOOL.ID AS poolId,HOST.ID AS hostId,CLUSTER.ID AS clusterId,HOST.ORDER_NUM AS orderNum
+			FROM (SELECT HP.ID,HP.SERVICE_TYPE,HP.SECURE_AREA_TYPE, PLAT.PLATFORM_ID AS PLATFORM_TYPE FROM RM_HOST_RES_POOL HP INNER JOIN RM_PLATFORM PLAT ON 	HP.PLATFORM_TYPE=PLAT.PLATFORM_CODE) HOSTPOOL
+			INNER JOIN RM_RES_POOL POOL ON POOL.ID=HOSTPOOL.ID 
+			<dynamic prepend="AND">
+				<isNotEmpty prepend="AND" property="serviceType">
+					HOSTPOOL.SERVICE_TYPE=#serviceType#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="secureAreaType">
+					HOSTPOOL.SECURE_AREA_TYPE=#secureAreaType#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="playFormType">
+					HOSTPOOL.PLATFORM_TYPE=#playFormType# 
+				</isNotEmpty>
+			</dynamic>
+			AND POOL.IS_ACTIVE='Y' AND POOL.POOL_TYPE ='COMPUTE'
+			INNER JOIN RM_CLUSTER CLUSTER ON POOL.ID = CLUSTER.res_pool_id AND CLUSTER.IS_ACTIVE='Y' 
+			<isNotEmpty prepend="AND" property="vmDistriType">
+					CLUSTER.VM_DISTRI_TYPE=#vmDistriType# 
+			</isNotEmpty> 
+			<isNotEmpty prepend="AND" property="vmType">
+					CLUSTER.VM_TYPE=#vmType#
+			</isNotEmpty>
+			INNER JOIN CM_HOST HOST ON CLUSTER.ID = HOST.CLUSTER_ID AND HOST.IS_INVC ='Y'
+			INNER JOIN (SELECT DEV.ID,DEV.IS_ACTIVE,DEV.DEVICE_STATUS,MODEL.DEVICE_TYPE  FROM CM_DEVICE  DEV 
+							INNER JOIN CM_DEVICE_MODEL MODEL ON DEV.DEVICE_MODEL_ID=MODEL.ID) DEVICE 
+				ON HOST.ID = DEVICE.ID  AND DEVICE.IS_ACTIVE='Y' 
+			<dynamic prepend="AND">
+				<isNotEmpty prepend="AND" property="datacenterId">
+					POOL.DATACENTER_ID=#datacenterId#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="poolId">
+					HOSTPOOL.ID = #poolId#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="clusterId">
+					CLUSTER.ID=#clusterId#
+				</isNotEmpty>
+				<isNotEmpty prepend="AND" property="hostId">
+					HOST.ID=#hostId# 
+				</isNotEmpty>
+			</dynamic>
+			LEFT OUTER JOIN (SELECT VM1.*  FROM CM_VM VM1,CM_DEVICE VMDEV1  WHERE VM1.ID=VMDEV1.ID  AND VMDEV1.IS_ACTIVE='Y' ) VM ON VM.HOST_ID = DEVICE.ID 
+			LEFT OUTER JOIN (SELECT DEV1.ID,DEV1.IS_ACTIVE,DEV1.DEVICE_STATUS,MODEL1.DEVICE_TYPE  FROM CM_DEVICE  DEV1 INNER JOIN CM_DEVICE_MODEL MODEL1 ON DEV1.DEVICE_MODEL_ID=MODEL1.ID) VMDEV ON VM.ID=VMDEV.ID AND VMDEV.IS_ACTIVE='Y' AND VMDEV.DEVICE_TYPE =#deviceType#
+			GROUP BY HOST.ID,CLUSTER.ID,HOSTPOOL.ID,HOST.ORDER_NUM,HOST.CPU,DEVICE.DEVICE_TYPE ORDER BY HOSTPOOL.ID
+	</select>
+	
+	<select id="findHostByResPoolId" parameterClass="java.util.Map"  resultClass="policyResultVo">
+		<![CDATA[
+			SELECT
+				cl.ID clusterId,
+				h.ID hostId ,
+				cl.RES_POOL_ID  as poolId,
+				IFNULL(h.CPU, 0) cpu,
+				IFNULL(h.MEM, 0) totalMem,
+				IFNULL(h.CPU_USED, 0) usedCpu,
+				IFNULL(h.MEM_USED, 0) usedMem,
+				count(*) vmNum
+			FROM
+				rm_cluster cl
+			LEFT JOIN (select ch.CLUSTER_ID,ch.ID,ch.CPU,ch.MEM,ch.CPU_USED,ch.MEM_USED ,ch.HOST_IP from cm_host ch INNER JOIN cm_device cd on ch.ID = cd.ID where cd.IS_ACTIVE ='Y' ) h ON cl.ID = h.CLUSTER_ID
+			LEFT JOIN (SELECT cv.ID, cv.HOST_ID, cv.CPU, cv.MEM
+						FROM CM_VM cv, CM_DEVICE cd
+						WHERE cv.ID = cd.ID
+						AND cd.IS_ACTIVE = 'Y') cc ON h.ID = cc.HOST_ID
+			WHERE
+				cl.RES_POOL_ID = #resPoolId#
+			AND cl.IS_ACTIVE = 'Y'
+			GROUP BY	h.HOST_IP,	h.CPU,	h.MEM
+		]]>
+	</select>
+</sqlMap>

@@ -1,0 +1,1148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCompute">
+	<typeAlias alias="RmNwResPoolFullVo"
+		type="com.git.cloud.resmgt.network.model.vo.RmNwResPoolFullVo" />
+	<typeAlias alias="RmResPoolPo"
+		type="com.git.cloud.resmgt.common.model.po.RmResPoolPo" />
+	<typeAlias alias="RmHostResPoolPo"
+		type="com.git.cloud.resmgt.compute.model.po.RmHostResPoolPo" />
+	<typeAlias alias="RmCdpPo"
+		type="com.git.cloud.resmgt.compute.model.po.RmCdpPo" />
+	<typeAlias alias="RmCdpVo"
+		type="com.git.cloud.resmgt.compute.model.vo.RmCdpVo" />
+	<typeAlias alias="CmHostEchartPo"
+		type="com.git.cloud.resmgt.common.model.po.CmHostEchartPo" />
+	<typeAlias alias="RmClusterPo"
+		type="com.git.cloud.resmgt.compute.model.po.RmClusterPo" />
+	<typeAlias alias="RmResPoolVo"
+		type="com.git.cloud.resmgt.common.model.vo.RmResPoolVo" />
+	<typeAlias alias="RmNwConvergePo"
+		type="com.git.cloud.resmgt.network.model.po.RmNwConvergePo" />
+	<typeAlias alias="RmVmManageServerPo"
+		type="com.git.cloud.resmgt.common.model.po.RmVmManageServerPo" />
+	<typeAlias alias="RmVmManagerServerPo"
+		type="com.git.cloud.resmgt.common.model.vo.RmVmManageServerPo" />
+	<typeAlias alias="RmVirtualTypePo"
+		type="com.git.cloud.resmgt.common.model.po.RmVirtualTypePo" />
+	<typeAlias alias="CmSnapshotVo"
+		type="com.git.cloud.resmgt.common.model.vo.CmSnapshotVo" />
+
+	<typeAlias alias="VmVo1" type="com.git.cloud.resmgt.compute.model.vo.VmVo" />
+	<typeAlias alias="IpRules"
+		type="com.git.cloud.resmgt.compute.model.vo.IpRules" />
+	<typeAlias alias="CloudServiceVoByRmHost"
+		type="com.git.cloud.resmgt.compute.model.vo.CloudServiceVoByRmHost" />
+	<typeAlias alias="DuPoByRmHost"
+		type="com.git.cloud.resmgt.compute.model.po.DuPoByRmHost" />
+	<typeAlias alias="IpRuleInfoVo"
+		type="com.git.cloud.resmgt.common.model.vo.IpRuleInfoVo" />
+	<typeAlias alias="RmDatacenterPo1"
+		type="com.git.cloud.resmgt.common.model.po.RmDatacenterPo" />
+	<typeAlias alias="HostVo" type="com.git.cloud.excel.model.vo.HostVo" />
+	<typeAlias alias="CmVmVo"
+		type="com.git.cloud.resmgt.common.model.vo.CmVmVo" />
+	<typeAlias alias="CmLocalDiskPo"
+		type="com.git.cloud.resmgt.common.model.po.CmLocalDiskPo" />
+	<typeAlias alias="CmDevicePo"
+		type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="CmHostDatastoreRefPo"
+		type="com.git.cloud.resmgt.common.model.po.CmHostDatastoreRefPo" />
+	<typeAlias alias="AvailableZonePo" type = "com.git.cloud.resmgt.compute.model.po.AvailableZonePo"/>
+	<!-- 查询vCenter下的虚拟机信息 -->
+	<typeAlias alias="dataStoreVo" type="com.git.cloud.excel.model.vo.DataStoreVo" />
+
+	<typeAlias alias="cmHostVo"
+		type="com.git.cloud.resmgt.common.model.vo.CmHostVo" />
+	<typeAlias alias="cmHostUsernamePasswordPo"
+		type="com.git.cloud.resmgt.common.model.po.CmHostUsernamePasswordPo" />
+	<typeAlias alias="RmVolumeTypePo"
+		type="com.git.cloud.resmgt.compute.model.po.RmVolumeTypePo" />
+	<typeAlias alias="VolumeVo"
+		type="com.git.cloud.resmgt.openstack.model.vo.VolumeDetailVo" />
+	<select id="selectResPool" parameterClass="java.util.HashMap"
+		resultClass="RmResPoolPo">
+		select id,
+		datacenter_id as datacenterId,
+		pool_name as poolName,
+		ename,
+		status,
+		pool_type as poolType,
+		remark
+		from RM_RES_POOL
+		where is_active = 'Y' and pool_type = #poolType# and datacenter_id =
+		#datacenterId#
+		ORDER BY CONVERT(poolName USING gbk) ASC
+	</select>
+	<select id="selectCluster" parameterClass="java.util.HashMap"
+		resultClass="RmClusterPo">
+		select id,
+		cdp_id as cdpId,
+		cluster_name as clusterName,
+		ename,
+		status,
+		remark
+		from RM_CLUSTER where is_active = 'Y' and cdp_id = #cdpId#
+		ORDER BY CONVERT(clusterName USING gbk) ASC
+	</select>
+	<select id="selectClusterByResPoolId" parameterClass="java.util.HashMap"
+		resultClass="RmClusterPo">
+		SELECT
+		id,
+		cdp_id AS cdpId,
+		cluster_name AS clusterName,
+		ename,
+		STATUS,
+		remark
+		FROM
+		RM_CLUSTER
+		WHERE
+		is_active = 'Y'
+		AND CDP_ID IS NULL
+		AND RES_POOL_ID = #resPoolId#
+		ORDER BY
+		CONVERT(clusterName USING gbk)ASC
+	</select>
+
+	<!-- 资源沲查询 -->
+	<select id="findRmResPoolVoById" parameterClass="java.lang.String"
+		resultClass="RmResPoolVo">
+		<![CDATA[
+			SELECT 
+				a.ID AS id ,
+				a.DATACENTER_ID AS datacenterId ,
+				dc.DATACENTER_CNAME AS datacenterCName,
+				a.POOL_NAME AS poolName ,
+				a.ENAME AS ename,
+				a.STATUS AS STATUS ,
+				a.POOL_TYPE AS poolType,
+				a.IS_ACTIVE AS isActive,
+				a.REMARK AS remark,
+				b.PLATFORM_TYPE AS platformType,
+				c.PLATFORM_NAME AS platformTypeName,
+				b.SERVICE_TYPE AS serviceType,
+				d.DIC_NAME AS serviceTypeName,
+				b.SECURE_AREA_TYPE AS secureAreaType,
+				e.SECURE_AREA_NAME AS secureAreaTypeName,
+				b.SECURE_LAYER AS secureLayer,
+				f.SECURE_TIER_NAME AS secureLayerName,
+				b.AZ_ID AS availableZoneId,
+				b.HOST_TYPE_ID AS hostTypeId,
+				ht.HOST_TYPE_NAME AS hostTypeName
+			FROM 
+				RM_RES_POOL a  
+			LEFT JOIN
+				RM_HOST_RES_POOL b ON a.id=b.id
+			LEFT JOIN
+				RM_PLATFORM c ON b.PLATFORM_TYPE=c.PLATFORM_ID
+			LEFT JOIN
+				(SELECT * FROM ADMIN_DIC WHERE DIC_TYPE_CODE = 'DU_SEV_TYPE') d ON b.SERVICE_TYPE= d.dic_code
+			LEFT JOIN
+				RM_NW_SECURE_AREA e ON b.SECURE_AREA_TYPE= e.SECURE_AREA_ID
+			LEFT JOIN
+				RM_NW_SECURE_TIER f ON b.SECURE_LAYER= f.SECURE_TIER_ID
+			LEFT JOIN
+				RM_DATACENTER dc ON a.DATACENTER_ID = dc.ID
+			LEFT JOIN
+				RM_HOST_TYPE ht ON b.HOST_TYPE_ID = ht.HOST_TYPE_ID
+			WHERE 
+				 a.IS_ACTIVE='Y' 
+				AND a.ID =  #id#
+		]]>
+	</select>
+
+	<insert id="saveRmResPoolVo" parameterClass="RmResPoolVo">
+		<![CDATA[
+			INSERT INTO RM_RES_POOL(ID ,DATACENTER_ID ,POOL_NAME,ENAME, STATUS,POOL_TYPE,IS_ACTIVE,REMARK,CREATE_USER,CREATE_DATETIME,UPDATE_USER,UPDATE_DATETIME) VALUES(#id#,#datacenterId#,#poolName# ,#ename#,#status# ,#poolType#,#isActive#,#remark#,#createUser#,#createDateTime#,#updateUser#,#updateDateTime#)
+		]]>
+	</insert>
+
+	<!-- 资源沲子表 -->
+	<insert id="saveRmHostResPoolPo" parameterClass="RmResPoolVo">
+		<![CDATA[
+			INSERT INTO RM_HOST_RES_POOL(ID ,PLATFORM_TYPE ,SERVICE_TYPE,SECURE_AREA_TYPE, SECURE_LAYER,CREATE_USER,CREATE_DATETIME,UPDATE_USER,UPDATE_DATETIME,AZ_ID,HOST_TYPE_ID) VALUES(#id#,#platformType#,#serviceType# ,#secureAreaType#,#secureLayer#,#createUser#,#createDateTime#,#updateUser#,#updateDateTime#,#availableZoneId#,#hostTypeId#)
+		]]>
+	</insert>
+
+	<select id="getManageServerListByDatacenterIdAndVmType"
+		parameterClass="java.util.Map" resultClass="RmVmManageServerPo">
+		SELECT
+		ID AS id ,
+		SERVER_NAME AS serverName
+		FROM
+		RM_VM_MANAGE_SERVER
+		WHERE 1=1 AND IS_ACTIVE='Y'
+		<isNotEmpty prepend="AND" property="vmType">
+			VM_TYPE = #vmType#
+		</isNotEmpty>
+		AND DATACENTER_ID = #datacenterId#
+	</select>
+
+	<select id="getVmTypeListByPlatformType" parameterClass="java.util.Map"
+		resultClass="RmVirtualTypePo">
+		SELECT
+		VIRTUAL_TYPE_ID AS virtualTypeId ,
+		VIRTUAL_TYPE_NAME AS virtualTypeName
+		FROM
+		RM_VIRTUAL_TYPE
+		WHERE 1=1 AND IS_ACTIVE='Y'
+		<isNotEmpty prepend="AND" property="platformType">
+			PLATFORM_ID = #platformType#
+		</isNotEmpty>
+	</select>
+
+	<select id="findClusterCountByRmCdpPoId" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT 
+				count(*) as count
+			FROM 
+				RM_CLUSTER 
+			WHERE 
+				CDP_ID = #id# 
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+
+	<select id="selectClusterById" parameterClass="java.lang.String"
+		resultClass="RmClusterPo">
+		SELECT
+        a.ID as id,
+        a.RES_POOL_ID as resPoolId,
+        a.CLUSTER_NAME as clusterName,
+        a.ENAME as ename,
+        a.STATUS as status,
+        a.IS_ACTIVE as isActive,
+        a.REMARK as remark,
+        a.vm_type AS vmType,
+        b.virtual_type_name AS vmTypeName,
+        b.virtual_type_code AS vmTypeCode,
+        a.vm_distri_type AS vmDistriType,
+        c.dic_name AS vmDistriTypeName,
+        a.manage_server AS manageServer,
+        f.server_name AS manageServerName,
+        f.manage_ip AS manageServerHost,
+        f.domain_name AS domainName,
+        a.manage_server_bak AS manageServerBak,
+        g.server_name AS manageServerBakName,
+        a.network_convergence AS networkConvergence,
+        a.PLATFORM_TYPE AS platformType,
+        (SELECT
+        DATACENTER_ID AS datacenterId
+        FROM
+        RM_RES_POOL
+        WHERE
+        ID =(
+        SELECT
+        l.RES_POOL_ID
+        FROM
+        RM_CLUSTER l
+        WHERE l.ID = #id#
+        AND l.IS_ACTIVE = 'Y'
+        )
+
+        ) as datacenterId
+        FROM RM_CLUSTER a
+        LEFT JOIN RM_VIRTUAL_TYPE b ON a.vm_type=b.virtual_type_id
+        LEFT JOIN
+        (SELECT * FROM ADMIN_DIC WHERE DIC_TYPE_CODE = 'VM_DISTRI_TYPE') c ON
+        a.vm_distri_type= c.dic_code
+        LEFT JOIN RM_VM_MANAGE_SERVER f ON
+        a.manage_server=f.id
+        LEFT JOIN RM_VM_MANAGE_SERVER g ON
+        a.manage_server_bak=g.id
+        WHERE a.IS_ACTIVE='Y' AND a.ID=#id#
+        ORDER BY CONVERT(clusterName USING gbk)
+        ASC
+	</select>
+	<insert id="saveRmClusterPo" parameterClass="RmClusterPo">
+		<![CDATA[
+		INSERT INTO 
+		RM_CLUSTER
+			(ID ,CDP_ID ,CLUSTER_NAME,ENAME, STATUS,IS_ACTIVE,REMARK,CREATE_USER,CREATE_DATETIME,STORAGE_ID,VM_TYPE,VM_DISTRI_TYPE,MANAGE_SERVER,MANAGE_SERVER_BAK,NETWORK_CONVERGENCE,RES_POOL_ID,PLATFORM_TYPE) 
+		VALUES
+			(#id#,#cdpId#,#clusterName#,#ename#,#status#,#isActive#,#remark#,#createUser#,#createDateTime#,#storage_id#,#vmType#,#vmDistriType#,#manageServer#,#manageServerBak#,#networkConvergence#,#resPoolId#,#platformType#)
+		]]>
+	</insert>
+	<insert id="saveSampleRmClusterPo" parameterClass="RmClusterPo">
+		<![CDATA[
+		INSERT INTO 
+		RM_CLUSTER
+			(ID ,CLUSTER_NAME,ENAME, IS_ACTIVE,VM_TYPE,RES_POOL_ID,PLATFORM_TYPE) 
+		VALUES
+			(#id#,#clusterName#,#clusterName#,#isActive#,#vmType#,#resPoolId#,#platformType#)
+		]]>
+	</insert>
+	<select id="selectClusterListByNoEqaulExistIds" parameterClass="java.util.Map"
+		resultClass="RmClusterPo">
+		SELECT c.ID as id
+		FROM
+		RM_CLUSTER c
+		WHERE
+		c.RES_POOL_ID=#poolId#
+		c.ID NOT
+		IN
+		<iterate property="idExistIds" open="(" close=")" conjunction=",">
+			#idExistIds[]#
+		</iterate>
+	</select>
+	<update id="updateRmClusterPo" parameterClass="RmClusterPo">
+		<![CDATA[
+			UPDATE 
+				RM_CLUSTER
+			SET 
+				CDP_ID=#cdpId# ,
+				CLUSTER_NAME=#clusterName# ,
+				ENAME=#ename# ,
+				STATUS=#status# ,
+				REMARK=#remark#,
+				STORAGE_ID=#storage_id#,
+				UPDATE_USER=#updateUser# ,
+				VM_TYPE=#vmType# ,
+				VM_DISTRI_TYPE=#vmDistriType# ,
+				MANAGE_SERVER=#manageServer# ,
+				MANAGE_SERVER_BAK=#manageServerBak# ,
+				NETWORK_CONVERGENCE=#networkConvergence# ,
+				UPDATE_DATETIME=#updateDateTime#   
+			WHERE ID = #id#
+		]]>
+	</update>
+	<delete id="deleteRmClusterPoById" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE 
+				RM_CLUSTER 
+			SET 
+				IS_ACTIVE= 'N' 
+			WHERE ID = #id#
+		]]>
+	</delete>
+
+	<select id="findRmVmManagerServerPo" parameterClass="java.lang.String"
+		resultClass="RmVmManageServerPo">
+		select user_name as userName,
+		manage_ip as manageIp,
+		DATACENTER_ID as datacenterId
+		from RM_VM_MANAGE_SERVER
+		where id = #serverId#
+		and is_active='Y'
+	</select>
+
+	<select id="findDatacenterInfoByHostId" parameterClass="java.lang.String"
+		resultClass="RmDatacenterPo1">
+		SELECT
+		dc.QUEUE_IDEN AS queueIden
+		FROM
+		RM_DATACENTER dc
+		LEFT JOIN RM_RES_POOL res ON res.DATACENTER_ID = dc.ID AND res.IS_ACTIVE =
+		'Y'
+		LEFT JOIN CM_DEVICE dev ON dev.RES_POOL_ID = res.ID AND dev.IS_ACTIVE =
+		'Y'
+		WHERE
+		dev.ID = #hostId# AND dc.IS_ACTIVE = 'Y'
+	</select>
+
+	<!-- 根据vcenternId查询vcentern的username password 和 manageIP -->
+	<select id="findRmVCenternInfoByVcId" parameterClass="java.lang.String"
+		resultClass="RmVmManageServerPo">
+		<![CDATA[
+			SELECT
+				vms.MANAGE_IP AS manageIp,
+				pass.USER_NAME AS userName,
+				pass.`PASSWORD` AS password
+			FROM
+				RM_VM_MANAGE_SERVER vms
+				LEFT JOIN CM_PASSWORD pass ON pass.RESOURCE_ID = vms.ID
+			WHERE
+				vms.ID = #vcId# AND vms.IS_ACTIVE = 'Y'
+		]]>
+	</select>
+
+	<select id="findRmNwSecureLayer" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT
+		SECURE_TIER_ID AS value,
+		SECURE_TIER_NAME AS name
+		FROM
+		RM_NW_SECURE_TIER
+		WHERE
+		IS_ACTIVE = 'Y' AND SECURE_AREA_ID = #typeId#;
+	</select>
+	<!-- 查询数据资源池对象根据名称模糊查询 -->
+	<select id="selectRmResPoolByName" parameterClass="String"
+		resultClass="RmResPoolVo">
+		SELECT
+		P.ID as id,
+		P.POOL_NAME as poolName
+		FROM RM_RES_POOL P
+		WHERE 1 = 1
+		AND P.IS_ACTIVE = 'Y'
+		AND P.POOL_NAME LIKE '%$poolName$%'
+	</select>
+	
+	<!-- 查询数据集群对象根据名称模糊查询 -->
+	<select id="selectRmClusterByName" parameterClass="String"
+		resultClass="RmClusterPo">
+		SELECT
+		P.ID as id,
+		P.CLUSTER_NAME as clusterName
+		FROM RM_CLUSTER P
+		WHERE 1 = 1
+		AND P.IS_ACTIVE = 'Y'
+		AND P.CLUSTER_NAME LIKE '%$clusterName$%'
+	</select>
+	<select id="selectclusterNamefortrim" parameterClass="java.util.Map"
+		resultClass="RmClusterPo">
+		select
+		d.CLUSTER_NAME as clusterName,
+		d.ID as id
+		from RM_CLUSTER d
+		where d.IS_ACTIVE='Y'
+		and d.CLUSTER_NAME=#clusterName#
+		and d.CDP_ID=#cdpId#
+	</select>
+	<select id="selectclusterEnamefortrim" parameterClass="String"
+		resultClass="RmClusterPo">
+		select
+		d.ENAME as ename,
+		d.ID as id
+		from RM_CLUSTER d
+		where d.IS_ACTIVE='Y'
+		and d.ENAME=#ename#
+	</select>
+
+	<select id="findClusterCountByRmResPoolVoId" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT 
+				count(*) as count
+			FROM 
+				RM_CLUSTER
+			WHERE 
+				RES_POOL_ID = #id# 
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+	<select id="findClusterByRmResPoolId" parameterClass="java.lang.String"
+		resultClass="RmClusterPo">
+		<![CDATA[
+			SELECT 
+				id as id 
+			FROM 
+				RM_CLUSTER
+			WHERE 
+				RES_POOL_ID = #id# 
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+	<delete id="deleteRmHostByClusterId" parameterClass="java.lang.String">
+		delete from CM_HOST where CLUSTER_ID = #clusterId#
+	</delete>
+
+	<insert id="saveCmSnapshotVo" parameterClass="CmSnapshotVo">
+		<![CDATA[
+		INSERT INTO CM_SNAPSHOT(
+			SNAPSHOT_ID,
+			SNAPSHOT_NAME,
+			VM_ID,
+			VM_NAME,
+			CREATE_USER,
+			CREATE_DATE,
+			ISSUCC,
+			ISACTIVE,
+			SNAPSHOT_MEMORY,
+			SNAPSHOT_SILENCE
+		)
+		VALUES
+			(#snapshotId#,#snapshotName#,#vmId#,#vmName#,#createUser#,#createDate#,#isSucc#,#isActive#,#snapshotMemory#,#snapshotSilence#)
+		]]>
+	</insert>
+	<!-- 查询所有的快照信息记录 ByName -->
+	<select id="selectCmSnapshotByName" parameterClass="java.util.Map"
+		resultClass="CmSnapshotVo">
+		<![CDATA[
+		 select 
+		     d.SNAPSHOT_ID as snapshotId,
+			 d.SNAPSHOT_NAME as snapshotName,
+			 d.CREATE_USER as createUser,
+			 d.CREATE_DATE as createDate,
+			 d.VM_NAME as vmName,
+			 d.VM_ID as vmId
+		 from CM_SNAPSHOT d
+		 WHERE d.ISACTIVE='Y' 
+			 and d.SNAPSHOT_ID is not null
+			 and d.SNAPSHOT_ID!=''
+	 		 and d.VM_ID=#vmId#
+	 		 and d.SNAPSHOT_NAME=#snapshotName#
+	 		 ORDER BY CONVERT(createDate USING gbk) DESC
+		 ]]>
+	</select>
+	<!-- 查询所有的快照信息记录 and d.VM_ID=#vmId# ORDER BY $sidx$ $sord$ -->
+	<sql id="selectCmSnapshotList">
+		<![CDATA[
+		 select 
+		     d.SNAPSHOT_ID as snapshotId,
+			 d.SNAPSHOT_NAME as snapshotName,
+			 d.CREATE_USER as createUser,
+			 d.CREATE_DATE as createDate,
+			 d.VM_NAME as vmName,
+			 d.VM_ID as vmId,
+			 d.SNAPSHOT_SILENCE as snapSilence,
+			 d.SNAPSHOT_MEMORY as snapMemory
+		 from CM_SNAPSHOT d
+		 WHERE d.ISACTIVE='Y' 
+			 and d.SNAPSHOT_ID is not null
+			 and d.SNAPSHOT_ID!=''
+	 		 and d.VM_ID=#vmId#
+	 		 ORDER BY CONVERT(createDate USING gbk) DESC
+		 ]]>
+	</sql>
+	<select id="findCmSnapshotTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="selectCmSnapshotList" />
+		) re
+	</select>
+	<select id="findCmSnapshotPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectCmSnapshotList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<update id="rmCmSnapshotById" parameterClass="CmSnapshotVo">
+		<![CDATA[
+			UPDATE 
+				CM_SNAPSHOT 
+			SET 
+				ISACTIVE= 'N' 
+			WHERE VM_ID = #vmId#
+			  and SNAPSHOT_NAME =#snapshotName#
+		]]>
+	</update>
+	<!-- 扫描虚拟机 -->
+	<insert id="rmHostVmSaveVm" parameterClass="VmVo1">
+		INSERT INTO
+		CM_VM
+		(ID,HOST_ID,CPU,MEM,DISK,CREATE_TIME,ONLINE_TIME,DATASTORE_ID,DU_ID,ORDER_NUM,DATASTORE_TYPE,PLATFORM_TYPE_CODE,CLOUDSERVICE_ID)
+		VALUES
+		(#Id#,#hostId#,#cpu#,#memory#,#disk#,#createTime#,#onlineTime#,#datastoreId#,#duId#,#orderNum#,#datastoreType#,#platFormTypeCode#,#cloudService#);
+	</insert>
+
+	<insert id="rmHostVmSaveDevice" parameterClass="VmVo1">
+		INSERT INTO
+		CM_DEVICE
+		(ID,DEVICE_NAME,SN,DEVICE_MODEL_ID,SEAT_ID,RES_POOL_ID,IS_ACTIVE,DESCRIPTION,CREATE_USER,CREATE_DATETIME,UPDATE_USER,UPDATE_DATETIME,DEVICE_STATUS,IS_INVC,RUNNING_STATE)
+		VALUES
+		(#Id#,#vmName#,#sn#,#deviceModelId#,#seatId#,#resPoolId#,'Y',#description#,#createUser#,#createDatetime#,#updateUser#,#updateDatetime#,#deviceStatus#,'NA',#runningState#);
+
+	</insert>
+	
+	<insert id="saveDeviceByHostVo" parameterClass="HostVo">
+		INSERT INTO
+		CM_DEVICE
+		(ID,DEVICE_NAME,RES_POOL_ID,IS_ACTIVE,IS_INVC)
+		VALUES
+		(#id#,#hostName#,#resPoolId#,'Y','Y');
+	</insert>
+	<insert id="saveHostByHostVo" parameterClass="HostVo">
+		INSERT INTO
+		CM_HOST
+		(ID,CPU,MEM,CPU_USED,MEM_USED,CLUSTER_ID,IS_INVC)
+		VALUES
+		(#id#,#hostCpu#,#hostMem#,#usedCpu#,#usedMem#,#clusterId#,'Y');
+	</insert>
+	
+	<update id="updateVmByVmVo" parameterClass="CmVmVo">
+		UPDATE CM_VM
+		SET
+		CPU=#cpu#,
+		MEM=#mem#
+		WHERE
+		HOST_ID=#hostId#;
+	</update>
+	<update id="updateVmIpByVmVo" parameterClass="CmVmVo">
+		UPDATE
+		RM_NW_OPENSTACK_IP_ADDRESS
+		SET
+		IP=#cmVmIps#
+		WHERE
+		INSTANCE_ID=#id#;
+	</update>
+	<insert id="saveDeviceByVmVo" parameterClass="CmVmVo">
+		INSERT INTO
+		CM_DEVICE
+		(ID,DEVICE_NAME,RES_POOL_ID,IS_ACTIVE,IS_INVC)
+		VALUES
+		(#id#,#cmVmName#,#resPoolId#,'Y','Y');
+	</insert>
+	<update id="updateDeviceByVmVo" parameterClass="CmVmVo">
+		UPDATE 
+			CM_DEVICE
+		SET DEVICE_NAME = #cmVmName# 
+		WHERE 
+			ID = #id#;
+	</update>
+	<insert id="saveSanDeviceByPo" parameterClass="CmDevicePo">
+		INSERT INTO
+		CM_DEVICE
+		(ID,DEVICE_NAME,IS_ACTIVE,IS_INVC)
+		VALUES
+		(#id#,#deviceName#,'Y','Y');
+	</insert>
+	<insert id="saveSanStorage" parameterClass="CmDevicePo">
+		INSERT INTO
+		CM_STORAGE
+		(ID,STORAGE_TYPE)
+		VALUES
+		(#id#,'SAN');
+	</insert>
+	<insert id="saveSanDataStoreByDataStoreVo" parameterClass="dataStoreVo">
+		INSERT INTO
+		CM_DATASTORE
+		(ID,STORAGE_ID,NAME,IS_ACTIVE,FREE_SIZE)
+		VALUES
+		(#id#,#deviceId#,#dsName#,'Y',#freeSize#);
+	</insert>
+	<insert id="saveSanHostDataStoreRef" parameterClass="CmHostDatastoreRefPo">
+		INSERT INTO
+		CM_HOST_DATASTORE_REF
+		(ID,HOST_ID,DATASTORE_ID)
+		VALUES
+		(#id#,#hostId#,#datastoreId#);
+	</insert>
+	<update id="updateSanDataStoreByDataStoreVo" parameterClass="dataStoreVo">
+		UPDATE
+		CM_DATASTORE
+		SET FREE_SIZE=#freeSize#
+		WHERE ID=#id#;
+	</update>
+	<insert id="saveVmByVmVo" parameterClass="CmVmVo">
+		INSERT INTO
+		CM_VM
+		(ID,HOST_ID,CPU,MEM)
+		VALUES
+		(#id#,#hostId#,#cpu#,#mem#);
+	</insert>
+	<update id="updateVmDeviceByVmVo" parameterClass="CmVmVo">
+		UPDATE 
+			CM_VM
+		SET HOST_ID = #hostId#,CPU = #cpu#,MEM = #mem#
+		WHERE
+			ID = #id#;
+	</update>
+	<delete id="deleteDeviceByParams" parameterClass="java.util.List">
+		UPDATE
+		CM_DEVICE
+		SET
+		IS_ACTIVE= 'N'
+		WHERE ID IN
+		<iterate open="(" close=")" conjunction=",">
+			#deviceList[].id#
+		</iterate>
+	</delete>
+	<select id="findLocalDiskListByHostId" parameterClass="java.lang.String"
+		resultClass="CmLocalDiskPo">
+		SELECT
+		ID as id,
+		DEVICE_ID as deviceId,
+		NAME as name
+		FROM
+		CM_LOCAL_DISK
+		WHERE
+		DEVICE_ID=#hostId#
+	</select>
+	<insert id="saveLocalDisk" parameterClass="dataStoreVo">
+		INSERT INTO
+		CM_LOCAL_DISK
+		(ID,DEVICE_ID,NAME,IS_ACTIVE)
+		VALUES
+		(#id#,#hostId#,#dsName#,'Y');
+	</insert>
+	<delete id="deleteLocalDiskList" parameterClass="java.util.List">
+		DELETE FROM
+		CM_LOCAL_DISK
+		WHERE
+		ID IN
+		<iterate open="(" close=")" conjunction=",">
+			#idExistIds[].id#
+		</iterate>
+	</delete>
+	<delete id="deleteSanDataStoreList" parameterClass="java.util.List">
+		DELETE FROM
+		CM_DATASTORE
+		WHERE
+		ID IN
+		<iterate open="(" close=")" conjunction=",">
+			#idExistIds[].id#
+		</iterate>
+	</delete>
+	<delete id="deleteHostDataStoreRefList" parameterClass="java.util.List">
+		DELETE FROM
+		CM_HOST_DATASTORE_REF
+		WHERE
+		DATASTORE_ID IN
+		<iterate open="(" close=")" conjunction=",">
+			#idExistIds[].id#
+		</iterate>
+	</delete>
+	<select id="findSanStorgeListByHostId" parameterClass="java.lang.String"
+		resultClass="dataStoreVo">
+		SELECT
+		r.HOST_ID as hostId,
+		r.DATASTORE_ID as id,
+		d.NAME as
+		dsName,
+		d.FREE_SIZE as
+		freeSize
+		FROM
+		CM_HOST_DATASTORE_REF r
+		INNER JOIN
+		CM_DATASTORE d ON r.DATASTORE_ID=d.ID
+		WHERE
+		HOST_ID=#hostId#
+	</select>
+	<select id="queryIpRuleList" parameterClass="VmVo1" resultClass="IpRules">
+		SELECT DISTINCT
+		rlist.RM_NW_RULE_ID as id,
+		rlist.ACT_NUM as num,
+		rlist.RM_IP_TYPE_NAME as ipTypeName
+		FROM
+		RM_NW_RULE_LIST rlist
+		LEFT JOIN RM_NW_RULE r ON r.RM_NW_RULE_ID = rlist.RM_NW_RULE_ID AND
+		r.IS_ACTIVE = 'Y' AND rlist.IS_ACTIVE = 'Y'
+		LEFT JOIN RM_CLUSTER cluster ON cluster.PLATFORM_TYPE = r.PLATFORM_ID AND
+		cluster.VM_TYPE = r.VIRTUAL_TYPE_ID AND cluster.IS_ACTIVE = 'Y'
+		LEFT JOIN CLOUD_SERVICE service ON service.HA_TYPE = r.HA_TYPE AND
+		service.IS_ACTIVE = 'Y'
+		LEFT JOIN CM_HOST host ON host.CLUSTER_ID = cluster.ID
+		WHERE
+		r.HOST_TYPE_ID = '1'
+		<dynamic prepend=" and ">
+			<isNotEmpty property="cloudService" prepend=" and ">
+				service.SERVICE_ID = #cloudService#
+			</isNotEmpty>
+			<isEmpty property="cloudService" prepend=" and ">
+				service.HA_TYPE = 'single'
+			</isEmpty>
+			<isNotEmpty property="hostId" prepend=" and ">
+				host.ID = #hostId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="getCloudServiceList" parameterClass="VmVo1"
+		resultClass="CloudServiceVoByRmHost">
+		SELECT
+		service.SERVICE_ID AS cloudServiceId,
+		service.SERVICE_NAME AS cloudServiceName
+		FROM
+		CLOUD_SERVICE service
+		LEFT JOIN RM_CLUSTER cluster ON cluster.VM_TYPE = service.VM_TYPE AND
+		cluster.PLATFORM_TYPE = service.PLATFORM_TYPE AND cluster.IS_ACTIVE =
+		'Y' AND service.IS_ACTIVE = 'Y'
+		LEFT JOIN CM_HOST host ON `host`.CLUSTER_ID = cluster.ID
+		WHERE
+		`host`.ID = #hostId# AND service.SERVICE_STATUS='Y'
+	</select>
+	<!-- 获取虚拟机数目 -->
+	<select id="checkVmIsExist" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT 
+				count(*) as count
+			FROM 
+				CM_DEVICE 
+			WHERE 
+				DEVICE_NAME = #vmName# 
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+	<!-- 获取服务器角色列表 -->
+	<select id="getDuListByRmHost" parameterClass="java.lang.String"
+		resultClass="DuPoByRmHost">
+		SELECT
+		concat(
+		fo.CNAME,
+		concat(".", du.CNAME)
+		)AS AppDuName,
+		du.DU_ID AS AppDuId
+		FROM
+		APP_DU du
+		LEFT JOIN APP_INFO fo ON fo.APP_ID = du.APP_ID
+		WHERE
+		du.SERVICE_ID = #cloudService# AND du.IS_ACTIVE = 'Y'
+
+	</select>
+	<!-- 获取未关联云服务的服务器角色列表 -->
+	<select id="getDuListNoServiceId" resultClass="DuPoByRmHost">
+		SELECT
+		concat(
+		fo.CNAME,
+		concat(".", du.CNAME)
+		)AppDuName,
+		du.DU_ID AS AppDuId
+		FROM
+		APP_DU du
+		LEFT JOIN APP_INFO fo ON fo.APP_ID = du.APP_ID
+		WHERE
+		du.IS_ACTIVE = 'Y'
+		AND(
+		ISNULL(du.SERVICE_ID)
+		OR du.SERVICE_ID = ''
+		)
+	</select>
+	<select id="checkdataStoreIsExist" parameterClass="hashMap"
+		resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT 
+				count(*) as count
+			FROM 
+				CM_LOCAL_DISK d 
+			WHERE 
+				d.`NAME` = #dataStoreName# AND d.DEVICE_ID = #hostId#
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+	<select id="selectDatastoreId" parameterClass="hashMap"
+		resultClass="java.lang.String">
+		<![CDATA[
+			SELECT 
+				d.ID
+			FROM 
+				CM_LOCAL_DISK d 
+			WHERE 
+				d.`NAME` = #dataStoreName# AND d.DEVICE_ID = #hostId#
+				AND IS_ACTIVE='Y'
+		]]>
+	</select>
+	<select id="selectShareDatastoreId" parameterClass="hashMap"
+		resultClass="java.lang.String">
+		<![CDATA[
+			SELECT
+				d.ID
+			FROM 
+				CM_DATASTORE d 
+			WHERE 
+				d.`NAME` = #dataStoreName# AND IS_ACTIVE='Y'
+		]]>
+	</select>
+	<select id="selectDeviceInfoByHostId" parameterClass="hashMap"
+		resultClass="java.util.HashMap">
+		<![CDATA[
+			SELECT
+				dev.SN AS sn,
+				dev.RES_POOL_ID resPoolId,
+				dev.DEVICE_NAME deviceName
+			FROM
+				CM_DEVICE dev
+			LEFT JOIN CM_HOST ho ON dev.ID = ho.ID
+			WHERE
+				dev.ID = #hostId#
+			AND dev.IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	<select id="selectIpRuleInfoByHostIdAndCloSerId" parameterClass="hashMap"
+		resultClass="IpRuleInfoVo">
+		<![CDATA[
+			SELECT 
+				rlist.RM_NW_RULE_LIST_ID AS ruleListId,
+				rlist.RM_NW_RULE_ID AS ruleId,
+				rlist.RM_IP_TYPE_NAME AS ipTypeName,
+				rlist.USE_CODE AS useCode,
+				r.HA_TYPE AS haType,
+				r.HOST_TYPE_ID AS hostTypeId,
+				hostType.HOST_TYPE_CODE AS hostTypeCode,
+				r.VIRTUAL_TYPE_ID AS virTypeId,
+				virType.VIRTUAL_TYPE_CODE AS virTypeCode,
+				r.PLATFORM_ID AS platformId,
+				platform.PLATFORM_CODE AS platformCode
+			FROM
+				RM_NW_RULE_LIST rlist
+				LEFT JOIN RM_NW_RULE r ON r.RM_NW_RULE_ID = rlist.RM_NW_RULE_ID AND r.IS_ACTIVE = 'Y' AND rlist.IS_ACTIVE = 'Y'
+				LEFT JOIN RM_CLUSTER cluster ON cluster.PLATFORM_TYPE = r.PLATFORM_ID AND cluster.VM_TYPE = r.VIRTUAL_TYPE_ID AND cluster.IS_ACTIVE = 'Y'
+				LEFT JOIN CLOUD_SERVICE service ON service.HA_TYPE = r.HA_TYPE AND service.IS_ACTIVE = 'Y'
+				LEFT JOIN CM_HOST host ON host.CLUSTER_ID = cluster.ID
+				LEFT JOIN RM_HOST_TYPE hostType ON hostType.HOST_TYPE_ID = r.HOST_TYPE_ID
+				LEFT JOIN RM_VIRTUAL_TYPE virType ON virType.VIRTUAL_TYPE_ID = r.VIRTUAL_TYPE_ID
+				LEFT JOIN RM_PLATFORM platform ON platform.PLATFORM_ID = r.PLATFORM_ID
+			WHERE
+				service.SERVICE_ID = #cloudService# AND `host`.ID = #hostId# AND r.HOST_TYPE_ID = '1'
+		]]>
+	</select>
+	<update id="updateHostCpuAndMem">
+		UPDATE CM_HOST ch,
+		(
+		SELECT
+		ch.ID,
+		CASE WHEN ISNULL(SUM(cc.CPU)) THEN 0 ELSE (SUM(cc.CPU)) END AS CPU_USED,
+		CASE WHEN ISNULL(SUM(cc.MEM)) THEN 0 ELSE (SUM(cc.MEM)) END AS
+		MEM_USED
+		FROM
+		CM_HOST ch LEFT JOIN
+		(
+		SELECT
+		cv.ID,
+		cv.HOST_ID,
+		cv.CPU,
+		cv.MEM
+		FROM
+		CM_VM cv,
+		CM_DEVICE cd
+		WHERE
+		cv.ID = cd.ID
+		AND cd.IS_ACTIVE = 'Y'
+		)cc
+		ON
+		ch.ID = cc.HOST_ID
+		GROUP BY
+		ch.ID
+		)cb
+		SET ch.CPU_USED = cb.CPU_USED,
+		ch.MEM_USED = cb.MEM_USED
+		WHERE
+		ch.ID = cb.ID
+	</update>
+
+	<select id="getCmSnapshotVoList" parameterClass="java.util.Map"
+		resultClass="CmSnapshotVo">
+     <![CDATA[
+           	SELECT
+				d.SNAPSHOT_ID AS snapshotId,
+				d.SNAPSHOT_NAME AS snapshotName,
+				d.VM_NAME AS vmName,
+				d.VM_ID AS vmId
+			FROM
+				CM_SNAPSHOT d
+			WHERE
+				d.ISACTIVE = 'Y'
+			AND d.VM_ID = #vmId#
+           ]]>
+	</select>
+	
+	<select id="findDatastoreByHostIp" parameterClass="java.lang.String"
+		resultClass="dataStoreVo">
+		SELECT	DS.DATASTORE_ID id	,DS.DATASTORE_NAME dsName	,DEV.HOST_IP hostIp	,DEV.ID hostId
+		FROM CM_HOST_DATASTORE_REF REF	
+		INNER JOIN	CM_DATASTORE DS	ON	REF.DATASTORE_ID = DS.DATASTORE_ID
+		INNER JOIN	cm_host DEV	ON	REF.HOST_ID = DEV.ID
+		WHERE
+		DEV.HOST_IP = #hostIp#
+	</select>
+
+
+<!-- 查询物理机总数量 -->
+	<select id="findPhyHostTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer">
+		SELECT COUNT(1) AS total FROM CM_HOST h LEFT JOIN CM_DEVICE d ON h.ID = d.ID
+		  WHERE
+				d.DEVICE_NAME != '' and d.IS_ACTIVE = 'Y'
+			<isNotEmpty prepend="and" property="cmHostName"> 
+				d.DEVICE_NAME LIKE '%$cmHostName$%'
+			</isNotEmpty>
+	</select>
+
+
+
+	<!-- 查看物理机管理服务器信息 -->
+	<select id="findPhyHostPage" parameterClass="hashMap"
+
+		resultClass="cmHostVo">
+		<!-- <include refid="selectVMServerInfoSql" />
+		$_orderby$ limit
+
+		#startIndex#,#pageSize# -->
+		
+		SELECT h.ID, (d.DEVICE_NAME) AS cmHostName,(p.USER_NAME)as ipmiUser,(h.IS_INVC) as isInvc,h.IS_BARE as isBare FROM CM_HOST h 
+		LEFT JOIN CM_DEVICE d on h.ID = d.ID
+		LEFT JOIN CM_PASSWORD p on h.ID = p.RESOURCE_ID WHERE d.DEVICE_NAME != '' AND d.IS_ACTIVE = 'Y'
+		<isNotEmpty prepend="and" property="cmHostName"> 
+				d.DEVICE_NAME LIKE '%$cmHostName$%'
+			</isNotEmpty>
+		LIMIT #startIndex#,#pageSize#
+		
+	</select>
+	
+	<!-- 更改物理机用户名密码 -->
+	
+	<update id="updateUserNamePasswd" parameterClass="cmHostUsernamePasswordPo">
+	
+	UPDATE CM_PASSWORD c SET c.USER_NAME = #username# ,UPDATE_USER = #updateUser#,UPDATE_DATETIME = #updateDateTime#
+	<isNotEmpty prepend="," property="password"> 
+				c.PASSWORD = #password#
+	</isNotEmpty> 
+	WHERE c.RESOURCE_ID = #id#
+	
+	</update>
+	
+	<!-- 查询物理机是否存在用户名密码 -->
+	<select id="findExistUserNamePassWd" parameterClass="cmHostUsernamePasswordPo"
+		resultClass="java.lang.Integer">
+		SELECT count(ID) FROM CM_PASSWORD WHERE RESOURCE_ID = #id#
+		
+	</select>
+	
+	<!-- 新增物理机用户名密码 -->
+	
+	<insert id="insertHostUserNamePasswd" parameterClass="cmHostUsernamePasswordPo">
+		<![CDATA[
+			INSERT INTO CM_PASSWORD(ID ,RESOURCE_ID ,USER_NAME,PASSWORD, CREATE_USER,CREATE_DATETIME)
+			 VALUES(#primaryId#,#id#,#username# ,#password#,#createUser# ,#createDateTime#)
+		]]>
+	</insert>
+    <!-- 同步资源池下的集群 -->
+    <insert id="insertRmClusterPoSynck" parameterClass="RmClusterPo">
+		<![CDATA[
+		INSERT INTO 
+		RM_CLUSTER
+			(ID ,CDP_ID ,CLUSTER_NAME,ENAME, STATUS,IS_ACTIVE,REMARK,CREATE_USER,CREATE_DATETIME,STORAGE_ID,VM_TYPE,VM_DISTRI_TYPE,MANAGE_SERVER,MANAGE_SERVER_BAK,NETWORK_CONVERGENCE,RES_POOL_ID,PLATFORM_TYPE) 
+		VALUES
+			(#id#,#cdpId#,#clusterName#,#ename#,#status#,#isActive#,#remark#,#createUser#,#createDateTime#,#storage_id#,#vmType#,#vmDistriType#,#manageServer#,#manageServerBak#,#networkConvergence#,#resPoolId#,#platformType#)
+		]]>
+	</insert>
+	<!-- 查询集群  名称  -->
+	<select id="selectClusterByResPoolIdAndName" parameterClass="java.util.HashMap" resultClass="RmClusterPo">
+		SELECT
+		id,
+		cluster_name AS clusterName
+		FROM
+		RM_CLUSTER
+		WHERE
+		is_active = 'Y'
+		AND RES_POOL_ID = #resPoolId# 
+		AND cluster_name = #clusterName#
+	</select>
+    <!-- 同步资源池下的集群 下的 物理机 -->
+   <insert id="insertDeviceByHostVoSynck" parameterClass="HostVo">
+		INSERT INTO
+		CM_DEVICE
+		(ID,DEVICE_NAME,RES_POOL_ID,IS_ACTIVE,IS_INVC,DEVICE_MODEL_ID)
+		VALUES
+		(#id#,#hostName#,#resPoolId#,'Y','Y',#deviceModelId#);
+	</insert>
+   <insert id="insertHostByHostVoSynck" parameterClass="HostVo">
+		INSERT INTO
+		CM_HOST
+		(ID,CPU,MEM,CPU_USED,MEM_USED,CLUSTER_ID,IS_INVC,DISK)
+		VALUES
+		(#id#,#hostCpu#,#hostMem#,#usedCpu#,#usedMem#,#clusterId#,'Y',#disk#);
+	</insert>
+	<update id="updateHostByHostVoSynck" parameterClass="HostVo">
+		UPDATE 
+		CM_HOST SET 
+		 CPU=#hostCpu#,MEM=#hostMem#,CPU_USED=#usedCpu#,MEM_USED=#usedMem#,CLUSTER_ID=#clusterId#,IS_INVC='Y',DISK= #disk#
+		WHERE ID = #id#
+	</update>
+	
+	<insert id="insertLocalDiskSynck" parameterClass="CmLocalDiskPo">
+		INSERT INTO
+		CM_LOCAL_DISK
+		(ID,DEVICE_ID,SIZE,IS_ACTIVE)
+		VALUES
+		(#id#,#deviceId#,#size#,'Y');
+	</insert>
+	<!-- 根据集群Id 查询 该集群是否属于 openstackX86平台 -->
+	<select id="selectPlatByClusterId" parameterClass="java.util.Map" resultClass="RmClusterPo">
+		SELECT PLATFORM_TYPE AS platformType FROM RM_CLUSTER WHERE ID = #id#
+	</select>
+	<!-- 根据主机Id和集群Id查找物理机表，数据是否存在 -->
+	<select id="selectHostByClusterIdAndHostId" parameterClass="java.util.Map" resultClass="HostVo">
+		SELECT d.ID AS id FROM CM_HOST h, CM_DEVICE d WHERE d.ID=h.ID AND d.IS_ACTIVE='Y' AND h.ID= #id# AND h.CLUSTER_ID= #clusterId#
+	</select>
+	
+	<!-- 根据物理机Id查找所属集群 -->
+	<select id="selectHostByHostId" parameterClass="java.util.Map" resultClass="HostVo">
+		SELECT ID AS id , CLUSTER_ID AS clusterId FROM CM_HOST WHERE ID= #id#
+	</select>
+	
+	<delete id="updateDeviceActiveStatusToN" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE CM_DEVICE SET IS_ACTIVE='N' WHERE ID = #deviceId#
+		]]>
+	</delete>
+	<select id="getVmIdByProjectId" parameterClass="java.lang.String" resultClass="CmDevicePo">
+		SELECT
+		    d.DEVICE_NAME AS deviceName,
+		    d.ID AS id
+		FROM
+		    CM_DEVICE d
+		LEFT JOIN CM_VM vm ON d.ID = vm.ID
+		WHERE
+		    d.ID = vm.ID
+		AND d.IS_ACTIVE = 'Y'
+		AND vm.PROJECT_ID = #projectId#
+	</select>
+	<!-- 保存数据卷 openstack-->
+	<insert id="saveOpenstackVolume" parameterClass="VolumeVo">
+		insert into CLOUD_VOLUME (id,availability_zone,size,project_id,storage_type,VOLUME_TYPE,volume_name,is_share,sys_volume,IAAS_UUID ) 
+								values(#volumeId#,#azName#,#volumeSize#,#projectId#,#storageType#,#volumeType#,#volumeName#,#isShareVol#,#sysVolumeVal#,#iaasUuid#)
+	</insert>
+	<!-- 删除数据卷 openstack-->
+	<update id="deleteOpenstackVolume" parameterClass="java.lang.String">
+		update CLOUD_VOLUME set IS_ACTIVE='N' ,DELETE_TIME=NOW() where id = #volumeId#
+	</update>
+	<!-- 更新数据卷 openstack-->
+	<update id="updateOpenstackVolume" parameterClass="java.util.Map">
+		update CLOUD_VOLUME set VOLUME_NAME = #volumeName# where id = #volumeId#
+	</update>
+	<select id="getOpenstackVolume" parameterClass="java.lang.String" resultClass="VolumeVo">
+		select ID as volumeId from CLOUD_VOLUME where PROJECT_ID = #projectId# and IS_ACTIVE='Y'
+	</select>
+	<select id="getVolumeTypeList" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT
+			rt.VOLUME_TYPE AS
+		VALUE
+			,
+			rt.VOLUME_TYPE AS NAME
+		FROM
+			RM_VOLUME_TYPE rt
+		LEFT JOIN RM_VM_MANAGE_SERVER rvms ON rt.VM_MS_ID = rvms.ID
+		LEFT JOIN RM_DATACENTER rd ON rvms.DATACENTER_ID = rd.ID
+		LEFT JOIN RM_AVAILABILITY_ZONE a ON a.VM_MS_ID = rvms.ID
+		WHERE
+			rvms.IS_ACTIVE = 'Y'
+		AND rd.IS_ACTIVE = 'Y'
+		AND a.IS_ACTIVE = 'Y'
+		AND a.ID = #availableZoneId#
+	</select>
+	
+	<select id="findCloudVolumeById" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.openstack.model.po.CloudVolumePo">
+       SELECT
+		    id id,
+		    availability_zone availabilityZone,
+		    size size,
+		    project_id projectId,
+		    storage_type storageType,
+		    VOLUME_TYPE volumeType,
+		    volume_name volumeName,
+		    is_share isShare,
+		    sys_volume sysVolume,
+		    IMAGE_ID imageId,
+		    PASSTHROUGH passthrough,
+		    IAAS_UUID iaasUuid
+		FROM
+		    cloud_volume
+		WHERE
+		    IS_ACTIVE = 'Y'
+		AND id = #id#
+    </select>
+	<select id="selectCloudVolumeIdByIaasUuid" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.openstack.model.po.CloudVolumePo">
+       SELECT
+		    id id,
+		    availability_zone availabilityZone,
+		    size size,
+		    project_id projectId,
+		    storage_type storageType,
+		    VOLUME_TYPE volumeType,
+		    volume_name volumeName,
+		    is_share isShare,
+		    sys_volume sysVolume,
+		    IMAGE_ID imageId,
+		    PASSTHROUGH passthrough,
+		    IAAS_UUID iaasUuid
+		FROM
+		    cloud_volume
+		WHERE
+		    IS_ACTIVE = 'Y'
+		AND IAAS_UUID = #iaasUuid#
+    </select>
+	<update id="updateCloudVolumeIaasUuidById" parameterClass="com.git.cloud.resmgt.openstack.model.po.CloudVolumePo">
+        update cloud_volume set IAAS_UUID = #iaasUuid# where id = #id#
+    </update>
+</sqlMap>

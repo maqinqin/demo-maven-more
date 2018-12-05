@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="workflowComponent">
+	<typeAlias alias="ComponentPo" type="com.gitcloud.tankflow.model.po.ComponentPo" />
+	<!-- 查询所有组件  -->
+	<select id="getCompList" resultClass="ComponentPo">
+		 select 
+			 	COMPONENT_ID    componentId,
+			 	COMPONENT_NAME  componentName,
+			 	INF_PATH_NAME   infPathName,
+			 	PAGE_PATH_NAME  pagePathName,
+			 	COMPONENT_TYPE  componentType,
+			 	COMPONENT_ICON  componentIcon,
+				REMARK          remark,
+				IS_ACTIVE       isActive
+		 from 
+		 	BPM_NODE_COMPONENT
+		 where  IS_ACTIVE  = 'Y' order by COMPONENT_NAME
+	</select>
+	<!-- 查询组件信息列表  -->
+	<sql id="findAllComponent">
+		<![CDATA[
+			 select 
+				 	COMPONENT_ID    componentId,
+				 	COMPONENT_NAME  componentName,
+				 	INF_PATH_NAME   infPathName,
+				 	PAGE_PATH_NAME  pagePathName,
+				 	COMPONENT_TYPE  componentType,
+				 	COMPONENT_ICON  componentIcon,
+					REMARK          remark,
+					IS_ACTIVE       isActive
+			 from 
+			 	BPM_NODE_COMPONENT 
+			 where IS_ACTIVE = 'Y'
+		]]>
+	 	<dynamic prepend="and"> 
+			<isNotEmpty prepend=" and " property="componentName"><!-- 模糊查询不能用#,#在是用prepareStatement的?插入参数,$是文本替换  -->           
+				COMPONENT_NAME like CONCAT('%',trim(#componentName#),'%')            
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="pagePathName">          
+				PAGE_PATH_NAME like CONCAT('%',trim(#pagePathName#),'%')             
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="infPathName">          
+				INF_PATH_NAME like CONCAT('%',trim(#infPathName#),'%')              
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="componentType">         
+				COMPONENT_TYPE = #componentType#         
+			</isNotEmpty>         
+		</dynamic>   
+	</sql>
+	<!-- 查询总数 -->
+	<select id="findAllComponentTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="findAllComponent"/>
+        ) as recordTable
+    </select>
+    <select id="findAllComponentPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="findAllComponent"/> $_orderby$ limit #startIndex# ,#pageSize#
+    </select>
+    
+	<!-- 根据Id查询组件信息 -->
+	<select id="findComponentById"  resultClass="ComponentPo">
+		 select 
+			 	COMPONENT_ID    componentId,
+			 	COMPONENT_NAME  componentName,
+			 	INF_PATH_NAME   infPathName,
+			 	PAGE_PATH_NAME  pagePathName,
+			 	COMPONENT_TYPE  componentType,
+			 	COMPONENT_ICON  componentIcon,
+				REMARK          remark,
+				IS_ACTIVE       isActive
+		 from 
+		 	BPM_NODE_COMPONENT 
+		 where 
+		 	COMPONENT_ID = #componentId#
+	</select>
+	
+	<!-- 根据Id查询组件信息 -->
+	<select id="findComponentByType"  resultClass="ComponentPo">
+		 select 
+			 	COMPONENT_ID    componentId,
+			 	COMPONENT_NAME  componentName,
+			 	INF_PATH_NAME   infPathName,
+			 	PAGE_PATH_NAME  pagePathName,
+			 	COMPONENT_TYPE  componentType,
+			 	COMPONENT_ICON  componentIcon,
+				REMARK          remark,
+				IS_ACTIVE       isActive
+		 from 
+		 	BPM_NODE_COMPONENT 
+		 where 
+		 	COMPONENT_TYPE = #componentType#
+		 	and IS_ACTIVE = 'Y'
+	</select>
+	
+	<!-- 添加组件信息  -->
+	<insert id="insertComponentInfo"  parameterClass="ComponentPo">  
+      INSERT INTO BPM_NODE_COMPONENT (
+	      COMPONENT_ID,COMPONENT_NAME,INF_PATH_NAME,PAGE_PATH_NAME,COMPONENT_TYPE,COMPONENT_ICON,REMARK,IS_ACTIVE
+      ) VALUES (
+	      #componentId#,
+	      #componentName#,
+	      #infPathName#,
+	      #pagePathName#,
+	      #componentType#,
+	      #componentIcon#,
+	      #remark#,
+	      #isActive#
+      )
+	</insert>
+	
+	<!-- 修改组件信息 --> 
+	<update id="updateComponentInfo"  parameterClass="ComponentPo">
+		 update BPM_NODE_COMPONENT set  
+		      COMPONENT_NAME  = #componentName#,
+		      INF_PATH_NAME   = #infPathName#,
+		      PAGE_PATH_NAME  = #pagePathName#,
+		      COMPONENT_TYPE  = #componentType#,
+		      COMPONENT_ICON  = #componentIcon#,
+		      REMARK 		  = #remark#
+	     where 
+	     	COMPONENT_ID = #componentId#
+	</update>
+	
+	<!-- 逻辑删除组件信息  -->
+	<update id="deleteComponentInfo"  parameterClass="String">
+		 update BPM_NODE_COMPONENT set  
+		      IS_ACTIVE = 'N'
+	     where COMPONENT_ID = #componentId#
+	</update>
+</sqlMap>

@@ -1,0 +1,27 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>	
+	<!-- IP用途管理 -->
+	<package name="netWork-use-package" extends="netWork-NwResPool-package" namespace="/network/use">
+		<action name="indexAct" class="rmNwUseAction" method="index">
+			<result name="success">/pages/resmgt/network/rmNwUse.jsp</result>
+		</action>
+		<action name="queryRmNwUsePoPaginationAct" class="rmNwUseAction" method="queryRmNwUsePoPagination"/>
+		<action name="queryUseNameList" class="rmNwUseAction" method="queryUseNameList"/>
+		<action name="queryDatacenterList" class="rmNwUseAction" method="queryDatacenterList"/>
+		<action name="saveRmNwUsePoAct" class="rmNwUseAction" method="saveRmNwUsePoAct"/>
+		<action name="updateRmNwUsePoAct" class="rmNwUseAction" method="updateRmNwUsePoAct"/>
+		<action name="findRmNwUsePoByIdAct" class="rmNwUseAction" method="findRmNwUsePoByIdAct"/>
+		<action name="findRmNwUseRelPoByIdAct" class="rmNwUseAction" method="findRmNwUseRelPoByIdAct"/>
+		<action name="deleteRmNwUsePoByIdAct" class="rmNwUseAction" method="deleteRmNwUsePoById"></action>
+		<action name="checkUseCode" class="rmNwUseAction" method="checkUseCode"></action>
+		<action name="checkUseName" class="rmNwUseAction" method="checkUseName"></action>
+		<action name="queryRmNwUseRelPoPaginationByUseId" class="rmNwUseAction" method="queryRmNwUseRelPoPagination"/>
+		<action name="selectRmHostTypeSel" class="rmNwUseAction" method="selectRmHostTypeSel"/>
+		<action name="saveRmNwUseRelPoAct" class="rmNwUseAction" method="saveRmNwUseRelPoAct"/>
+		<action name="updateRmNwUseRelPoAct" class="rmNwUseAction" method="updateRmNwUseRelPoAct"/>
+		<action name="deleteRmNwUseRelPoByIdAct" class="rmNwUseAction" method="deleteRmNwUseRelPoById"></action>
+	</package>
+</struts>

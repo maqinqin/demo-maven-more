@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<bean class="com.git.cloud.resmgt.common.dao.impl.RmGeneralServerDAO" id="rmGeneralServerDAO">
+		<property name="sqlMapClient" ref="sqlMapClient"></property>
+	</bean>
+	
+	<bean class="com.git.cloud.resmgt.common.service.impl.RmGeneralServerServiceImpl" id="rmGeneralServerService">
+		<property name="rmGeneralServerDAO" ref="rmGeneralServerDAO"></property>
+		<property name="cmPasswordDAO" ref="cmPasswordDAO"></property>
+	</bean>
+	
+	<bean class="com.git.cloud.resmgt.common.action.RmGeneralServerAction" id="rmGeneralServerAction" scope="prototype">
+		<property name="rmGeneralServerService" ref="rmGeneralServerService"></property>
+	</bean>
+	<!-- 报警信息DAO -->
+	<bean id="cmAlarmDAOImpl" class="com.git.cloud.resmgt.common.dao.impl.CmAlarmDAOImpl" />
+	<!-- 同步砖头信息DAO -->
+	<bean id="syncVmInfoDAOImpl" class="com.git.cloud.resmgt.common.dao.impl.SyncVmInfoDAOImpl" />
+</beans>	

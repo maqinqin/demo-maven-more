@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	 <!-- DAO -->
+	<bean id="sysMailMsgDaoImpl" class="com.git.cloud.sys.dao.impl.SysMailMsgDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- SERVICE -->
+	<bean id="sysMailMsgServiceImpl" class="com.git.cloud.sys.service.impl.SysMailMsgServiceImpl">
+		<property name="sysMailMsgDaoImpl" ref="sysMailMsgDaoImpl" />
+	</bean>
+</beans>

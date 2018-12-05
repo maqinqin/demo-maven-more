@@ -1,0 +1,22 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>	
+	<!-- 安全区域管理 -->
+	<package name="netWork-secure-area" extends="netWork-NwResPool-package" namespace="/network/secure/area">
+	<action name="getSecureAreaList" class="rmNwSecureAction" method="getSecureAreaList"/>
+	<action name="saveSecureArea" class="rmNwSecureAction" method="saveSecureArea"></action>
+	<action name="viewSecureArea" class="rmNwSecureAction" method="viewSecureArea"></action>
+	<action name="deleteCheckArea" class="rmNwSecureAction" method="deleteCheckArea"></action>
+	<action name="deleteArea"  class="rmNwSecureAction"    method="deleteArea"></action>
+	<action name="getSecureTierList" class="rmNwSecureAction" method="getSecureTierList"></action>
+	<action name="saveSecureTier" class="rmNwSecureAction" method="saveSecureTier"></action>
+	<action name="viewSecureTier" class="rmNwSecureAction" method="viewSecureTier"></action>
+	<action name="viewSecureTierCclass" class="rmNwSecureAction" method="viewSecureTierCclass"></action>
+	
+	<action name="deleteSecureTier" class="rmNwSecureAction" method="deleteSecureTier"></action>
+		
+	 
+	</package>
+</struts>

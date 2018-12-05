@@ -1,0 +1,22 @@
+{
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "EMC",
+		"OPERATION": 3003
+	},
+	"BODY" :{
+	
+		"DATACENTER_ENAME":"NH/YQ",
+		"STORAGE_MODEL":VMAX
+		"SMISISERVER_IP": "128.192.162.48",
+		"USER_NAME":"admin",
+		"USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+		"NAME_SPACE":"interop",
+		"STORAGE_SN": ["000292603712","000292603713"],
+		"SELECTED_PORT_GROUP":"11",
+		"PORT_GROUP": {
+			"1": ["8g1", "8g0", "7g1", "7g0"],
+			"2": ["8f1", "8f0", "7f1", "7f0"]
+		}
+	}
+}

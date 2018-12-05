@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	<!-- action -->
+	<bean id="imageAction" class="com.git.cloud.cloudservice.action.ImageAction"
+		scope="prototype">
+		<property name="imageService" ref="imageService" />
+	</bean>
+
+	<bean id="softWareAction" class="com.git.cloud.cloudservice.action.SoftWareAction"
+		scope="prototype">
+		<property name="softWareService" ref="softWareService" />
+	</bean>
+	<!-- service -->
+	<bean id="imageService"
+		class="com.git.cloud.cloudservice.service.impl.ImageServiceImpl"
+		scope="prototype">
+		<property name="requestService" ref="requestServiceImpl" />
+		<property name="imageDao" ref="imageDao" />
+		<property name="cmPasswordDAO" ref="cmPasswordDAO" />
+	</bean>
+
+	<bean id="softWareService"
+		class="com.git.cloud.cloudservice.service.impl.SoftWareServiceImpl"
+		scope="prototype">
+		<property name="softWareDao" ref="softWareDao" />
+		<property name="softWareVerDao" ref="softWareVerDao" />
+	</bean>
+	<!-- DAO -->
+	<bean id="imageDao" class="com.git.cloud.cloudservice.dao.impl.ImageDaoImpl"
+		scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="softWareDao" class="com.git.cloud.cloudservice.dao.impl.SoftWareDaoImpl"
+		scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="softWareVerDao" class="com.git.cloud.cloudservice.dao.impl.SoftWareVerDaoImpl"
+		scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- 脚本部分 begin -->
+	<bean id="packageDefAction" class=" com.git.cloud.cloudservice.action.PackageDefAction"
+		scope="prototype">
+		<property name="packageDefService" ref="packageDefService" />
+	</bean>
+
+	<bean id="packageDefService"
+		class="com.git.cloud.cloudservice.service.impl.PackageDefServiceImpl">
+		<property name="packageDefDao" ref="packageDefDao" />
+		<property name="modelDao" ref="modelDao" />
+		<property name="scriptDao" ref="scriptDao" />
+		<property name="scriptParamDao" ref="scriptParamDao" />
+	</bean>
+	<bean id="packageDefDao" class=" com.git.cloud.cloudservice.dao.impl.PackageDefDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="modelDao" class=" com.git.cloud.cloudservice.dao.impl.ModelDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="scriptDao" class=" com.git.cloud.cloudservice.dao.impl.ScriptDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="scriptParamDao" class=" com.git.cloud.cloudservice.dao.impl.ScriptParamDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- 脚本部分 end -->
+	<!-- 云服务定义部分 begin -->
+	<bean id="cloudServiceDao"
+		class=" com.git.cloud.cloudservice.dao.impl.CloudServiceDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="cloudServiceService"
+		class="com.git.cloud.cloudservice.service.impl.CloudServiceServiceImpl">
+		<property name="cloudServiceDao" ref="cloudServiceDao" />
+	</bean>
+
+	<bean id="cloudFileService"
+		class="com.git.cloud.cloudservice.service.impl.CloudFileServiceImpl">
+		<property name="cloudServiceDao" ref="cloudServiceDao" />
+		<property name="imageDao" ref="imageDao" />
+		<property name="cloudServiceAttrDao" ref="cloudServiceAttrDao" />
+		<property name="cloudServiceAttrSelDao" ref="cloudServiceAttrSelDao" />
+		<property name="cloudServiceFlowRefDao" ref="cloudServiceFlowRefDao" />
+		<property name="designerServiceImpl" ref="designerServiceImpl"></property>
+	</bean>
+	<bean id="cloudServiceAction" class=" com.git.cloud.cloudservice.action.CloudServiceAction"
+		scope="prototype">
+		<property name="cloudServiceService" ref="cloudServiceService" />
+		<property name="cloudFileService" ref="cloudFileService" />
+	</bean>
+	
+	<bean id="cloudServiceFlowRefDao"
+		class=" com.git.cloud.cloudservice.dao.impl.CloudServiceFlowRefDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="cloudServiceFlowRefService"
+		class="com.git.cloud.cloudservice.service.impl.CloudServiceFlowRefServiceImpl">
+		<property name="cloudServiceFlowRefDao" ref="cloudServiceFlowRefDao" />
+	</bean>
+	<bean id="cloudServiceFlowRefAction"
+		class=" com.git.cloud.cloudservice.action.CloudServiceFlowRefAction"
+		scope="prototype">
+		<property name="cloudServiceFlowRefService" ref="cloudServiceFlowRefService" />
+	</bean>
+	<bean id="cloudServiceAttrDao"
+		class=" com.git.cloud.cloudservice.dao.impl.CloudServiceAttrDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="cloudServiceAttrService"
+		class="com.git.cloud.cloudservice.service.impl.CloudServiceAttrServiceImpl">
+		<property name="cloudServiceAttrDao" ref="cloudServiceAttrDao" />
+	</bean>
+	<bean id="cloudServiceAttrAction"
+		class=" com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+		scope="prototype">
+		<property name="cloudServiceAttrService" ref="cloudServiceAttrService" />
+	</bean>
+
+	<bean id="cloudServiceAttrSelDao"
+		class=" com.git.cloud.cloudservice.dao.impl.CloudServiceAttrSelDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="cloudServiceAttrSelService"
+		class="com.git.cloud.cloudservice.service.impl.CloudServiceAttrSelServiceImpl">
+		<property name="cloudServiceAttrSelDao" ref="cloudServiceAttrSelDao" />
+	</bean>
+	<bean id="cloudServiceAttrSelAction"
+		class=" com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+		scope="prototype">
+		<property name="cloudServiceAttrSelService" ref="cloudServiceAttrSelService" />
+	</bean>
+	<!-- 云服务定义部分 end -->
+</beans>

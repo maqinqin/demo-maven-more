@@ -1,0 +1,14 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+<package name="log-config"  extends="icms-package"  namespace="/sys/config">
+      <action  name="init"  class="com.git.cloud.sys.action.SystemConfigAction"  method="init">
+      <result name="success">/pages/sys/common/systemConfig.jsp</result>
+      </action>
+     <action name="refreshSysOperLogCfg" class="com.git.cloud.sys.action.SystemConfigAction" 
+       method="refreshSysOperLogCfg">
+      </action>
+</package>
+</struts>

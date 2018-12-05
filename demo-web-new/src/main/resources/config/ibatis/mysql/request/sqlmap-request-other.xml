@@ -1,0 +1,920 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="request-other">
+	<typeAlias alias="cmPasswordPo"
+		type="com.git.cloud.resmgt.common.model.po.CmPasswordPo" />
+	<typeAlias alias="cmVmPo"
+		type="com.git.cloud.resmgt.common.model.po.CmVmPo"></typeAlias>
+	<typeAlias alias="cmHostPo"
+		type="com.git.cloud.resmgt.common.model.po.CmHostPo" />
+	<typeAlias alias="cmDevicePo"
+		type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="cmDeviceVo"
+		type="com.git.cloud.resmgt.common.model.vo.CmDeviceVo" />
+	<typeAlias alias="cmMacPo"
+		type="com.git.cloud.resmgt.common.model.po.CmMacPo" />
+
+	<typeAlias alias="deployUnitPo" type="com.git.cloud.appmgt.model.po.DeployUnitPo" />
+	<typeAlias alias="scriptFullPathVo"
+		type="com.git.cloud.cloudservice.model.vo.ScriptFullPathVo" />
+	<typeAlias alias="rmVmManageServerPo"
+		type="com.git.cloud.resmgt.common.model.po.RmVmManageServerPo" />
+	<typeAlias alias="cmVmVo"
+		type="com.git.cloud.resmgt.common.model.vo.CmVmVo" />
+	<typeAlias alias="serviceAttrPo"
+		type="com.git.cloud.cloudservice.model.po.CloudServiceAttrPo" />
+	<typeAlias alias="bmSrRrinfoPo"
+		type="com.git.cloud.request.model.po.BmSrRrinfoPo" />
+	<typeAlias alias="syncVmInfoVo"
+		type="com.git.cloud.resmgt.common.model.vo.SyncVmInfoVo" />
+	<typeAlias alias="cmLun"
+		type="com.git.cloud.handler.automation.se.po.CmLun" />
+	<typeAlias alias="rmHostTypePo   "
+		type="com.git.cloud.resmgt.common.model.po.RmHostTypePo" />
+	<typeAlias alias="floatingIpVo" type="com.git.cloud.resmgt.openstack.model.vo.FloatingIpVo" />
+	<typeAlias alias="rmDeviceVolumesRefPo"  type="com.git.cloud.resmgt.common.model.po.RmDeviceVolumesRefPo" />
+	<typeAlias alias="serviceInstanceNode"  type="com.git.cloud.resmgt.compute.model.vo.ServiceInstanceNode" />
+	<typeAlias alias="InstanceComponentRef"  type="com.git.cloud.openstack.model.InstanceComponentRef" />
+	<typeAlias alias="ServiceInstance"  type="com.git.cloud.openstack.model.ServiceInstance" />
+	<select id="findRmVmManageServerById" parameterClass="java.lang.String"
+		resultClass="rmVmManageServerPo">
+		<![CDATA[
+			SELECT
+				ms.id as id,
+				ms.USER_NAME as userName,
+				ms.SERVER_NAME as serverName,
+				ms.PLATFORM_TYPE as platformType,
+				ms.VM_TYPE as vmType,
+				ms.MANAGE_IP as manageIp,
+				ms.DOMAIN_NAME as domainName,
+				ms.DATACENTER_ID as datacenterId,
+				ms.SUB_MASK as subMask
+			FROM
+				RM_VM_MANAGE_SERVER ms
+			WHERE
+			    ms.id = #vmMsId#
+		]]>
+	</select>	
+	<sql id="findAppDuByTypeAComp">
+		<![CDATA[
+			SELECT
+				ad.DU_ID AS duId,
+				ad.CNAME AS cname,
+				ad.ENAME AS ename,
+				ad.SERVICE_TYPE_CODE AS serviceTypeCode,
+				d.DIC_NAME AS serviceTypeName,
+				cs.SERVICE_ID AS serviceId,
+				cs.SERVICE_NAME AS serviceName
+			FROM APP_DU ad
+			LEFT JOIN ADMIN_DIC d ON ad.SERVICE_TYPE_CODE = d.DIC_CODE AND d.DIC_TYPE_CODE = 'DU_SEV_TYPE'
+			LEFT JOIN CLOUD_SERVICE cs ON ad.SERVICE_ID = cs.SERVICE_ID
+			WHERE ad.IS_ACTIVE = 'Y'
+			AND ad.STATUS = 'Y'
+			AND (ad.RRINFO_ID IS NULL OR ad.RRINFO_ID = '' OR cs.HA_TYPE = 'SINGLE')
+			AND (cs.HA_TYPE = 'SINGLE' OR cs.HA_TYPE IS NULL)
+	  	]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="appId" prepend=" and ">
+		      <![CDATA[ad.APP_ID = #appId#]]>
+			</isNotEmpty>
+			<isNotEmpty property="datacenterId" prepend=" and ">
+		      <![CDATA[ad.DATACENTER_ID = #datacenterId#]]>
+			</isNotEmpty>
+			<isNotEmpty property="duName" prepend=" and ">
+		      <![CDATA[(ad.CNAME like concat('%', #duName#, '%') or ad.ENAME like concat('%', #duName#, '%') )]]>
+			</isNotEmpty>
+			<isNotEmpty property="duType" prepend=" and ">
+		      <![CDATA[ad.SERVICE_TYPE_CODE = #duType#]]>
+			</isNotEmpty>
+		</dynamic>
+
+		order by ad.CREATE_DATETIME
+	</sql>
+	<select id="findAppDuByTypeACompTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="findAppDuByTypeAComp" />
+		) as recordTable
+	</select>
+	<select id="findAppDuByTypeACompPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="findAppDuByTypeAComp" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<sql id="findServiceList">
+	<![CDATA[
+		SELECT
+			cs.SERVICE_ID AS serviceId,
+			cs.SERVICE_NAME AS serviceName,
+			cs.FUNC_REMARK AS funcRemark,
+			cs.PLATFORM_TYPE AS platformTypeCode,
+			cs.VM_BASE AS vmBase
+		FROM
+			CLOUD_SERVICE cs
+	  ]]>
+	</sql>
+	<select id="findServiceListTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="findServiceList" />
+		) as recordTable
+	</select>
+	<select id="findServiceListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="findServiceList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+
+	<select id="findServiceAttrListById" parameterClass="java.lang.String"
+		resultClass="serviceAttrPo">
+		SELECT
+		csattr.ATTR_ID AS attrId,
+		csattr.ATTR_NAME AS
+		attrName,
+		csattr.ATTR_CNAME as attrCname,
+		csattr.IS_REQUIRE AS
+		isRequire,
+		csattr.REMARK AS remark
+		FROM
+		CLOUD_SERVICE_ATTR csattr
+		WHERE
+		csattr.IS_VISIBLE = 'Y'
+		and csattr.IS_ACTIVE = 'Y'
+		and csattr.SERVICE_ID
+		= #serviceId#
+	</select>
+
+	<select id="selectVMDeviceByAppAndDCId" parameterClass="java.util.HashMap"
+		resultClass="CmDevicePo">
+		SELECT
+		cd.ID,
+		cd.DEVICE_NAME as deviceName,
+		cd.SN,
+		h.DEVICE_MODEL as deviceModel,
+		h.DEVICE_MANUFACTURER as manufacturer,
+		cd.SEAT_CODE as seatCode,
+		h.DEVICE_TYPE as deviceType,
+		cd.RES_POOL_ID as
+		resPoolId,
+		cd.DESCRIPTION
+		FROM
+		CM_DEVICE cd
+		LEFT JOIN
+		CM_DEVICE_MODEL h ON
+		cd.DEVICE_MODEL_ID=h.id,
+		CM_VM cv
+		where cd.id = cv.id
+		and cd.IS_ACTIVE =
+		'Y'
+		and cv.host_id = #hostId#
+		ORDER BY cd.ID ASC
+	</select>
+	<select id="selectDuListByAppId" parameterClass="java.util.Map"
+		resultClass="deployUnitPo">
+		SELECT a.DU_ID duId,
+		a.DATACENTER_ID datacenterId,
+		a.APP_ID
+		appId,
+		a.CNAME cname,
+		a.FULL_CNAME fullCname,
+		a.ENAME ename,
+		a.FULL_ENAME
+		fullEname,
+		a.SERVICE_TYPE_CODE serviceTypeCode,
+		a.`STATUS` status,
+		a.SECURE_AREA_CODE secureAreaCode,
+		a.SEVURE_TIER_CODE sevureTierCode,
+		a.REMARK remark,
+		a.IS_ACTIVE isActive
+		FROM APP_DU a
+		WHERE
+		a.app_ID=#appId#
+		AND a.IS_ACTIVE = 'Y'
+	</select>
+	<select id='selectDeviceListByDuId' parameterClass="hashMap"
+		resultClass="cmDeviceVo">
+		<![CDATA[ 
+			SELECT
+				cd.ID,
+				cd.DEVICE_NAME AS deviceName,
+				cd.SN AS sn,
+				cd.RES_POOL_ID AS resPoolId,
+				cv.CPU AS vmCpu,
+				cv.MEM AS vmMem,
+				cv.DISK AS vmDisk,
+				cd.DESCRIPTION
+			FROM CM_DEVICE cd, CM_VM cv
+			WHERE
+				cd.id = cv.id
+			AND cd.is_active = #isActive#
+			AND cd.device_status = #deviceStatus#
+			AND cv.du_Id = #duId#
+			AND cd.id NOT IN (
+				SELECT
+					vmRef.DEVICE_ID
+				FROM
+					BM_SR s,
+					BM_SR_RR_VM_REF vmRef
+				WHERE
+					s.SR_ID = vmRef.SR_ID
+				AND s.SR_TYPE_MARK = #srType#
+				AND s.SR_STATUS_CODE <> #srStatus#
+				AND vmRef.DEVICE_ID IS NOT NULL
+			)
+			AND cv.ID NOT IN (
+				SELECT DISTINCT
+					srvr.DEVICE_ID
+				FROM
+					BM_SR s,
+					BM_SR_RRINFO sr,
+					BM_SR_RR_VM_REF srvr
+				WHERE
+					s.sr_id = sr.sr_id
+				AND sr.RRINFO_ID = srvr.RRINFO_ID
+				AND s.SR_TYPE_MARK = 'VE'
+				AND s.SR_STATUS_CODE <> 'REQUEST_DELETE'
+				AND s.SR_STATUS_CODE <> 'REQUEST_CLOSED'
+			)
+		]]>
+	</select>
+	<!--批量插入虚拟机信息  -->
+	<insert id="cmVmBatchInsert" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into CM_VM(
+				id,host_id,cpu,mem,disk,order_num,create_time,datastore_id,du_id,DATASTORE_TYPE,APP_ID,TENANT_ID,PLATFORM_TYPE_CODE,PROJECT_ID,CLOUDSERVICE_ID,USER_ID, vm_group_id
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#boList[].id#,#boList[].hostId#,#boList[].cpu#,#boList[].mem#,#boList[].disk#,#boList[].orderNum#,#boList[].createTime#,#boList[].datastoreId#,#boList[].duId#,#boList[].datastoreType#,#boList[].appId#,#boList[].tenantId#,#boList[].platformCode#,#boList[].projectId#,#boList[].serviceId#,#boList[].userId#, #boList[].vmGroupId#)
+			]]>
+		</iterate>
+	</insert>
+
+
+	<insert id="cmVmOldBatchInsert" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into CM_VM_OLD(
+				id,host_id_old,cpu_old,mem_old,disk_old,order_num_old,create_time_old,datastore_id_old,du_id_old
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#boList[].id#,#boList[].hostId#,#boList[].cpu#,#boList[].mem#,#boList[].disk#,#boList[].orderNum#,#boList[].createTime#,#boList[].datastoreId#,#boList[].duId#)
+			]]>
+		</iterate>
+	</insert>
+
+	<update id="updateCmVmModel" parameterClass="cmVmPo">
+		<![CDATA[ 
+			update CM_VM set CPU = #cpu#, MEM = #mem# ,DISK = #disk# where id = #id#
+		]]>
+	</update>
+	<update id="updateCmVmHostId" parameterClass="cmVmPo">
+		<![CDATA[ 
+			update CM_VM set HOST_ID = #hostId# where id = #id#
+		]]>
+	</update>
+
+	<update id="updateCmVmOnlineTime" parameterClass="cmVmPo">
+		<![CDATA[ 
+			update CM_VM set ONLINE_TIME = #onlineTime# where id = #id#
+		]]>
+	</update>
+
+	<update id="updateCmVmDuId" parameterClass="cmVmPo">
+		<![CDATA[ 
+			update CM_VM set DU_ID = '' where id = #id#
+		]]>
+	</update>
+	
+	<update id="updateCmVm" parameterClass="cmVmPo">
+		update CM_VM 
+			<dynamic prepend="set">	
+				<isNotEmpty prepend="," property="iaasUuid"> iaas_uuid=#iaasUuid# </isNotEmpty>
+			</dynamic>
+		where id = #id#
+	</update>
+	
+	<delete id="deleteCmVmById" parameterClass="java.lang.String">
+		DELETE FROM CM_VM WHERE ID = #deviceId#
+	</delete>
+
+	<insert id="cmDeviceBatchInsert" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into CM_DEVICE(
+				id,device_name,sn,device_model_id,res_pool_id,is_active,device_status,RUNNING_STATE,lpar_name,lpar_name_prefix
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#boList[].id#,#boList[].deviceName#,#boList[].sn#,#boList[].deviceModelId#,#boList[].resPoolId#,#boList[].isActive#,#boList[].deviceStatus#,#boList[].runningState#,#boList[].lparName#,#boList[].lparNamePrefix#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<delete id="updateCmDeviceById" parameterClass="java.lang.String">
+		update CM_DEVICE set IS_ACTIVE='N' WHERE ID = #deviceId#
+	</delete>
+
+	<insert id="cmPasswordBatchInsert" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into CM_PASSWORD(
+				id,resource_id,user_name,password,last_modify_time
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#boList[].id#,#boList[].resourceId#,#boList[].userName#,#boList[].password#,#boList[].lastModifyTime#)
+			]]>
+		</iterate>
+	</insert>
+
+
+	<insert id="insertCmPassword" parameterClass="cmPasswordPo">
+		<![CDATA[ 
+			INSERT INTO CM_PASSWORD(
+				ID,RESOURCE_ID,USER_NAME,PASSWORD,LAST_MODIFY_TIME
+			) VALUES (#id#,#resourceId#,#userName#,#password#,#lastModifyTime#)
+		]]>
+	</insert>
+
+	<update id="updateCmPassword" parameterClass="cmPasswordPo">
+		<![CDATA[ 
+			UPDATE CM_PASSWORD SET
+				   USER_NAME = #userName#,
+				   PASSWORD = #password#,
+				   LAST_MODIFY_TIME=#lastModifyTime#
+			 WHERE RESOURCE_ID = #resourceId#
+		]]>
+	</update>
+	<delete id="cmPassword.delete" parameterClass="hashMap">
+		DELETE FROM
+		CM_PASSWORD WHERE RESOURCE_ID = #resourceId#
+	</delete>
+	<select id="findCmPasswordByResourceId" parameterClass="hashMap"
+		resultClass="cmPasswordPo">
+		<![CDATA[
+		   select id, resource_id resourceId, user_name userName, password
+		     from CM_PASSWORD
+		    where resource_id = #resourceId#
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="userName" prepend=" and ">
+				user_name =
+				#userName#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="findCmPasswordByResourceUser" parameterClass="java.util.HashMap"
+		resultClass="cmPasswordPo">
+		<![CDATA[
+		   select id, resource_id resourceId, user_name userName, password
+		     from CM_PASSWORD
+		    where resource_id = #resourceId#
+		    	and user_name = #userName#;
+		]]>
+	</select>
+
+	<select id="findHostDatastoreIdByHostId" parameterClass="hashMap"
+		resultClass="com.git.cloud.resmgt.common.model.po.CmHostDatastoreRefPo">
+		<![CDATA[
+		   select id, host_id as hostId, datastore_id as datastoreId
+		     from CM_HOST_DATASTORE_REF
+		    where host_id = #hostId#
+		]]>
+	</select>
+
+	<select id="findLocalDiskByHostId" parameterClass="hashMap"
+		resultClass="com.git.cloud.resmgt.common.model.po.CmLocalDiskPo">
+		<![CDATA[
+		   select id, device_id as deviceId, name, size
+		     from CM_LOCAL_DISK
+		    where device_id = #hostId#
+		]]>
+	</select>
+
+	<select id="findDefaultDatastoreIdByHostId" parameterClass="hashMap"
+		resultClass="com.git.cloud.resmgt.common.model.po.CmHostDatastorePo">
+		<![CDATA[
+		   SELECT
+				hst.DEFAULT_DATASTORE_ID AS datastoreId,
+				hst.DEFAULT_DATASTORE_TYPE AS datastoreType
+		   FROM
+				CM_HOST hst 
+		   WHERE 
+				hst.ID = #hostId#
+		]]>
+	</select>
+	<!-- 根据物理机ID查询多个datatore信息 -->
+	<select id="findDatastoreIdByHostIds" parameterClass="hashMap"
+		resultClass="com.git.cloud.resmgt.common.model.po.CmHostDatastorePo">
+		SELECT
+			cd.DATASTORE_ID AS dataStoreId,
+			cd.DATASTORE_NAME AS dataStoreName,
+			cd.TOTAL_SIZE AS totalSize,
+			cd.FREE_SIZE AS freeSize,
+			cd.`STATUS` AS status,
+			chtr.HOST_ID AS hostId
+		FROM
+			cm_datastore cd
+		LEFT JOIN cm_host_datastore_ref chtr ON cd.DATASTORE_ID = chtr.DATASTORE_ID
+		WHERE
+			cd.IS_ACTIVE = 'Y' and cd.FREE_SIZE !=0 and cd.status in (0,1)
+		AND chtr.HOST_ID in ($hostId$)
+		order by chtr.HOST_ID,cd.FREE_SIZE desc
+	</select>
+
+	<select id="findCmVmById" parameterClass="java.lang.String"
+		resultClass="cmVmPo">
+		<![CDATA[
+		   SELECT
+			v.ID id,
+			v.HOST_ID AS hostId,
+			v.CPU cpu,
+			v.MEM mem,
+			v.DISK disk,
+			v.CREATE_TIME AS createTime,
+			v.DATASTORE_ID AS datastoreId,
+			v.DU_ID AS duId,
+			d.DEVICE_NAME deviceName,
+			d.LPAR_ID lparId,
+			d.LPAR_NAME lparName,
+			d.LPAR_NAME_PREFIX lparNamePrefix,
+			hd.DEVICE_NAME hostName,
+			v.platform_type_code platformCode,
+			v.CLOUDSERVICE_ID serviceId,
+			v.iaas_uuid as iaasUuid
+		FROM
+			CM_VM v
+			LEFT JOIN CM_DEVICE d ON v.ID = d.ID
+			left JOIN CM_DEVICE hd ON v.HOST_ID = hd.ID
+		WHERE
+			v.id = #id#
+		AND d.IS_ACTIVE = 'Y' ;
+		]]>
+	</select>
+	<select id="findCmVmByDuId" parameterClass="hashMap"
+		resultClass="cmVmPo">
+		<![CDATA[
+		  SELECT
+			v.id,
+			v.host_id hostId,
+			v.cpu,
+			v.mem,
+			v.disk,
+			v.create_time createTime,
+			v.datastore_id datastoreId,
+			v.du_id duId,
+			v.platform_type_code platformCode,
+		IFNULL(
+			(
+				SELECT
+					sum(re.DISK_SIZE)
+				FROM
+					RM_DEVICE_VOLUMES_REF re
+				WHERE
+					re.DEVICE_ID = v.id
+				AND re.MOUNT_STATUS = 'mount'
+			),
+			0
+			)AS externalDiskSum
+		FROM
+			CM_VM v
+		LEFT JOIN 	CM_DEVICE vd ON 	v.id = vd.id
+		WHERE
+		 vd.is_active = 'Y'
+		 and v.du_id = #duId#
+		]]>
+	</select>
+	<select id="findCmHostById" parameterClass="java.lang.String"
+		resultClass="cmHostPo">
+		<![CDATA[
+		SELECT
+			ch.ID AS id,
+			ch.CPU AS cpu,
+			ch.MEM AS mem,
+			ch.DISK AS disk,
+			ch.CPU_USED AS cpuUsed,
+			ch.MEM_USED AS memUsed,
+			ch.CLUSTER_ID AS clusterId,
+			ch.DEFAULT_DATASTORE_TYPE AS datastoreType,
+			cd.DATASTORE_NAME AS datastoreName,
+			cld. NAME AS localDatastoreName
+		FROM
+			CM_HOST ch
+		LEFT JOIN CM_HOST_DATASTORE_REF chdr ON chdr.HOST_ID = ch.ID
+		AND chdr.DATASTORE_ID = ch.DEFAULT_DATASTORE_ID
+		LEFT JOIN CM_DATASTORE cd ON chdr.DATASTORE_ID = cd.DATASTORE_ID
+		AND cd.IS_ACTIVE = 'Y'
+		LEFT JOIN CM_LOCAL_DISK cld ON cld.DEVICE_ID = ch.ID
+		AND cld.IS_ACTIVE = 'Y'
+		WHERE
+		ch.ID = #id#
+		]]>
+	</select>
+	<select id="findCmDeviceById" parameterClass="java.lang.String"
+		resultClass="cmDevicePo">
+		<![CDATA[
+		    select  
+			   d.ID id,
+			   d.SEAT_ID seatId,
+			   d.DEVICE_NAME deviceName,
+			   d.SN sn,
+			   d.DEVICE_MODEL_ID deviceModelId,
+			   d.RES_POOL_ID resPoolId,
+			   d.IS_ACTIVE isActive,
+			   d.DESCRIPTION description,
+			   d.DEVICE_STATUS deviceStatus,
+			   d.SEAT_ID seatCode,
+			   h.IS_INVC isInvc,
+			   d.LPAR_ID lparId,
+			   d.LPAR_NAME lparName,
+			   d.LPAR_NAME_PREFIX lparNamePrefix,
+			   h.HOST_IP ip
+			from CM_DEVICE d LEFT JOIN CM_HOST h ON h.ID = d.ID
+		    where d.ID = #id# and  d.IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	<select id="findScriptFullPath" parameterClass="hashMap"
+		resultClass="scriptFullPathVo">
+		<![CDATA[
+		   select sp.FILE_PATH as packageFillPath, sm.FILE_PATH as modelFilePath, s.FILE_NAME as scriptFileName, s.RUN_USER as runUser
+		     from CLOUD_SCRIPT s, CLOUD_SCRIPT_MODEL sm, CLOUD_SCRIPT_PACKAGE sp
+ 			where s.MODEL_MODEL_FK = sm.ID
+ 			  and sm.PACKAGE_MODEL_FK = sp.ID
+ 			  and s.ID = #scriptId#
+		]]>
+	</select>
+	<select id="findScriptByModelId" parameterClass="hashMap"
+		resultClass="com.git.cloud.cloudservice.model.po.ScriptModel">
+		<![CDATA[
+		   select name, file_name as fileName from CLOUD_SCRIPT t where t.MODEL_MODEL_FK = #modelId#;
+		]]>
+	</select>
+	<!-- 根据服务器类型查询所有的通用服务器 -->
+	<select id="findAllGeneralServerByType" parameterClass="java.lang.String"
+		resultClass="com.git.cloud.resmgt.common.model.vo.RmGeneralServerVo">
+		SELECT
+		S.ID,
+		S.SERVER_NAME serverName,
+		S.TYPE type,
+		D.DIC_NAME typeName,
+		S.SERVER_IP serverIp,
+		S.SUB_MASK subMask,
+		S.GATEWAY
+		gateway,
+		S.DATACENTER_ID datacenterId,
+		C.DATACENTER_CNAME
+		datacenterName,
+		S.USER_NAME userName,
+		P.`PASSWORD` password
+		FROM
+		RM_GANERAL_SERVER S
+		LEFT JOIN ADMIN_DIC D ON S.TYPE = D.DIC_CODE AND
+		D.DIC_TYPE_CODE='GANERAL_SERVER_TYPE'
+		LEFT JOIN RM_DATACENTER C ON
+		S.DATACENTER_ID = C.ID AND C.IS_ACTIVE='Y'
+		LEFT JOIN CM_PASSWORD P ON
+		P.RESOURCE_ID = S.ID
+		WHERE S.IS_ACTIVE='Y'
+		AND S.TYPE = #serverType#
+
+	</select>
+
+	<update id="updateCmHostUsed" parameterClass="cmHostPo">
+		<![CDATA[ 
+			update CM_HOST set
+				   cpu_used = #cpuUsed#,
+				   mem_used = #memUsed#
+			 where id = #id#
+		]]>
+	</update>
+	<select id="findRmVmManageServerListByVmIdList" parameterClass="hashMap"
+		resultClass="rmVmManageServerPo">
+		<![CDATA[
+			SELECT
+				ms.id as id,
+				ms.USER_NAME as userName,
+				ms.SERVER_NAME as serverName,
+				ms.PLATFORM_TYPE as platformType,
+				ms.VM_TYPE as vmType,
+				ms.MANAGE_IP as manageIp,
+				ms.DATACENTER_ID as datacenterId,
+				ms.SUB_MASK as subMask
+			FROM
+				CM_VM vm,
+				CM_HOST h,
+				RM_CLUSTER cl,
+				RM_VM_MANAGE_SERVER ms
+			WHERE
+				vm.HOST_ID = h.ID
+			AND h.CLUSTER_ID = cl.ID
+			AND cl.MANAGE_SERVER = ms.ID
+			AND vm.id in ($vmIds$)
+		]]>
+	</select>
+	<select id="findRmVmManageServerByVmId" parameterClass="hashMap"
+		resultClass="rmVmManageServerPo">
+		<![CDATA[
+			SELECT
+				ms.id as id,
+				ms.USER_NAME as userName,
+				ms.SERVER_NAME as serverName,
+				ms.PLATFORM_TYPE as platformType,
+				ms.VM_TYPE as vmType,
+				ms.MANAGE_IP as manageIp,
+				ms.DATACENTER_ID as datacenterId,
+				ms.SUB_MASK as subMask
+			FROM
+				CM_VM vm,
+				CM_HOST h,
+				RM_CLUSTER cl,
+				RM_VM_MANAGE_SERVER ms
+			WHERE
+				vm.HOST_ID = h.ID
+			AND h.CLUSTER_ID = cl.ID
+			AND cl.MANAGE_SERVER = ms.ID
+			AND vm.id = #vmId#
+		]]>
+	</select>
+	<select id="findCmVmVoListBySrId" parameterClass="java.lang.String"
+		resultClass="cmVmVo">
+		<![CDATA[
+			SELECT
+				ad.DU_ID as duId,
+				ad.CNAME as duName,
+				ad.ENAME as duEname,
+				cv.CPU as cpu,
+				cv.MEM as mem,
+				cv.DISK as disk,
+				sv.DEVICE_ID as id,
+				cd.DEVICE_NAME as deviceName
+			FROM
+				BM_SR s
+			LEFT JOIN BM_SR_RRINFO sr ON s.SR_ID = sr.SR_ID
+			LEFT JOIN BM_SR_RR_VM_REF sv ON sr.RRINFO_ID = sv.RRINFO_ID
+			LEFT JOIN APP_DU ad ON sr.DU_ID = ad.DU_ID
+			LEFT JOIN CM_DEVICE cd ON sv.DEVICE_ID = cd.ID
+			LEFT JOIN CM_VM cv ON cd.ID = cv.ID
+			WHERE
+				1 = 1
+			AND s.SR_ID = #srId#
+		]]>
+	</select>
+	<select id="findPlatformTypeAndVmTypeByVmId" parameterClass="hashMap"
+		resultClass="cmVmVo">
+		<![CDATA[
+			SELECT
+				cl.PLATFORM_TYPE platformType,
+				cl.VM_TYPE vmType
+			FROM
+				CM_VM v, CM_HOST h, RM_CLUSTER cl
+			WHERE v.HOST_ID = h.ID
+			AND h.CLUSTER_ID = cl.ID
+			AND v.ID = #vmId#
+		]]>
+	</select>
+	<update id="updateDuId" parameterClass="cmVmVo">
+		<![CDATA[ 
+			update CM_VM set DU_ID = #duId# where id = #id#
+		]]>
+	</update>
+
+
+	<select id="findVmPowerStateByVmName" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+		<![CDATA[
+		  SELECT 
+		  	cm.RUNNING_STATE 
+		  FROM 
+		  	CM_DEVICE cm , CM_VM vm 
+		  WHERE 
+		  	cm.ID=vm.ID AND cm.DEVICE_NAME=#vmName# AND cm.IS_ACTIVE='Y';
+		]]>
+	</select>
+	<update id="updateVmStatus" parameterClass="syncVmInfoVo">
+		<![CDATA[ 
+			UPDATE CM_DEVICE cm , CM_VM vm 
+			SET cm.RUNNING_STATE=#powerState# 
+			WHERE cm.ID=vm.ID AND cm.DEVICE_NAME=#vmName#; 
+		]]>
+	</update>
+
+	<update id="updateVmHostId" parameterClass="syncVmInfoVo">
+		<![CDATA[ 
+			UPDATE CM_DEVICE cm,
+			CM_VM vm,
+			(SELECT CH.ID
+				FROM cm_host CH 
+				WHERE CH.HOST_IP = #hostName#) hm
+			SET vm.HOST_ID = hm.ID
+			WHERE cm.ID = vm.ID
+			AND cm.DEVICE_NAME = #vmName#
+		]]>
+	</update>
+
+	<select id="findIDByVmName" parameterClass="java.lang.String"
+		resultClass="java.lang.String">
+	<![CDATA[
+		  SELECT ID FROM CM_DEVICE cm WHERE cm.DEVICE_NAME= #vmName# AND cm.IS_ACTIVE='Y'
+		]]>
+	</select>
+	
+	<select id="getCpuMemSumByAppIds" parameterClass="hashMap" resultClass="cmVmPo">
+		<![CDATA[
+			SELECT
+				sum(v.CPU) cpu,
+				sum(v.MEM) mem
+			FROM
+				APP_INFO ai,
+				APP_DU ad,
+				CM_VM v,
+				CM_DEVICE d
+			WHERE
+				ai.APP_ID = ad.APP_ID
+			AND ai.IS_ACTIVE = 'Y'
+			AND ad.DU_ID = v.DU_ID
+			AND ad.IS_ACTIVE = 'Y'
+			AND v.ID = d.ID
+			AND d.IS_ACTIVE = 'Y'
+			AND ai.APP_ID in ($appIds$)
+		]]>
+	</select>
+	
+	<select id="getLunListByRrinfoId" parameterClass="hashMap" resultClass="cmLun">
+		<![CDATA[
+			SELECT l.LUN_ID lunId, l.STORAGE_ID storageId, l.LUN_PATH lunPath, l.LUN_TYPE lunType, l.LUN_SIZE lunSize
+			  FROM CM_LUN l
+			 WHERE l.LUN_STATUS = '1'
+			   AND l.IS_ACTIVE = 'Y'
+			   AND l.USED_RESOURCE_ID = #rrinfoId#
+			 ORDER BY l.LUN_ID
+		]]>
+	</select>
+	
+	<update id="updateVmDisk" parameterClass="cmVmPo">
+		<![CDATA[ 
+			UPDATE CM_VM vm SET vm.DISK=#disk# WHERE vm.ID=#id#
+		]]>
+	</update>
+	<select id="findVmInfoListByParams" parameterClass="java.util.Map" 
+		resultClass="cmVmVo">
+			SELECT
+                v.ID as id,
+                v.HOST_ID as hostId,
+                v.CPU as cpu,
+                v.MEM as mem,
+                d.DEVICE_NAME as cmVmName,
+                i.IP as cmVmIps
+            FROM
+                CM_VM v 
+            LEFT JOIN 
+                CM_DEVICE d ON v.ID=d.ID 
+            LEFT JOIN 
+                rm_nw_openstack_ip_address i on i.INSTANCE_ID=v.ID 
+            WHERE 
+                1=1 
+			<dynamic prepend=" and ">
+				<isNotEmpty property="hostId" prepend=" and ">
+					v.HOST_ID = #hostId#
+				</isNotEmpty>
+				<isEmpty property="ip" prepend=" and ">
+					i.IP = #ip#
+				</isEmpty>
+			</dynamic>
+	</select>
+	<select id="getRmHostTypeById" parameterClass="java.lang.String" resultClass="rmHostTypePo">
+		SELECT
+			r.HOST_TYPE_ID hostTypeId,
+			r.HOST_TYPE_CODE hostTypeCode,
+			r.HOST_TYPE_NAME hostTypeName,
+			r.IS_ACTIVE isActive
+		FROM
+			RM_HOST_TYPE r
+		WHERE
+			r.IS_ACTIVE = 'Y'
+		AND r.HOST_TYPE_ID = #hostTypeId#
+	</select>
+	
+	<select id="getTemplateTree" resultClass="com.git.cloud.workflow.model.po.TemplateTypePo" parameterClass="java.util.Map">
+		SELECT t.type_id as typeId,
+			   t.type_name as typeName
+		 FROM BPM_TEMPLATE_TYPE t 
+		 WHERE t.type_level = #typeLevel#
+		 	and t.parent_id = #parentId#
+	</select>
+	
+	<select id="getTemplateByTypeWeb" parameterClass="java.lang.String"
+		resultClass="com.git.cloud.common.model.CommonTreeNode">
+		SELECT t.template_id id,
+				t.template_name name,
+				t.type_id pId
+		FROM BPM_TEMPLATE t
+		WHERE t.type_id = #id# and t.is_active = 'Y'
+		ORDER BY t.template_name asc
+	</select>
+	<!-- 获取设备的卷列表信息  -->
+	<select id="getDeviceVolumeRefList" parameterClass="java.util.HashMap" resultClass="rmDeviceVolumesRefPo">
+		SELECT
+			ref.ID id,
+			ref.DISK_SIZE diskSize,
+			ref.DEVICE_ID deviceId
+		FROM
+			RM_DEVICE_VOLUMES_REF ref
+		LEFT JOIN CM_DEVICE de ON de.ID = ref.DEVICE_ID
+		WHERE
+			de.IS_ACTIVE = 'Y'
+		AND de.ID = #deviceId#
+		  
+	</select>
+	<!-- 获取设备浮动ip列表信息  -->
+	<select id="getFloatIpList" parameterClass="java.util.HashMap" resultClass="floatingIpVo">
+		SELECT
+			floatIp.ID id,
+			floatIp.DEVICE_ID deviceId
+		FROM
+			RM_NW_OPENSTACK_FLOATING_IP floatIp
+		LEFT JOIN CM_DEVICE de ON de.ID = floatIp.DEVICE_ID
+		WHERE
+			de.IS_ACTIVE = 'Y'
+		AND de.ID = #deviceId#
+		
+	</select>
+	
+	<update id="updateVmOfflineTime" parameterClass="cmVmPo">
+		<![CDATA[ 
+			UPDATE CM_VM vm SET vm.UPDATE_DATETIME=#updateDateTime# WHERE vm.ID=#id#
+		]]>
+	</update>
+	
+	<insert id="saveServiceInstanceNode" parameterClass="serviceInstanceNode">
+		<![CDATA[ 
+			insert into SERVICE_INSTANCE_NODE (id,name,create_datetime,device_id,flavor_id,cpu,mem,sys_disk,data_disk,data_disk_num,service_instance_id,is_active,order_num,manager,control,data,complete_status) values (#id#,#name#,#createDt#,#deviceId#,#flavorId#,#cpu#,#mem#,#sysDisk#,#dataDisk#,#dataDiskNum#,#serviceInstanceId#,#isActive#,#orderNum#,#manager#,#control#,#data#,#completeStatus#)
+		]]>
+	</insert>
+	
+	<select id="getServiceInstanceNodeById" parameterClass="java.lang.String" resultClass="serviceInstanceNode">
+		select id id,name name, device_id deviceId, flavor_id flavorId,cpu cpu,mem mem,sys_disk sysDisk,data_disk dataDisk,data_disk_num dataDiskNum,manager manager,control control,data data from SERVICE_INSTANCE_NODE where device_id=#deviceId#
+	</select>
+	
+	<select id="getServiceInstanceNodeByClusterId" parameterClass="java.util.Map" resultClass="serviceInstanceNode">
+		select id id,name name, device_id deviceId, flavor_id flavorId,cpu cpu,mem mem,sys_disk sysDisk,data_disk dataDisk,data_disk_num dataDiskNum,manager manager,control control,data data from SERVICE_INSTANCE_NODE where service_instance_id=#clusterId# 
+		<dynamic prepend=" and ">
+				<isNotEmpty property="manager" prepend=" and ">
+					manager = #manager#
+				</isNotEmpty>
+				<isNotEmpty property="control" prepend=" and ">
+					control = #control#
+				</isNotEmpty>
+				<isNotEmpty property="data" prepend=" and ">
+					data = #data#
+				</isNotEmpty>
+			</dynamic>
+			 order by order_num 
+	</select>
+	<delete id="deleteInstanceNodeById" parameterClass="java.lang.String">
+		delete from SERVICE_INSTANCE_NODE where id = #deviveId#
+	</delete>
+	<delete id="deleteInstanceNodeRefById" parameterClass="java.lang.String">
+		delete from SERVICE_NODE_COMPONENT_ROLE_REF where instance_node_id = #deviveId#
+	</delete>
+	<delete id="deleteServiceInstanceById" parameterClass="java.lang.String">
+		delete from SERVICE_INSTANCE where id = #serviceInstanceId#
+	</delete>
+	<delete id="deleteServiceInstanceRefById" parameterClass="java.lang.String">
+		delete from SERVICE_INSTANCE_COMPONENT_REF where instance_id = #serviceInstanceId#
+	</delete>
+	
+	<!-- 根据租户ID查询个数 -->
+	<select id="selectCountByTenantId" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		select count(v.ID)
+		from
+		cm_vm v
+		inner join
+		cm_device d
+		on
+		v.ID = d.ID
+		where
+		d.IS_ACTIVE = 'Y'
+		and
+		v.TENANT_ID = #id#
+	</select>
+	<!-- 根据租户ID查询CPU内存使用总量 -->
+	<select id="getCpuMemSumByTenantId" parameterClass="java.lang.String" resultClass="cmVmPo">
+		<![CDATA[
+			SELECT
+				sum(v.CPU) cpu,
+				sum(v.MEM) mem
+			FROM
+				CM_VM v,
+				CM_DEVICE d
+			WHERE
+			 v.ID = d.ID
+			AND d.IS_ACTIVE = 'Y'
+			AND v.TENANT_ID = #id#
+		]]>
+	</select>
+</sqlMap>

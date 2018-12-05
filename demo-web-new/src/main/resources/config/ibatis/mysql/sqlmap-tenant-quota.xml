@@ -1,0 +1,342 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="tenantManager.tenant.quota">
+ <!---->
+	<typeAlias alias="quotaConfigPo" type="com.git.cloud.tenant.model.po.QuotaConfigPo" />
+	<typeAlias alias="QuotaPo" type="com.git.cloud.tenant.model.po.QuotaPo" />
+	<typeAlias alias="CloudProjectPo" type = "com.git.cloud.resmgt.network.model.po.CloudProjectPo"/>
+	<typeAlias alias="QuotaVo" type="com.git.cloud.tenant.model.vo.QuotaVo" />
+	<typeAlias alias="AllQuotaCountVo" type="com.git.cloud.tenant.model.vo.AllQuotaCountVo" />
+	<!-- 根据平台类型获取配额指标 -->
+	<select id="selectQuotaConfigByPlaTypeCode" parameterClass="java.lang.String" resultClass="quotaConfigPo">
+		SELECT
+		ID id,
+		PLATFORM_TYPE_CODE platformTypeCode,
+		NAME name,
+		CODE code,
+		ORDERNUM ordernum,
+		UNIT unit
+		FROM
+		ClOUD_QUOTA_CONFIG
+		WHERE PLATFORM_TYPE_CODE = #typeCode#
+		order by ordernum 
+	</select>
+	
+	<!-- 获取配额指标平台类型 -->
+	<select id="selectPlaTypeCode" resultClass="java.lang.String">
+		SELECT
+		PLATFORM_TYPE_CODE platformTypeCode
+		FROM
+		ClOUD_QUOTA_CONFIG
+		group by PLATFORM_TYPE_CODE
+	</select>
+	
+	<!-- 根据租户id获取租户配额-->
+	<select id="selectQuotaByTenantId" parameterClass="java.lang.String" resultClass="QuotaPo">
+		SELECT
+		TENANT_ID tenantId,
+		CLOUD_QUOTA_CONFIG_ID quotaConfigId,
+		PROJECT_ID projectId,
+		DATACENTER_ID dataCnterId,
+		VAL value,
+		CODE code,
+		platform_type_code platformCode
+		from QUOTA q,CLOUD_QUOTA_CONFIG c
+		where TENANT_ID = #tenantId# and q.cloud_quota_config_id = c.id
+	</select>
+	<!-- 添加租户配额 -->
+	<insert id="addQuota" parameterClass="QuotaPo">
+	   insert into QUOTA(ID,TENANT_ID,CLOUD_QUOTA_CONFIG_ID,PROJECT_ID,DATACENTER_ID,VAL)
+	   values(#id#,#tenantId#,#quotaConfigId#,#projectId#,#dataCnterId#,#value#)
+	</insert>
+	<update id="updateTenantQuotaFlag" parameterClass="java.lang.String">
+		update CLOUD_TENANT set quota_limit = '0' where id = #tenantId#
+	</update>
+	<!-- 删除租户配额 -->
+	<insert id="deleteQuota" parameterClass="java.lang.String">
+	  delete  from QUOTA
+	  where TENANT_ID = #denantID#
+	</insert>
+	<select id="selectProjecteByTenantId" parameterClass="java.lang.String" resultClass="CloudProjectPo">
+		<![CDATA[
+				SELECT a.ID as projectId,
+					a.NAME as projectName,
+					a.VM_MS_ID as vmMsId,
+					a.DATACENTER_ID datacenterId			
+				FROM CLOUD_PROJECT a   	
+				where 
+				  a.IS_ACTIVE='Y' and  
+				  a.tenant_id=#tenantId#	 
+		 ]]>		 	
+	</select>
+	
+	<!-- 配额验证 -->
+	<!-- openstack已用资源统计 -->
+	<select id="countOpenstackUsedQuota" parameterClass="hashMap" resultClass="AllQuotaCountVo">
+		SELECT 
+		(select count(1) from CM_VM v LEFT JOIN 
+		CM_DEVICE de ON de.id = v.id where 
+		v.PROJECT_ID = #projectId# and v.PLATFORM_TYPE_CODE = 'O' 
+		 and v.TENANT_ID = #tenantId#
+		AND de.IS_ACTIVE='Y') as vmNumUsed, 
+		IFNULL((SELECT sum(size) FROM CLOUD_VOLUME v WHERE v.PROJECT_ID = #projectId# and v.IS_ACTIVE = 'Y' ),0) as storageUsed,
+		(SELECT count(1) FROM RM_NW_OPENSTACK_FLOATING_IP f WHERE f.PROJECT_ID =#projectId# and f.IS_ACTIVE='Y') as floatingIpNumUsed, 
+		(SELECT count(1) FROM RM_NW_OPENSTACK_VLB_POOL p WHERE p.TENANT_ID=#projectId#) as vlbNumUsed,
+		(SELECT count(1) FROM RM_NW_OPENSTACK_SECURITY_GROUPS g WHERE g.PROJECT_ID =#projectId# and g.IS_ACTIVE='Y')  as securityGroupNumUsed, 
+		(SELECT count(1) FROM rm_nw_openstack_virtual_network p WHERE p.PROJECT_ID =#projectId# and p.IS_ACTIVE='Y') as networkNumUsed, 
+		(select ifnull(sum(CPU),0) from CM_VM v LEFT JOIN
+		CM_DEVICE de ON de.id = v.id where v.PROJECT_ID = #projectId#
+		and v.TENANT_ID = #tenantId#
+		and v.PLATFORM_TYPE_CODE = 'O' AND de.IS_ACTIVE='Y') as cpuUsed, 
+		(select ifnull(sum(MEM),0) from CM_VM v LEFT JOIN
+		CM_DEVICE de ON de.id = v.id where v.PROJECT_ID = #projectId#
+		and v.TENANT_ID = #tenantId#
+		and PLATFORM_TYPE_CODE = 'O' AND de.IS_ACTIVE='Y') as memUsed 
+	</select>
+	
+	
+	<!-- 查询租户在一个资源池下的资源数 -->
+	<select id="selectOpenstackUsedResourceByResPoolId" parameterClass="hashMap" resultClass="AllQuotaCountVo">
+		SELECT
+		(
+		select ifnull(count(1),0)
+		from CM_VM v
+		LEFT JOIN
+		CM_DEVICE de
+		ON de.id = v.id
+		where
+		de.RES_POOL_ID = #resPoolId#
+		and v.PLATFORM_TYPE_CODE = 'O'
+		and v.TENANT_ID = #tenantId#
+		AND de.IS_ACTIVE='Y') as vmNumUsed,
+		(
+		select ifnull(sum(CPU),0)
+		from CM_VM v
+		LEFT JOIN
+		CM_DEVICE de
+		ON de.id = v.id
+		where
+		de.RES_POOL_ID = #resPoolId#
+		and v.TENANT_ID = #tenantId#
+		and v.PLATFORM_TYPE_CODE = 'O'
+		AND de.IS_ACTIVE='Y') as cpuUsed,
+		(
+		select ifnull(sum(MEM),0)
+		from CM_VM v
+		LEFT JOIN
+		CM_DEVICE de
+		ON de.id = v.id
+		where
+		de.RES_POOL_ID = #resPoolId#
+		and v.TENANT_ID = #tenantId#
+		and PLATFORM_TYPE_CODE = 'O'
+		AND de.IS_ACTIVE='Y') as memUsed
+	</select>
+	<!-- 查询租户的用户下的资源数 -->
+	<select id="selectOpenstackUsedResourceByUserId" parameterClass="hashMap" resultClass="AllQuotaCountVo">
+		SELECT
+		(
+		select ifnull(count(1),0)
+		from CM_VM v
+		LEFT JOIN
+		CM_DEVICE de
+		ON de.id = v.id
+		where
+		v.USER_ID = #userId#
+		and v.PLATFORM_TYPE_CODE = 'O'
+		and v.TENANT_ID = #tenantId#
+		AND de.IS_ACTIVE='Y') as vmNumUsed,
+		(
+		select ifnull(sum(CPU),0)
+		from CM_VM v
+		LEFT JOIN
+		CM_DEVICE de
+		ON de.id = v.id
+		where
+		v.USER_ID = #userId#
+		and v.TENANT_ID = #tenantId#
+		and v.PLATFORM_TYPE_CODE = 'O'
+		AND de.IS_ACTIVE='Y') as cpuUsed,
+		(
+		select ifnull(sum(MEM),0)
+		from CM_VM v
+		LEFT JOIN
+		CM_DEVICE de
+		ON de.id = v.id
+		where
+		v.USER_ID = #userId#
+		and v.TENANT_ID = #tenantId#
+		and PLATFORM_TYPE_CODE = 'O'
+		AND de.IS_ACTIVE='Y') as memUsed
+	</select>
+	<!-- power已用资源统计 -->
+	<select id="countPowerUsedQuota" parameterClass="java.lang.String" resultClass="AllQuotaCountVo">
+		SELECT
+			count(cv.ID)vmNumUsed,
+			IFNULL(SUM(ref.DISK_SIZE),0)storageUsed,
+			IFNULL(SUM(cv.CPU),0)cpuUsed,
+			IFNULL(SUM(cv.MEM),0)memUsed
+		FROM
+			CM_VM cv
+		LEFT JOIN CM_DEVICE d ON cv.ID = d.ID
+		LEFT JOIN RM_DEVICE_VOLUMES_REF ref ON ref.device_id = d.ID
+		WHERE
+			cv.tenant_id = #tenantId# AND cv.PLATFORM_TYPE_CODE = 'P' AND d.IS_ACTIVE = 'Y' AND cv.ID = d.ID
+	</select>
+	
+	<!-- vmware已用资源统计 -->
+	<select id="countVmwareUsedQuota" parameterClass="java.lang.String" resultClass="AllQuotaCountVo">
+SELECT
+			sum.vmNumUsed vmNumUsed,
+			SUM(sum.sysDisk + sum.dataDisk) storageUsed,
+			sum.cpuUsed cpuUsed,
+			sum.memUsed memUsed
+		FROM
+			(
+				SELECT
+					SUM(cv.DISK) sysDisk,
+					count(cv.ID) vmNumUsed,
+					(
+						SELECT
+							IFNULL(SUM(ref.DISK_SIZE), 0.0) dataDisk
+						FROM
+							cm_vm cv
+						LEFT JOIN CM_DEVICE d ON cv.ID = d.ID
+						LEFT JOIN RM_DEVICE_VOLUMES_REF ref ON ref.device_id = d.ID
+						WHERE
+							cv.tenant_id = #tenantId# AND cv.PLATFORM_TYPE_CODE = 'X' AND d.IS_ACTIVE = 'Y'
+						AND cv.ID = d.ID
+					) dataDisk,
+					SUM(cv.CPU) cpuUsed,
+					SUM(cv.MEM) memUsed
+				FROM
+					CM_VM cv
+				LEFT JOIN CM_DEVICE d ON cv.ID = d.ID
+				WHERE
+					cv.tenant_id = #tenantId#
+				AND cv.PLATFORM_TYPE_CODE = 'X'
+				AND d.IS_ACTIVE = 'Y'
+				AND cv.ID = d.ID
+			) sum
+	</select>
+	
+	<!-- 获取配额列表 -->
+	<select id="getQuotaList" parameterClass="java.lang.String" resultClass="QuotaVo">
+		SELECT
+			c.`CODE` CODE,
+			c.ORDERNUM orderNum,
+			c.`NAME` NAME,
+			c.PLATFORM_TYPE_CODE platformTypeCode,
+			c.UNIT unit,
+			q.VAL val,
+			q.TENANT_ID tenantId,
+			q.project_id projectId,
+			op.`NAME` projectName
+		FROM
+			QUOTA q
+		LEFT JOIN ClOUD_QUOTA_CONFIG c ON q.CLOUD_QUOTA_CONFIG_ID = c.ID
+		LEFT JOIN CLOUD_PROJECT op ON q.project_id = op.ID
+		WHERE
+			q.TENANT_ID = #tenantId#
+		ORDER BY
+			c.platform_type_code,
+			q.project_id,
+			c.ordernum
+	</select>
+	<!-- 获取已用cpu、已用mem、已用虚机数 -->
+	<select id="getUsedResByMap" parameterClass="hashMap" resultClass="AllQuotaCountVo">
+		<![CDATA[
+		SELECT
+			count(cv.ID)vmNumUsed,
+			IFNULL(SUM(cv.CPU),0)cpuUsed,
+			IFNULL(SUM(cv.MEM),0) memUsed
+		FROM
+			CM_VM cv
+		LEFT JOIN CM_DEVICE d ON cv.ID = d.ID
+		WHERE
+			cv.tenant_id = #tenantId#
+		AND cv.PLATFORM_TYPE_CODE = #platformTypeCode#
+		AND d.IS_ACTIVE = 'Y'
+		AND cv.ID = d.ID
+		AND d.IS_ACTIVE = 'Y'
+		 ]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="projectId" prepend=" and ">
+				cv.PROJECT_ID = #projectId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<!-- 根据map获取具体配额 -->
+	<select id="getQuotaListByMap" parameterClass="hashMap" resultClass="QuotaVo">
+	<![CDATA[ 
+		SELECT
+			c.`CODE` CODE,
+			c.ORDERNUM orderNum,
+			c.`NAME` NAME,
+			c.PLATFORM_TYPE_CODE platformTypeCode,
+			c.UNIT unit,
+			q.VAL val,
+			q.TENANT_ID tenantId,
+			q.project_id projectId,
+			op.`NAME` projectName
+		FROM
+			QUOTA q
+		LEFT JOIN ClOUD_QUOTA_CONFIG c ON q.CLOUD_QUOTA_CONFIG_ID = c.ID
+		LEFT JOIN CLOUD_PROJECT op ON q.project_id = op.ID
+		WHERE 1 = 1
+	]]>
+	<dynamic prepend=" and ">
+		<isNotEmpty property="tenantId" prepend=" and ">
+			q.TENANT_ID = #tenantId#
+		</isNotEmpty>
+	</dynamic>
+	<dynamic prepend=" and ">
+		<isNotEmpty property="projectId" prepend=" and ">
+			q.project_id = #projectId#
+		</isNotEmpty>
+	</dynamic>
+	<dynamic prepend=" and ">
+		<isNotEmpty property="code" prepend=" and ">
+			c.`CODE` = #code#
+		</isNotEmpty>
+	</dynamic>
+	<dynamic prepend=" and ">
+		<isNotEmpty property="platformTypeCode" prepend=" and ">
+			c.PLATFORM_TYPE_CODE = #platformTypeCode#
+		</isNotEmpty>
+	</dynamic>
+	</select>
+	<!-- 查询租户的所有资源池的资源总数 -->
+	<select id="selectResPoolResourceByTenantId" parameterClass="java.lang.String" resultClass="AllQuotaCountVo" >
+		SELECT
+		ifnull(sum(ch.CPU),0) cpu,
+		ifnull(sum(ch.MEM),0) mem
+		FROM
+		tenant_res_pool_ref r
+		inner join
+		rm_res_pool p
+		on
+		r.RES_POOL_ID = p.id
+		inner join
+		cm_device cd
+		on
+		p.ID = cd.RES_POOL_ID
+		and
+		cd.IS_ACTIVE = 'Y'
+		inner join
+		cm_host ch
+		on
+		cd.ID = ch.ID
+		WHERE
+		p.IS_ACTIVE = 'Y'
+		AND r.TENANT_ID = #tenantId#
+	</select>
+	
+	<!-- 查询租户下的所有资源池 -->
+	<select id="selectResPoolByTenantId" parameterClass="java.lang.String" resultClass="hashMap" >
+		select * from tenant_res_pool_ref where TENANT_ID = #tenantId#
+	</select>
+	
+	
+</sqlMap>

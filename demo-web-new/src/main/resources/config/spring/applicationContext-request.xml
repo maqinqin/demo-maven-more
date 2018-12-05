@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<!-- action配置 -->
+	<bean id="requestBaseAction" class="com.git.cloud.request.action.RequestBaseAction" scope="prototype">
+		<property name="requestBaseService" ref="requestBaseServiceImpl" />
+		<property name="bpmInstanceService" ref="bpmInstanceServiceImpl" />
+		<property name="cmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="userService" ref="userServiceImpl" />
+		<property name="cmHostServiceImpl" ref="cmHostServiceImpl" />
+	</bean>
+	
+	
+	<bean id="virtualSupplyAction" class="com.git.cloud.request.action.VirtualSupplyAction" scope="prototype">
+		<property name="virtualSupplyService" ref="virtualSupplyServiceImpl" />
+	</bean>
+	
+	<bean id="virtualExtendAction" class="com.git.cloud.request.action.VirtualExtendAction" scope="prototype">
+		<property name="virtualExtendService" ref="virtualExtendServiceImpl" />
+	</bean>
+	
+	<bean id="virtualRecycleAction" class="com.git.cloud.request.action.VirtualRecycleAction" scope="prototype">
+		<property name="virtualRecycleService" ref="virtualRecycleServiceImpl" />
+	</bean>
+
+
+	<!-- service配置 -->
+	<bean id="requestBaseServiceImpl" class="com.git.cloud.request.service.impl.RequestBaseServiceImpl">
+		<property name="requestWorkflowService" ref="requestWorkflowServiceImpl" />
+		<property name="bmSrDao" ref="bmSrDaoImpl" />
+		<property name="bmApproveDao" ref="bmApproveDaoImpl" />
+		<property name="bmToDoDao" ref="bmToDoDaoImpl" />
+		<property name="ipAllocToDeviceService" ref="ipAllocToDeviceImpl" />
+		<property name="userDao" ref="userDaoImpl" />
+		<property name="bmSrAttrValDao" ref="bmSrAttrValDaoImpl"/>
+		<property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl"/>
+		<property name="bmSrRrVmRefDao" ref="bmSrRrVmRefDaoImpl"/>
+		<property name="bmSrStatusMapDao" ref="bmSrStatusMapDaoImpl"/>
+		<property name="deployunitDao" ref="deployunitDaoImpl"/>
+		<property name="cmDeviceDao" ref="cmDeviceDAO" />
+		<property name="cmHostDao" ref="cmHostDAO" />
+		<property name="cmVmDao" ref="cmVmDAO" />
+		<property name="bpmInstanceDaoImpl" ref="bpmInstanceDaoImpl" />
+		<property name="appMagServiceImpl" ref="appMagServiceImpl" />
+		<property name="notiServiceImpl" ref="noti_service" />
+		<property name="virtualNetworkDao" ref="virtualNetworkDao" />
+		<property name="firewallRequestServiceImpl" ref="firewallRequestServiceImpl" />
+	</bean>
+	
+	<bean id="virtualSupplyServiceImpl" class="com.git.cloud.request.service.impl.VirtualSupplyServiceImpl">
+		<property name="computePolicyService" ref="computePolicyService" />
+		<property name="bmSrDao" ref="bmSrDaoImpl" />
+		<property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl" />
+		<property name="bmSrRrVmRefDao" ref="bmSrRrVmRefDaoImpl" />
+		<property name="bmSrAttrValDao" ref="bmSrAttrValDaoImpl" />
+		<property name="deployunitDao" ref="deployunitDaoImpl" />
+		<property name="cloudServiceDao" ref="cloudServiceDao" />
+		<property name="cmDeviceDao" ref="cmDeviceDAO" />
+		<property name="cmHostDao" ref="cmHostDAO" />
+		<property name="cmVmDao" ref="cmVmDAO" />
+		<property name="cmPasswordDao" ref="cmPasswordDAO" />
+		<property name="rmVmManageServerDao" ref="rmVmManageServerDAO" />
+		<property name="virtualNetworkService" ref="virtualNetworkService" />
+		<property name="virtualNetworkDao" ref="virtualNetworkDao" />
+		<property name="virtualSupplyDAO" ref="virtualSupplyDAO" />
+		<property name="imageDao" ref="imageDao" />
+	</bean>
+	
+	<bean id="virtualExtendServiceImpl" class="com.git.cloud.request.service.impl.VirtualExtendServiceImpl">
+		<property name="computePolicyService" ref="computePolicyService" />
+		<property name="bmSrDao" ref="bmSrDaoImpl" />
+		<property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl" />
+		<property name="bmSrRrVmRefDao" ref="bmSrRrVmRefDaoImpl" />
+		<property name="bmSrAttrValDao" ref="bmSrAttrValDaoImpl" />
+		<property name="cmVmDao" ref="cmVmDAO" />
+		<property name="cmHostDao" ref="cmHostDAO" />
+		<property name="cmDeviceDao" ref="cmDeviceDAO" />
+		<property name="rmClusterDao" ref="rmClusterDAO" />
+		<property name="virtualExtendDAO" ref="virtualExtendDAO" />
+	</bean>
+	
+	<bean id="virtualRecycleServiceImpl" class="com.git.cloud.request.service.impl.VirtualRecycleServiceImpl">
+		<property name="bmSrDao" ref="bmSrDaoImpl" />
+		<property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl" />
+		<property name="bmSrRrVmRefDao" ref="bmSrRrVmRefDaoImpl" />
+		<property name="virtualRecycleDAO" ref="virtualRecycleDAO" />
+		<property name="cloudServiceDao" ref="cloudServiceDao" />
+		<property name="ipAllocToVMService" ref="ipAllocToDeviceImpl" />
+	</bean>
+	
+	<bean id="requestWorkflowServiceImpl" class="com.git.cloud.request.service.impl.RequestWorkflowServiceImpl">
+		<property name="requestService" ref="requestServiceImpl" />
+		<property name="bmSrDao" ref="bmSrDaoImpl" />
+		<property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl" />
+		<property name="bmToDoDao" ref="bmToDoDaoImpl" />
+		<property name="bmSrTypeWfRefDao" ref="bmSrTypeWfRefDaoImpl" />
+		<property name="bpmModelDao" ref="bpmModelDaoImpl" />
+	</bean>
+
+	<!-- DAO配置 -->
+	<bean id="bmSrDaoImpl" class="com.git.cloud.request.dao.impl.BmSrDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmSrRrinfoDaoImpl" class="com.git.cloud.request.dao.impl.BmSrRrinfoDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmSrRrVmRefDaoImpl" class="com.git.cloud.request.dao.impl.BmSrRrVmRefDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmSrAttrValDaoImpl" class="com.git.cloud.request.dao.impl.BmSrAttrValDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmApproveDaoImpl" class="com.git.cloud.request.dao.impl.BmApproveDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmToDoDaoImpl" class="com.git.cloud.request.dao.impl.BmToDoDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmSrTypeWfRefDaoImpl" class="com.git.cloud.request.dao.impl.BmSrTypeWfRefDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="bmSrStatusMapDaoImpl" class="com.git.cloud.request.dao.impl.BmSrStatusMapDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- 临时 -->
+	<bean id="virtualSupplyDAO" class="com.git.cloud.request.dao.impl.VirtualSupplyDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="virtualExtendDAO" class="com.git.cloud.request.dao.impl.VirtualExtendDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="virtualRecycleDAO" class="com.git.cloud.request.dao.impl.VirtualRecycleDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+		
+	<bean id="requestServiceImpl" class="com.git.cloud.workflow.service.impl.RequestServiceImpl">
+		<property name="bpmInstanceDao" ref="bpmInstanceDaoImpl" />
+		<property name="bpmModelDao" ref="bpmModelDaoImpl" />
+		<property name="bmToDoDao" ref="bmToDoDaoImpl" />
+		<property name="bpmModelService" ref="bpmModelServiceImpl" />
+		<property name="bpmInstanceService" ref="bpmInstanceServiceImpl" />
+		<property name="processInstanceService" ref="processInstanceServiceImpl" />
+		<!-- <property name="parameterService" ref="paramService" /> -->
+		<property name="parameterServiceImpl" ref="parameterServiceImpl"/>
+	</bean>
+	
+	
+	<bean id="businessDesignerAction" class="com.git.cloud.tankflow.action.BusinessDesignerAction">
+		<property name="designerService" ref="businessDesignerServiceImpl"></property>
+	</bean>
+
+	<bean id="businessDesignerServiceImpl" class="com.git.cloud.tankflow.service.impl.BusinessDesignerServiceImpl">
+		<property name="desinerDao" ref="businessDesignerDaoImpl" />
+	</bean>
+
+	<bean id="businessDesignerDaoImpl" class="com.git.cloud.tankflow.dao.impl.BusinessDesignerDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="bpmBusinessTankflowServiceImpl" class="com.git.cloud.workflow.service.impl.BpmBusinessTankflowServiceImpl">
+		<property name="bpmInstanceOataskDao" ref="bpmInstanceOataskDaoImpl" />
+		<property name="bpmInstanceDao" ref="bpmInstanceDaoImpl" />
+		<property name="bmSrDao" ref="bmSrDaoImpl" />
+		<property name="requestBaseService" ref="requestBaseServiceImpl" />
+		<property name="sysRoleDAO" ref="sysRoleDAO" />
+	</bean>
+</beans>

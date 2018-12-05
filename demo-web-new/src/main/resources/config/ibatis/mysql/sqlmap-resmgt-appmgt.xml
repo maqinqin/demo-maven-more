@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgt-appmgt">
+<typeAlias alias="appMagActVo" type="com.git.cloud.appmgt.model.vo.AppMagActVo"/>
+
+	<select id="appMagCount" resultClass="appMagActVo" parameterClass="java.util.Map">
+		<!-- <![CDATA[
+		SELECT	
+			 (SELECT COUNT(IFNULL(APPINFO.APP_ID,0)) FROM APP_INFO APPINFO WHERE APPINFO.IS_ACTIVE = 'Y') AS systemNum,
+      		 (SELECT COUNT(*) FROM APP_DU APPDU WHERE APPDU.DU_ID <> '' AND APPDU.IS_ACTIVE = 'Y'
+      		 ]]>
+      		 <dynamic prepend="and">
+	        	<isNotEmpty prepend="AND" property="apptId">
+			  	APPDU.APP_ID = #apptId#
+		  		</isNotEmpty>
+	        	<isNotEmpty prepend="AND" property="apptADuId">
+			  	APPDU.DU_ID = #apptADuId#
+		  		</isNotEmpty>
+		  	 </dynamic>
+	  		<![CDATA[) AS deplUnitNum,
+			 COUNT(CLOUDSERVICE.SERVICE_ID) AS cloudServiceNum,
+			 SUM(IFNULL(CMVM.CPU,0)) AS cpuNum,
+			 SUM(IFNULL(CMVM.MEM,0)) AS memNum,
+			 COUNT(CMVM.ID) AS vmNum,
+			 CONCAT(CMVM.CPU,"核",CMVM.MEM,"M") AS cvmConfig
+		FROM CM_VM CMVM
+			 LEFT JOIN APP_DU APPDU ON APPDU.DU_ID = CMVM.DU_ID AND APPDU.IS_ACTIVE = 'Y'
+			 LEFT JOIN RM_DATACENTER RMDATACENTER ON RMDATACENTER.ID = APPDU.DATACENTER_ID AND RMDATACENTER.IS_ACTIVE = 'Y'
+			 LEFT JOIN CLOUD_SERVICE CLOUDSERVICE ON CLOUDSERVICE.SERVICE_ID = APPDU.SERVICE_ID AND CLOUDSERVICE.IS_ACTIVE = 'Y'
+		WHERE CMVM.DU_ID <> ''
+		]]> -->
+		<![CDATA[
+				SELECT DISTINCT
+				(
+					SELECT
+						COUNT(DISTINCT IFNULL(APPINFO.APP_ID, 0))
+					FROM
+						APP_INFO APPINFO,
+						SYS_ROLE_MANAGE
+					WHERE
+						APPINFO.IS_ACTIVE = 'Y'
+					AND (SYS_ROLE_MANAGE.APP_INFO_ID = APPINFO.APP_ID OR SYS_ROLE_MANAGE.APP_INFO_ID='ALL')
+					AND SYS_ROLE_MANAGE.USER_ID = #userId#
+				)AS systemNum,
+				(
+					SELECT
+						count(*)
+					FROM
+						APP_DU APPDU,
+						APP_INFO APPINFO,
+						SYS_ROLE_MANAGE
+					WHERE
+						APPINFO.IS_ACTIVE = 'Y'
+					AND (SYS_ROLE_MANAGE.APP_INFO_ID = APPINFO.APP_ID OR SYS_ROLE_MANAGE.APP_INFO_ID='ALL')
+					AND SYS_ROLE_MANAGE.USER_ID = #userId#
+					AND APPDU.DU_ID <> ''
+					AND APPDU.IS_ACTIVE = 'Y'
+					AND APPINFO.APP_ID = APPDU.APP_ID
+				 ]]>
+				 <dynamic prepend="and">
+	        	<isNotEmpty prepend="AND" property="apptId">
+			  	APPDU.APP_ID = #apptId#
+		  		</isNotEmpty>
+	        	<isNotEmpty prepend="AND" property="apptADuId">
+			  	APPDU.DU_ID = #apptADuId#
+		  		</isNotEmpty>
+		  	 </dynamic><![CDATA[)AS deplUnitNum,
+				COUNT(APPDU.SERVICE_ID)AS cloudServiceNum,
+				SUM(IFNULL(CMVM.CPU, 0))AS cpuNum,
+				SUM(IFNULL(CMVM.MEM, 0))AS memNum,
+				COUNT(CMVM.ID)AS vmNum
+			FROM
+				SYS_ROLE_MANAGE M,APP_INFO INFO 
+			LEFT JOIN APP_DU APPDU ON APPDU.APP_ID = INFO.APP_ID AND APPDU.IS_ACTIVE='Y'
+			LEFT JOIN CM_VM CMVM ON APPDU.DU_ID = CMVM.DU_ID
+			AND APPDU.IS_ACTIVE = 'Y'
+			JOIN CM_DEVICE VMDEV ON CMVM.ID = VMDEV.ID AND VMDEV.IS_ACTIVE = 'Y'
+			LEFT JOIN RM_DATACENTER RMDATACENTER ON RMDATACENTER.ID = APPDU.DATACENTER_ID
+			AND RMDATACENTER.IS_ACTIVE = 'Y'
+			LEFT JOIN CLOUD_SERVICE CLOUDSERVICE ON CLOUDSERVICE.SERVICE_ID = APPDU.SERVICE_ID
+			AND CLOUDSERVICE.IS_ACTIVE = 'Y' 
+			WHERE  M.USER_ID=#userId# AND (M.APP_INFO_ID = INFO.APP_ID OR  M.APP_INFO_ID='ALL')
+			AND INFO.IS_ACTIVE = 'Y'
+				]]>
+      	<dynamic prepend="and">
+        	<isNotEmpty prepend="AND" property="apptId">
+		  	APPDU.APP_ID = #apptId#
+	  		</isNotEmpty>
+        	<isNotEmpty prepend="AND" property="apptADuId">
+		  	APPDU.DU_ID = #apptADuId#
+	  		</isNotEmpty>
+	  		<isNotEmpty prepend="AND" property="apptACPId">
+			INFO.APP_ID = #apptACPId#
+			</isNotEmpty>
+	  	</dynamic>
+	</select>
+	
+	<select id="queryAppChart" parameterClass="java.util.Map" resultClass="appMagActVo">
+		<![CDATA[
+				SELECT
+					(CASE APP_STAT.SR_TYPE_MARK 
+				]]>
+						WHEN #srTypeMark#
+				<![CDATA[
+						THEN 0 
+						ELSE APP_STAT.CPU
+						END)  cpuNum,
+					(CASE APP_STAT.SR_TYPE_MARK
+				]]>
+						WHEN #srTypeMark#
+				<![CDATA[
+						THEN 0 
+						ELSE APP_STAT.MEM
+						END)  memNum,
+					  (CASE APP_STAT.SR_TYPE_MARK
+			    ]]>
+						WHEN #srTypeMark# THEN
+				<![CDATA[
+							0
+						ELSE
+							APP_STAT.DISK
+						END
+					) diskNum,
+					APP_STAT.SR_TYPE_MARK typeMark,
+					DATE_FORMAT(DATE_ADD(APP_STAT.CREATE_TIME, INTERVAL 1 MONTH), '%Y-%m-01') AS createDateTime,
+					APP_STAT.DEVICE_ID deviceId
+				FROM
+					APP_STAT 
+				LEFT JOIN 
+					APP_DU 
+						ON APP_DU.DU_ID = APP_STAT.DU_ID
+						AND APP_DU.IS_ACTIVE = 'Y'
+				LEFT JOIN 
+					RM_DATACENTER RM_DC
+						ON RM_DC.ID = APP_DU.DATACENTER_ID
+						AND RM_DC.IS_ACTIVE = 'Y'
+				WHERE
+					1 = 1
+				]]>
+				<dynamic prepend="and">
+					APP_STAT.SR_STATUS_CODE = #srStatusCode#
+					AND
+				  	APP_STAT.CREATE_TIME >= #createTime#
+				  	AND
+		        	<isNotEmpty prepend="AND" property="rmDataCId">
+				  	RM_DC.ID = #rmDataCId#
+			  		</isNotEmpty>
+		        	<isNotEmpty prepend="AND" property="apptId">
+				  	APP_DU.APP_ID = #apptId#
+			  		</isNotEmpty>
+		        	<isNotEmpty prepend="AND" property="apptADuId">
+				  	APP_DU.DU_ID = #apptADuId#
+			  		</isNotEmpty>
+			  	</dynamic>
+				ORDER BY
+                    APP_STAT.CREATE_TIME ,
+					APP_STAT.DEVICE_ID
+	</select>
+	
+</sqlMap>

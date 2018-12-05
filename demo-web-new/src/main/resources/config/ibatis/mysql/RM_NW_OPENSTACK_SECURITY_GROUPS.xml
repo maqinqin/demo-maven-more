@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="rmNwSecurityGroups">
+	<typeAlias alias="securityGroupsVo" type="com.git.cloud.resmgt.openstack.model.vo.SecurityGroupsVo" />
+	
+	<select id="getSecurityGroupsVoByProjectIdAndName" parameterClass="java.lang.String" resultClass="securityGroupsVo">
+		select 
+			t.ID as id,
+			t.PROJECT_ID as projectId,
+			t.SECURITY_GROUPS_NAME as securityGroupsName,
+			t.REMARK as remark,
+			t.IS_ACTIVE as isActive
+		from RM_NW_OPENSTACK_SECURITY_GROUPS t 
+		where t.IS_ACTIVE='Y' AND t.PROJECT_ID=#projectId# and t.SECURITY_GROUPS_NAME='default'
+	</select>
+</sqlMap>

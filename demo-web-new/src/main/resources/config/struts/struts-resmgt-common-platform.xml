@@ -1,0 +1,45 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-common-package" extends="icms-package" namespace="/resmgt-common">
+	</package>
+	<!-- 平台类型维护 -->
+	<package name="resmgt-common-platform" namespace="/resmgt-common/platform" extends="resmgt-common-package">
+		<action name="RmPlatformView" class="rmPlatformAction" method="RmPlatformView">
+			<result name="success">/pages/resmgt/common/RmPlatformView.jsp</result>
+		</action>
+		<action name="getPlatformList" class="rmPlatformAction" method="getPlatformList">
+		</action>
+		<action name="savaRmPlatform" class="rmPlatformAction" method="savaRmPlatform">
+		</action>
+		<action name="updateRmPlatform" class="rmPlatformAction" method="updateRmPlatform">
+		</action>
+		<action name="selectRmPlatform" class="rmPlatformAction" method="selectRmPlatform">
+		</action>
+		<action name="selectRmPlatformSel" class="rmPlatformAction" method="selectRmPlatformSel">
+		</action>
+		<action name="deleteRmPlatform" class="rmPlatformAction" method="deleteRmPlatform">
+		</action>
+		<action name="selectRmPlatformForTrim" class="rmPlatformAction" method="selectRmPlatformForTrim">
+		</action>
+		<action name="getRmVirtualTypeList" class="rmPlatformAction" method="getRmVirtualTypeList">
+		</action>
+		<action name="savaVirtualType" class="rmPlatformAction" method="savaVirtualType">
+		</action>
+		<action name="selectRmVirtualTypeForTrim" class="rmPlatformAction" method="selectRmVirtualTypeForTrim">
+		</action>
+		<action name="selectRmVirtualType" class="rmPlatformAction" method="selectRmVirtualType">
+		</action>
+		<action name="selectRmVirtualTypeSel" class="rmPlatformAction" method="selectRmVirtualTypeSel">
+		</action>
+		<action name="updateRmVirtualType" class="rmPlatformAction" method="updateRmVirtualType">
+		</action>
+		<action name="deleteVirtualType" class="rmPlatformAction" method="deleteVirtualType">
+		</action>
+		<action name="selectRmPlatformNameForTrim" class="rmPlatformAction" method="selectRmPlatformNameForTrim">
+		</action>
+	</package>
+	
+</struts>

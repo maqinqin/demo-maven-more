@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="ippolicy">
+	<typeAlias alias="RmNwRuleListPo" type="com.git.cloud.policy.model.po.RmNwRuleListPo" />
+	<typeAlias alias="RmNwCclassPo" type="com.git.cloud.resmgt.network.model.po.RmNwCclassPo" />
+	<typeAlias alias="RmNwIpAddressPo" type="com.git.cloud.resmgt.network.model.po.RmNwIpAddressPo" />
+	<typeAlias alias="AllocIpParamVo" type="com.git.cloud.policy.model.vo.AllocIpParamVo" />
+	<typeAlias alias="RmNwCclassFLPo" type="com.git.cloud.resmgt.network.model.po.RmNwCclassFLPo" />
+	<resultMap id="RmNwCclassFL" class="RmNwCclassFLPo" >
+	    <result property="cclassId" column="CCLASS_ID"></result>
+	    <result property="seqStart" column="SEQ_START"></result>
+	    <result property="seqEnd" column="SEQ_END"></result>
+	    <result property="availCnt" column="AVAIL_CNT"></result>
+	</resultMap>
+	<resultMap id="RmNwRuleList" class="com.git.cloud.policy.model.po.RmNwRuleListPo" >
+	    <result property="rmNwRuleListId" column="RM_NW_RULE_LIST_ID"></result>
+	    <result property="rmNwRuleId" column="RM_NW_RULE_ID"></result>
+	    <result property="useCode" column="USE_CODE"></result>
+	    <result property="actNum" column="ACT_NUM"></result>
+	    <result property="occNum" column="OCC_NUM"></result>
+	    <result property="occSite" column="OCC_SITE"></result>
+	    <result property="rmIpTypeName" column="RM_IP_TYPE_NAME"></result>
+	    <result property="isActive" column="IS_ACTIVE"></result>
+	    <result property="vmwarePGPEFIX" column="VMWARE_PG_PEFIX"></result>
+	    <result property="useId" column="USE_ID"></result>
+	</resultMap>
+	<resultMap id="RmNwCclassList" class="RmNwCclassPo" >
+	    <result property="cclassId" column="CCLASS_ID"></result>
+	    <result property="platformId" column="PLATFORM_ID"></result>
+	    <result property="bclassId" column="BCLASS_ID"></result>
+	    <result property="virtualTypeId" column="VIRTUAL_TYPE_ID"></result>
+	    <result property="hostTypeId" column="HOST_TYPE_ID"></result>
+	    <result property="useId" column="USE_ID"></result>
+	    <result property="useRelCode" column="USE_REL_CODE"></result>
+<!-- 	    <result property="secureAreaId" column="SECURE_AREA_ID"></result> -->
+<!-- 	    <result property="secureTierId" column="SECURE_TIER_ID"></result> -->
+<!-- 	    <result property="cclassName" column="CCLASS_NAME"></result> -->
+	    <result property="subnetmask" column="SUBNETMASK"></result>
+	    <result property="gateway" column="GATEWAY"></result>
+	    <result property="vlanId" column="VLAN_ID"></result>
+<!-- 	    <result property="ipStart" column="IP_START"></result> -->
+<!-- 	     <result property="ipEnd" column="IP_END"></result> -->
+	    <result property="aclassIp" column="ACLASS_IP"></result>
+	    <result property="bclassIp" column="BCLASS_IP"></result>
+	    <result property="cclassIp" column="CCLASS_IP"></result>
+<!-- 	    <result property="ipTotalCnt" column="IP_TOTAL_CNT"></result> -->
+	    <result property="ipAvailCnt" column="IP_AVAIL_CNT"></result>
+<!-- 	    <result property="datacenterId" column="DATACENTER_ID"></result> -->
+	    <result property="convergeId" column="CONVERGE_ID"></result>
+<!-- 	    <result property="isActive" column="IS_ACTIVE"></result> -->
+	</resultMap>
+	<resultMap id="RmNwIpAddress" class="RmNwIpAddressPo" >
+	    <result property="ip" column="IP"></result>
+	    <result property="cclassId" column="CCLASS_ID"></result>
+	    <result property="seq" column="SEQ"></result>
+	    <result property="useRelCode" column="USE_REL_CODE"></result>
+<!-- 	    <result property="resPoolId" column="RES_POOL_ID"></result> -->
+<!-- 	    <result property="resCdpId" column="RES_CDP_ID"></result> -->
+<!-- 	    <result property="appDuId" column="APP_DU_ID"></result> -->
+<!-- 	    <result property="resClusterId" column="RES_CLUSTER_ID"></result> -->
+	    <result property="deviceId" column="DEVICE_ID"></result>
+	    <result property="allocedStatusCode" column="ALLOCED_STATUS_CODE"></result>
+	    <result property="nwResPoolId" column="NW_RES_POOL_ID"></result>
+	    <result property="nwRuleListId" column="NW_RULE_LIST_ID"></result> 
+	    <result property="useRelCode" column="USE_REL_CODE"></result>
+	     <result property="portGroupId" column="PORT_GROUP_ID"></result>
+	</resultMap>
+	<resultMap id="RmNwIpAddress1" class="RmNwIpAddressPo" >
+	    <result property="ip" column="IP"></result>
+	    <result property="cclassId" column="CCLASS_ID"></result>
+	    <result property="seq" column="SEQ"></result>
+	    <result property="useRelCode" column="USE_REL_CODE"></result>
+		<result property="nwResPoolId" column="RES_POOL_ID"></result>
+		<result property="nwRuleListId" column="RULE_LIST_ID"></result> 
+ 	    <result property="resCdpId" column="RES_CDP_ID"></result>
+ 	    <result property="appDuId" column="APP_DU_ID"></result> 
+ 	    <result property="resClusterId" column="RES_CLUSTER_ID"></result>
+	    <result property="deviceId" column="DEVICE_ID"></result>
+	    <result property="allocedStatusCode" column="ALLOCED_STATUS_CODE"></result>
+	    <result property="useRelCode" column="USE_REL_CODE"></result>
+	</resultMap>
+	<!-- 虚机分配参数 -->
+	
+	<select id="ippolicy.findRuleList" parameterClass="AllocIpParamVo" resultMap="RmNwRuleList">
+		<![CDATA[
+			SELECT RM_NW_RULE_LIST_ID,RM_NW_RULE_ID,USE_CODE,ACT_NUM,OCC_NUM,OCC_SITE,IS_ACTIVE,RM_IP_TYPE_NAME,VMWARE_PG_PEFIX FROM RM_NW_RULE_LIST RNRL WHERE
+			    RM_NW_RULE_ID = (SELECT RM_NW_RULE_ID FROM RM_NW_RULE WHERE
+			    PLATFORM_ID=(SELECT RP.PLATFORM_ID FROM RM_PLATFORM RP WHERE RP.PLATFORM_CODE=#platformType# ) AND
+			    VIRTUAL_TYPE_ID=(SELECT VT.VIRTUAL_TYPE_ID FROM RM_VIRTUAL_TYPE VT WHERE VT.VIRTUAL_TYPE_CODE=#vmType# ) AND
+			    HOST_TYPE_ID=(SELECT HT.HOST_TYPE_ID FROM RM_HOST_TYPE HT WHERE HT.HOST_TYPE_CODE=#deviceType#)
+			     and (HA_TYPE is null or HA_TYPE = '')
+			    AND IS_ACTIVE = 'Y') AND IS_ACTIVE='Y' ORDER BY ACT_NUM DESC 
+		]]>
+	</select>
+	<select id="ippolicy.findRuleList.includeHaType" parameterClass="AllocIpParamVo" resultMap="RmNwRuleList">
+		<![CDATA[
+			SELECT RM_NW_RULE_LIST_ID, RM_NW_RULE_ID, USE_CODE, ACT_NUM, OCC_NUM, OCC_SITE, IS_ACTIVE, RM_IP_TYPE_NAME, 
+					VMWARE_PG_PEFIX, USE_ID
+				FROM RM_NW_RULE_LIST RNRL 
+				WHERE RM_NW_RULE_ID = (SELECT RM_NW_RULE_ID FROM RM_NW_RULE WHERE
+			    						PLATFORM_ID=(SELECT RP.PLATFORM_ID FROM RM_PLATFORM RP WHERE RP.PLATFORM_CODE=#platformType# )
+			    	  AND VIRTUAL_TYPE_ID=(SELECT VT.VIRTUAL_TYPE_ID FROM RM_VIRTUAL_TYPE VT WHERE VT.VIRTUAL_TYPE_CODE=#vmType# ) 
+			    	  AND HOST_TYPE_ID=(SELECT HT.HOST_TYPE_ID FROM RM_HOST_TYPE HT WHERE HT.HOST_TYPE_CODE=#deviceType#)
+			    	  and HA_TYPE = #cloudServiceHATypeCode#
+			    	  AND IS_ACTIVE = 'Y') 
+			    	  AND IS_ACTIVE='Y' 
+			   	ORDER BY ACT_NUM DESC 
+		]]>
+	</select>
+	<select id="findRuleListByUseCode" parameterClass="java.lang.String" resultMap="RmNwRuleList">
+		<![CDATA[
+			SELECT RM_NW_RULE_LIST_ID,RM_NW_RULE_ID,USE_CODE,ACT_NUM,OCC_NUM,OCC_SITE,IS_ACTIVE,RM_IP_TYPE_NAME,VMWARE_PG_PEFIX FROM RM_NW_RULE_LIST RNRL WHERE $param$
+		]]>
+	</select>
+	<select id="RmNwRuleList.findById" parameterClass="java.lang.String" resultMap="RmNwRuleList">
+		<![CDATA[
+			SELECT RM_NW_RULE_LIST_ID, RM_NW_RULE_ID, USE_CODE, ACT_NUM, OCC_NUM, OCC_SITE, IS_ACTIVE
+				, RM_IP_TYPE_NAME, VMWARE_PG_PEFIX, USE_ID
+				FROM RM_NW_RULE_LIST 
+				WHERE RM_NW_RULE_LIST_ID = #id#
+		]]>
+	</select>
+	
+	<select id="findTotalIpList" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.network.model.po.OpenstackIpAddressPo">
+		<![CDATA[
+			SELECT
+				address.ID id,
+				address.INSTANCE_ID instanceId,
+				rnoen.VLAN_ID vlanId ,
+				rnoen.NETWORK_LABEL networkLable,
+				address.IP ip ,
+				address.USE_REL_CODE useRelCode,
+				rlist.USE_CODE ruleListCode,
+				address.NW_RULE_LIST_ID as nwRuleListId	,
+				address.PORT_GROUP_ID as portGroupId,
+				rnoen.PLATFORM_TYPE	as platformType,
+				rnpes.SUBNET_MASK ipMask,
+				rnpes.GATEWAY gateWay
+			FROM
+				rm_nw_openstack_ip_address address
+			left JOIN RM_NW_EXT_NETWORK rnoen on address.NETWORK_ID =  rnoen.ID   and rnoen.IS_ACTIVE='Y'
+			LEFT JOIN RM_NW_EXT_SUBNET rnpes on rnpes.external_network_id =rnoen.id and rnpes.is_active='Y'
+			LEFT JOIN RM_NW_RULE_LIST rlist ON rlist.RM_NW_RULE_LIST_ID = address.NW_RULE_LIST_ID
+			AND rlist.IS_ACTIVE = 'Y'
+			LEFT JOIN RM_NW_RULE r ON r.RM_NW_RULE_ID = rlist.RM_NW_RULE_ID
+			AND r.IS_ACTIVE = 'Y'
+			WHERE
+				address.INSTANCE_ID in ($hostId$) 
+		]]>
+	</select>
+	
+	<select id="selectHostInfoById" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT 
+			COUNT(1)
+		FROM
+			CM_HOST
+		WHERE
+			ID = #hostId#
+	</select>
+
+	<select id="qryIPForHost" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.common.model.bo.CmHostBo">
+	   SELECT
+		    ch.HOST_IP hostIp
+		FROM
+		    cm_host ch
+		LEFT JOIN cm_device cd ON cd.ID = ch.ID
+		WHERE
+		    cd.IS_ACTIVE = 'Y'
+		WHERE
+		    cd.ID = #deviceId#
+	</select>
+	
+</sqlMap>

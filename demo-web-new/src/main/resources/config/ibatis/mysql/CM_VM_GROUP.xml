@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="cmVmGroup">
+    
+    <select id="findCmVmGroupById" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.compute.model.po.CmVmGroupPo">
+        <![CDATA[
+        SELECT
+		    id id,
+		    NAME NAME,
+		    policies policies,
+		    project_id projectId,
+		    datacenter_id datacenterId,
+		    vm_ms_id vmMsId,
+		    IAAS_UUID iaasUuid
+		FROM
+		    cm_vm_group
+		WHERE
+		    is_active = 'Y'
+		AND id = #id#
+    ]]>
+    </select>
+</sqlMap>

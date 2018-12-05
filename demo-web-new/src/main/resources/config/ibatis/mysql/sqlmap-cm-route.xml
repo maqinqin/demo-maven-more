@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+		
+<sqlMap  namespace="checkRoute">
+<typeAlias alias="cmRoutePo" type="com.git.cloud.resmgt.common.model.po.CmRoutePo" />
+
+<!-- 初始化参数 -->
+<sql id="selectRouteList">
+		
+			SELECT 
+          c.ID  as id,
+          r.DATACENTER_CNAME as datacenterId,
+          c.NAME as name2,
+          c.IP as ip,
+          c.MASK as mask,
+          c.GATEWAY as gateway,
+          c.REMARK as remark
+          FROM CM_ROUTE c LEFT JOIN RM_DATACENTER r ON c.DATACENTER_ID=r.ID WHERE c.IS_ACTIVE='Y'
+			
+			<dynamic prepend=" and ">
+			<isNotEmpty property="name2" prepend="and">
+				NAME like concat('%', #name2#, '%')
+			</isNotEmpty>
+			
+			<isNotEmpty property="ip" prepend="and">
+			    IP like concat('%', #ip#, '%')
+			</isNotEmpty>
+			</dynamic>
+	</sql>
+	<select id="selectRouteTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectRouteList" />
+		) as recordTable
+	</select>
+	<select id="selectRoutePage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectRouteList" />
+		$_orderby$ 
+		limit #startIndex# ,#pageSize#
+		
+   </select>
+<insert id="insertCmRoute"  parameterClass="cmRoutePo" >
+INSERT INTO CM_ROUTE(
+    ID, DATACENTER_ID,NAME,IP,MASK,GATEWAY,REMARK,IS_ACTIVE)VALUES
+    (#id#,#datacenterId#,#name2#,#ip#,#mask#,#gateway#,#remark#,#isActive#)
+</insert>
+<update id="updateCmRoute" parameterClass="cmRoutePo">
+    UPDATE  CM_ROUTE
+     <dynamic prepend="set">
+       <isNotEmpty prepend="," property="datacenterId">
+				DATACENTER_ID = #datacenterId#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="name2">
+				NAME = #name2#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="ip">
+				IP = #ip#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="mask">
+				MASK = #mask#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="gateway">
+				GATEWAY = #gateway#
+		</isNotEmpty>
+		<isNotEmpty prepend="," property="remark">
+				REMARK = #remark#
+		</isNotEmpty>
+	</dynamic>
+	   WHERE ID=#id#
+</update>
+   <select  id="getObjectById" parameterClass="java.util.Map" resultClass="cmRoutePo">
+         SELECT 
+          ID  as id,
+          DATACENTER_ID as datacenterId,
+          NAME as name2,
+          IP as ip,
+          MASK as mask,
+          GATEWAY as gateway,
+          REMARK as remark
+          FROM CM_ROUTE WHERE IS_ACTIVE='Y' AND ID=#id#
+  </select>
+<!-- 假删除 -->
+   <update  id="updateCmRoutePo" parameterClass="cmRoutePo">
+  <![CDATA[
+	  UPDATE  CM_ROUTE 
+	  SET
+		IS_ACTIVE = #isActive#
+	   WHERE  ID = #id#
+	 ]]>
+  </update>
+</sqlMap>	

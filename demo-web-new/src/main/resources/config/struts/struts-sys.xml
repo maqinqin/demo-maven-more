@@ -1,0 +1,225 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="sys-package" extends="icms-package" namespace="/sys">
+	</package>
+
+	<!-- 资源维护 -->
+	<package name="sys-menu" extends="sys-package,json-default,struts-default"
+		namespace="/sys/menu">
+		<action name="showSystemMenu" class="loginAction" method="showSystemMenu"></action>
+		<action name="showMenusByParentId" class="loginAction" method="showMenusByParentId"></action>
+		<action name="setSession" class="loginAction" method="setSession"></action>
+
+		<action name="login" class="loginAction" method="login">
+			<result name="index">/pages/success.jsp</result>
+			<result name="login">/pages/success.jsp</result>
+			<result name="error">/pages/false.jsp</result>
+		</action>
+		<action name="logout" class="loginAction" method="logout">
+			<result name="logout">/pages/login.jsp</result>
+		</action>
+		<action name="main" class="com.git.cloud.sys.action.SysMenuAction"
+			method="toMain">
+			<result name="success">/pages/sys/menu/main.jsp</result>
+		</action>
+		<action name="loadTree" class="com.git.cloud.sys.action.SysMenuAction"
+			method="loadTree">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+
+		<action name="load" class="com.git.cloud.sys.action.SysMenuAction"
+			method="load">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					sysMenuPo.*
+				</param>
+			</result>
+		</action>
+		<action name="loadtree" class="com.git.cloud.sys.action.SysMenuAction"
+			method="loadTree">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					list.*
+				</param>
+			</result>
+		</action>
+		<action name="loadtreeNew" class="com.git.cloud.sys.action.SysMenuAction"
+			method="loadtreeNew">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					list.*
+				</param>
+			</result>
+		</action>
+		<action name="save" class="com.git.cloud.sys.action.SysMenuAction"
+			method="save">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					sysMenuPo.*
+				</param>
+			</result>
+		</action>
+		<action name="delete" class="com.git.cloud.sys.action.SysMenuAction"
+			method="delete">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="roles" class="com.git.cloud.sys.action.SysMenuAction"
+			method="roles">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="isrepeat" class="com.git.cloud.sys.action.SysMenuAction"
+			method="isrepeat">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+
+
+	</package>
+
+	<!-- 角色维护 -->
+	<package name="sys-role" extends="sys-package" namespace="/sys/role">
+		<action name="sysRoleView" class="sysRoleAction" method="sysRoleView">
+			<result name="success">/pages/sys/role/sysRoleList.jsp</result>
+		</action>
+		<action name="getSysRoleList" class="sysRoleAction" method="getSysRoleList" />
+		<action name="findSysRoleByIdAct" class="sysRoleAction" method="findSysRoleById" />
+		<action name="updateSysRolePoAct" class="sysRoleAction" method="updateSysRolePo" />
+		<action name="saveSysRolePoAct" class="sysRoleAction" method="saveSysRolePo" />
+		<action name="deleteSysRolePoByRoleIdAct" class="sysRoleAction"
+			method="deleteSysRolePoByRoleId" />
+		<action name="findSysMenuRolePoByRoleIdAct" class="sysRoleAction"
+			method="findSysMenuRolePoByRoleId" />
+		<action name="saveAuthorizationAct" class="sysRoleAction"
+			method="saveAuthorization" />
+		<action name="findSysUserListAct" class="sysRoleAction" method="findSysUserList" />
+	</package>
+
+	<!-- 用户维护 -->
+	<package name="sys-user" extends="sys-package" namespace="/sys/user">
+		<action name="findUserList" class="userAction" method="findUserList">
+			<result name="success">/pages/sys/user/userManage.jsp</result>
+		</action>
+		<action name="modifyUserPassword" class="userAction" method="modifyUserPassword">
+			<result name="success">/pages/sys/user/userPasswordManage.jsp</result>
+		</action>
+		<action name="modifyUserByOldPassword" class="userAction" method="modifyUserByOldPassword" />
+		<action name="findUserByCurrent" class="userAction" method="findUserByCurrent" />
+		<action name="saveUser" class="userAction" method="saveUser" />
+		<action name="deleteUser" class="userAction" method="deleteUser" />
+		<action name="findUserById" class="userAction" method="findUserById" />
+		<action name="findUserPage" class="userAction" method="findUserPage" />
+		<action name="initRadio" class="userAction" method="initRadio" />
+		<action name="initAddSysRoleNoTree" class="userAction" method="initAddSysRoleNoTree" />
+		<action name="initAddSysRoleTree" class="userAction" method="initAddSysRoleTree" />
+		<action name="initCloudServiceNoTree" class="userAction" method="initCloudServiceNoTree" />
+		<action name="initCloudServiceTree" class="userAction" method="initCloudServiceTree" />
+		
+		<action name="saveRole" class="userAction" method="saveRole" />
+		<action name="saveCloudService" class="userAction" method="saveCloudService" />
+		<action name="findUserRoleResult" class="userAction" method="findUserRoleResult" />
+		<action name="saveAutoRole" class="userAction" method="saveAutoRole" />
+		<action name="calcleAutoRole" class="userAction" method="calcleAutoRole" />
+		<action name="findSysRoleList" class="userAction" method="findSysRoleList" />
+		<action name="findUserByOrgId" class="userAction" method="findUserByOrgId" />
+	</package>
+	<!-- 自检测 -->
+	<package name="sys-selfMonitor" extends="sys-package" namespace="/sys/selfMonitor">
+		<action name="getVcenterServerList" class="selfMonitorAction" method="getVcenterServerList" />
+		<action name="vcenterServerMonitor" class="selfMonitorAction" method="vcenterServerMonitor" />
+		<action name="getImageServiceList" class="selfMonitorAction" method="getImageServiceList" />
+		<action name="imageServiceMonitor" class="selfMonitorAction" method="imageServiceMonitor" />
+		<action name="getScriptServiceList" class="selfMonitorAction" method="getScriptServiceList" />
+		<action name="scriptServiceMonitor" class="selfMonitorAction" method="scriptServiceMonitor" />
+		<action name="getAutoServerList" class="selfMonitorAction" method="getAutoServerList" />
+		<action name="autoServiceMonitor" class="selfMonitorAction" method="autoServiceMonitor" />
+		<action name="getMqServiceList" class="selfMonitorAction" method="getMqServiceList" />
+		<action name="mqServiceMonitor" class="selfMonitorAction" method="mqServiceMonitor" />
+		<action name="getBpm" class="selfMonitorAction" method="getBpm" />
+		<action name="bpmServerMonitor" class="selfMonitorAction" method="bpmServerMonitor" />
+		<action name="getHmcServiceList" class="selfMonitorAction" method="getHmcServiceList"></action>
+		<action name="hmcServiceMonitor" class="selfMonitorAction" method="hmcServiceMonitor"></action>
+	</package>
+	<!-- 组织维护 -->
+	<package name="sys-organization" extends="sys-package"
+		namespace="/sys/organization">
+
+		<action name="main" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="toMain">
+			<result name="success">/pages/sys/organization/main.jsp</result>
+		</action>
+		<action name="loadTree" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="loadTree">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+
+		<action name="load" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="load">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					sysOrganizationPo.*
+				</param>
+			</result>
+		</action>
+		<action name="loadtree" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="loadTree">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					list.*
+				</param>
+			</result>
+		</action>
+		<action name="save" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="save">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					sysOrganizationPo.*
+				</param>
+			</result>
+		</action>
+		<action name="delete" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="delete">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="isrepeat" class="com.git.cloud.sys.action.SysOrganizationAction"
+			method="isrepeat">
+			<result name="success" type="json">
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+	</package>
+	
+    <package name="sys-logo" extends="sys-package,json-default,struts-default" namespace="/sys/uploadLogo">
+        <action name="uploadLogo" class="com.git.cloud.sys.action.UpdateLogoAction" method="updateLogo"></action>   
+        <action name="getLogo" class="com.git.cloud.sys.action.UpdateLogoAction" method="getLogo"></action>
+    </package>
+	
+	
+</struts>

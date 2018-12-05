@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="workflowTurnrecord">
+	<typeAlias alias="BpmInstanceTurnrecordPo" type="com.gitcloud.tankflow.model.po.BpmInstanceTurnrecordPo" />
+	<!-- 添加组件信息  -->
+	<insert id="insertTurnRecord"  parameterClass="BpmInstanceTurnrecordPo">  
+      INSERT INTO BPM_INSTANCE_TURNRECORD (
+	      TURNRECORD_ID, INSTANCE_ID, SOURCENODE_ID, TARGETNODE_ID, TRANS_TIME, MSG
+      ) VALUES (
+	      #turnrecordId#,
+	      #instanceId#,
+	      #sourcenodeId#,
+	      #targetnodeId#,
+	      #transTime#,
+	      #msg#
+      )
+	</insert>
+	
+	<select id="findTurnRecordListByParam" parameterClass="java.util.Map"  resultClass="BpmInstanceTurnrecordPo">
+		<![CDATA[
+		     select 
+		     	TURNRECORD_ID	turnrecordId, 
+		     	INSTANCE_ID		instanceId, 
+		     	SOURCENODE_ID	sourcenodeId, 
+		     	TARGETNODE_ID	targetnodeId, 
+		     	TRANS_TIME		transTime, 
+		     	MSG          	msg
+			 from  
+			 	BPM_INSTANCE_TURNRECORD
+			 where 
+			 	1 = 1
+		 ]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="turnrecordId">
+		 		TURNRECORD_ID = #turnrecordId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="instanceId">
+		 		INSTANCE_ID = #instanceId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	
+	<select id="findTurnRecordList" parameterClass="String"  resultClass="BpmInstanceTurnrecordPo">
+		<![CDATA[
+		     select 
+		     	TURNRECORD_ID	turnrecordId, 
+		     	INSTANCE_ID		instanceId, 
+		     	SOURCENODE_ID	sourcenodeId, 
+		     	TARGETNODE_ID	targetnodeId, 
+		     	TRANS_TIME		transTime, 
+		     	MSG          	msg
+			 from  
+			 	BPM_INSTANCE_TURNRECORD
+			 where 
+			 	INSTANCE_ID = #instanceId#
+		 ]]>
+		group by TARGETNODE_ID order by TRANS_TIME asc
+	</select>
+</sqlMap>

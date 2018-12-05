@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<!-- 通知管理 -->
+	<bean id="notiAction" class="com.git.cloud.log.action.NotificationAction" scope="prototype">
+		<property name="notiServiceImpl" ref="noti_service" />
+	</bean>
+	
+	<bean id="notiDaoImpl" class="com.git.cloud.log.dao.impl.NotificationDaoImpl" scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="noti_service" class="com.git.cloud.log.service.impl.NotificationServiceImpl" scope="prototype">
+		<property name="iCmDeviceService" ref="cmDeviceServiceImpl" />
+		<property name="notiDaoImpl" ref="notiDaoImpl" />
+		<property name="dicService" ref="dic_service" />
+	</bean>
+</beans>

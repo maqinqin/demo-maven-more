@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<!-- 工作流(服务策略) -->
+<sqlMap namespace="workflowService">
+
+	<!-- 服务策略对象 -->
+	<typeAlias alias="BpmServiceModulePo"
+		type="com.gitcloud.tankflow.model.po.BpmServiceModulePo" />
+
+	<!-- 策略参数对象 -->
+	<typeAlias alias="BpmServiceModuleParamPo"
+		type="com.gitcloud.tankflow.model.po.BpmServiceModuleParamPo" />
+
+	<!-- 查询服务策略数据SQL语句 -->
+	<sql id="findAllService">
+		<![CDATA[
+		select
+		MODULE_ID
+		moduleId,
+		MODULE_NAME moduleName,
+		EXE_PATH
+		exePath,
+		BUS_TYPE_CODE
+		busTypeCode,
+		EXE_TYPE_CODE exeTypeCode,
+		CHECK_CODE checkCode,
+		IS_ACTIVE
+		isActive
+		from
+		BPM_SERVICE_MODULE
+		where 1 = 1
+		]]>
+		<dynamic prepend="and"> 
+			<isNotEmpty prepend=" and " property="moduleName"><!-- 模糊查询不能用#,#在是用prepareStatement的?插入参数,$是文本替换  -->           
+				MODULE_NAME like CONCAT('%',trim(#moduleName#),'%')             
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="exeTypeCode">          
+				EXE_TYPE_CODE like CONCAT('%',trim(#exeTypeCode#),'%')            
+			</isNotEmpty>         
+		</dynamic>
+	</sql>
+
+	<!-- 查询所有的服务策略数据集合 -->
+	<select id="selAllServiceStrategySQL" resultClass="BpmServiceModulePo" parameterClass="java.lang.String">
+		SELECT 
+		  MODULE_ID moduleId,
+		  MODULE_NAME moduleName,
+		  EXE_PATH exePath,
+		  BUS_TYPE_CODE busTypeCode,
+		  EXE_TYPE_CODE exeTypeCode,
+		  CHECK_CODE checkCode,
+		  IS_ACTIVE isActive 
+		FROM
+		  BPM_SERVICE_MODULE m 
+		WHERE 1=1
+		  AND m.EXE_TYPE_CODE =#busType#
+		  AND m.IS_ACTIVE = 'Y'
+		ORDER BY MODULE_NAME 
+	</select>
+
+
+	<!-- 统计服务策略总数 -->
+	<select id="findAllServiceTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="findAllService" />
+		) as recordTable
+	</select>
+
+	<!-- 统计策略参数数量; -->
+	<select id="countServiceParams" parameterClass="java.lang.String"
+		resultClass="java.lang.Integer">
+		select count(*) as totalParams from
+		BPM_SERVICE_MODULE_PARAM
+		where
+		MODULE_ID = #mid#
+	</select>
+
+	<!-- 分页查询的请求数据 -->
+	<select id="findAllServiceReqeustPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="findAllService" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+
+	<!-- 添加服务策略 -->
+	<insert id="insertServiceModule" parameterClass="BpmServiceModulePo">
+		INSERT INTO
+		BPM_SERVICE_MODULE (
+		MODULE_ID,MODULE_NAME,EXE_PATH,BUS_TYPE_CODE,EXE_TYPE_CODE,CHECK_CODE,IS_ACTIVE
+		) VALUES (
+		#moduleId#,
+		#moduleName#,
+		#exePath#,
+		#busTypeCode#,
+		#exeTypeCode#,
+		#checkCode#,
+		#isActive#
+		)
+	</insert>
+
+
+	<!-- 添加策略参数对象 -->
+	<insert id="insertServiceParam" parameterClass="BpmServiceModuleParamPo">
+		INSERT INTO
+		BPM_SERVICE_MODULE_PARAM (
+		PARAM_ID,PARAM_KEY,PARAM_NAME,PARAM_VALUE,MODULE_ID,PARAM_TYPE_CODE,PARAM_IO_CODE,PARAM_OPER_CODE,PARENT_ID
+		) VALUES (
+		#paramId#,
+		#paramKey#,
+		#paramName#,
+		#paramValue#,
+		#moduleId#,
+		#paramTypeCode#,
+		#paramIoCode#,
+		#paramOperCode#,
+		#parentId#
+		)
+	</insert>
+
+
+	<!-- 查询策略参数集合 -->
+	<sql id="findServiceParam">
+		<![CDATA[
+		select
+		PARAM_ID
+		paramId,
+		PARAM_KEY paramKey,
+		PARAM_NAME
+		paramName,
+		PARAM_VALUE
+		paramValue,
+		MODULE_ID moduleId,
+		PARAM_TYPE_CODE paramTypeCode,
+		PARAM_IO_CODE
+		paramIoCode,PARAM_OPER_CODE paramOperCode,PARENT_ID parentId
+		from
+		BPM_SERVICE_MODULE_PARAM
+		where MODULE_ID = #mId#
+		]]>
+	</sql>
+
+	<!-- 统计服务策略参数的总数 -->
+	<select id="findServiceParamTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="findServiceParam" />
+		) as recordTable
+	</select>
+
+	<!-- 分页查询服务策略参数的的请求数据 -->
+	<select id="findServiceParamPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="findServiceParam" />
+		limit #startIndex# ,#pageSize#
+	</select>
+
+	<!-- 删除服务策略模块 -->
+	<delete id="deleteServiceModul" parameterClass="java.lang.String">
+		delete from
+		BPM_SERVICE_MODULE where MODULE_ID=#mid#
+	</delete>
+
+	<!-- 删除服务策略参数 -->
+	<delete id="deleteServiceParam" parameterClass="java.lang.String">
+		delete from
+		BPM_SERVICE_MODULE_PARAM where MODULE_ID=#mid#
+	</delete>
+
+
+	<!-- 查询服务策略对象; -->
+	<select id="selectServiceModule" parameterClass="java.lang.String"
+		resultClass="BpmServiceModulePo">
+		select
+		MODULE_ID
+		moduleId,
+		MODULE_NAME moduleName,
+		EXE_PATH
+		exePath,
+		BUS_TYPE_CODE
+		busTypeCode,
+		EXE_TYPE_CODE exeTypeCode,
+		CHECK_CODE
+		checkCode,
+		IS_ACTIVE
+		isActive
+		from
+		BPM_SERVICE_MODULE
+		where MODULE_ID =
+		#mid#
+	</select>
+
+
+	<!-- 查询服务策略参数集合 -->
+	<select id="selectServiceParams" parameterClass="java.lang.String"
+		resultClass="BpmServiceModuleParamPo">
+		select
+		PARAM_ID
+		paramId,
+		PARAM_KEY paramKey,
+		PARAM_NAME
+		paramName,
+		PARAM_VALUE
+		paramValue,
+		MODULE_ID moduleId,
+		PARAM_TYPE_CODE
+		paramTypeCode,
+		PARAM_IO_CODE
+		paramIoCode,PARAM_OPER_CODE
+		paramOperCode,PARENT_ID parentId
+		from
+		BPM_SERVICE_MODULE_PARAM
+		where
+		MODULE_ID = #mid#
+	</select>
+
+
+	<!-- 更新服务策略对象 -->
+	<update id="updateServiceModule" parameterClass="BpmServiceModulePo">
+		update
+		BPM_SERVICE_MODULE set
+		MODULE_NAME = #moduleName#,
+		EXE_PATH = #exePath#,
+		BUS_TYPE_CODE = #busTypeCode#,
+		EXE_TYPE_CODE = #exeTypeCode#,
+		CHECK_CODE = #checkCode#,
+		IS_ACTIVE = #isActive#
+		where
+		MODULE_ID=#moduleId#
+	</update>
+
+</sqlMap>

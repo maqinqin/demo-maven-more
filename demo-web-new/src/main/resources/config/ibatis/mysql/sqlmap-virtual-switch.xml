@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="virtualswitch-resmgt">
+	<typeAlias alias="CmPortGroupPo" type="com.git.cloud.resmgt.compute.model.po.CmPortGroupPo" />
+	<typeAlias alias="CmVirtualSwitchPo" type="com.git.cloud.resmgt.compute.model.po.CmVirtualSwitchPo" />
+	<typeAlias alias="RmNwIpAddressVo" type="com.git.cloud.resmgt.network.model.vo.RmNwIpAddressVo" />
+	<typeAlias alias="CmDevicePo" type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="CmDisPortGroup" type="com.git.cloud.resmgt.compute.model.po.CmDistributePortGroupPo" />
+	<typeAlias alias="OpenstackIpAddressPo" type="com.git.cloud.resmgt.network.model.po.OpenstackIpAddressPo" />
+	<!-- 物理机、虚拟机信息po -->
+	<typeAlias alias="RmHostVmInfoPo" type="com.git.cloud.resmgt.common.model.po.RmHostVmInfoPo"/>
+	
+	
+	<!-- 更新虚拟机ip对应的端口组id -->
+	<update id="updateRmNwOpstackIpAddress" parameterClass="OpenstackIpAddressPo">
+		UPDATE 
+			rm_nw_openstack_ip_address
+		SET 
+			PORT_GROUP_ID = #portGroupId#		
+		WHERE 
+			ID = #id#
+	</update>
+	
+	<!-- 查询资源池与端口组对应vlanid下的网络标签 -->
+	<select id="findCmPortGroupPoByVmHostId" resultClass="CmPortGroupPo" parameterClass="java.util.HashMap" >
+		<![CDATA[ 
+		SELECT
+            cpg.VLAN_ID vlanId,
+            cpg.NETWORK_TAG networkTag,
+            cvs.SWITCH_ID switchId,
+            cpg.PORT_GROUP_ID portGroupId,
+            (
+                SELECT
+                    count(*)
+                FROM
+                    rm_nw_openstack_ip_address a
+                WHERE
+                    a.PORT_GROUP_ID = cpg.PORT_GROUP_ID
+            )AS vmNum
+        FROM
+            CM_VIRTUAL_SWITCH cvs
+        LEFT JOIN CM_PORT_GROUP cpg ON cpg.SWITCH_ID = cvs.SWITCH_ID
+        WHERE 1 = 1
+        AND cvs.IS_ACTIVE = 'Y'
+        AND cpg.IS_ACTIVE = 'Y'
+		]]>
+			<isNotEmpty prepend="AND" property="hostId">
+				cvs.HOST_ID = #hostId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="vlanId">
+				cpg.VLAN_ID = #vlanId#
+			</isNotEmpty>
+		ORDER BY
+			vmNum ASC
+	</select>
+	
+	<!-- 查询资源池与端口组对应vlanid下的网络标签 -->
+	<select id="listCmPortGroupPoByVmHostId" resultClass="CmPortGroupPo"
+		parameterClass="java.util.HashMap">
+		<![CDATA[ 
+			SELECT 
+				distinct
+				cpg.VLAN_ID vlanId,
+				cpg.NETWORK_TAG networkTag,
+				cvs.SWITCH_ID switchId,
+				cpg.PORT_GROUP_ID portGroupId,
+				cvs.HOST_ID stdSwitchHostId,
+				cshr.HOST_ID dvcSwitchHostId,
+				(SELECT count(*)
+				FROM rm_nw_openstack_ip_address a
+			WHERE a.PORT_GROUP_ID = cpg.PORT_GROUP_ID) AS vmNum
+				FROM CM_VIRTUAL_SWITCH cvs
+			  LEFT JOIN CM_PORT_GROUP cpg
+			    ON cpg.SWITCH_ID = cvs.SWITCH_ID
+			   AND cpg.IS_ACTIVE = 'Y'
+			  LEFT JOIN cm_switch_host_ref cshr
+			    ON cshr.SWITCH_ID = cvs.SWITCH_ID
+			 WHERE cvs.IS_ACTIVE = 'Y'
+			 		AND cvs.IS_ACTIVE = 'Y'
+					AND cpg.IS_ACTIVE = 'Y'
+					and cpg.OVERALL_STATUS in (0,1)
+		]]>
+		<isNotEmpty prepend="AND" property="hostId">
+			(cvs.HOST_ID = #hostId# or cshr.HOST_ID = #hostId#)
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="vlanId">
+			cpg.VLAN_ID = #vlanId#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="networkTag">
+			cpg.NETWORK_TAG = #networkTag#
+		</isNotEmpty>		
+		ORDER BY
+		vmNum ASC
+	</select>
+		
+	<!-- 查询物理机和虚拟机的信息 -->
+	<select id="findHostVmInfoById" resultClass="RmHostVmInfoPo" parameterClass="java.util.HashMap" >
+	<![CDATA[ 
+		SELECT 
+            DEV.ID id,
+            DEV.DEVICE_NAME deviceName,
+            H_IP.IP hostIp,
+            VM.HOST_ID vmHostId,
+            VM_H_IP.IP vmHostIp,
+            DEV.RUNNING_STATE runningState,
+            (CASE WHEN `HOST`.ID IS NULL THEN 0 ELSE 1 END) isHost
+        FROM 
+            CM_DEVICE DEV
+            LEFT JOIN
+            CM_HOST HOST
+            ON
+                DEV.ID = `HOST`.ID
+            LEFT JOIN
+            CM_VM VM
+            ON 
+                DEV.ID = VM.ID
+            LEFT JOIN
+            rm_nw_openstack_ip_address H_IP
+            ON
+                `HOST`.ID = H_IP.INSTANCE_ID
+            LEFT JOIN
+            rm_nw_openstack_ip_address VM_H_IP
+            ON  
+                VM.HOST_ID = VM_H_IP.INSTANCE_ID
+        WHERE
+            1 = 1
+		]]>
+			<isNotEmpty prepend="AND" property="hostIp">
+				H_IP.IP = #hostIp#
+				AND
+				`HOST`.ID IS NOT NULL
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="deviceName">
+				DEV.DEVICE_NAME = #deviceName#
+				AND
+				`HOST`.ID IS NULL
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="deviceId">
+				DEV.IS_ACTIVE = 'Y' 
+				AND DEV.ID = #deviceId#
+			</isNotEmpty>
+	</select>
+	
+	
+</sqlMap>

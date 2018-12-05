@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="SysOrganization">
+	<typeAlias alias="sysOrganizationPo"
+		type="com.git.cloud.sys.model.po.SysOrganizationPo" />
+
+
+	<resultMap id="sysOrganizationResult" class="sysOrganizationPo">
+		<result property="orgId" column="ORG_ID" />
+		<result property="orgName" column="ORG_NAME" />
+		<result property="remark" column="REMARK" />
+		<result property="parent.orgId" column="PARENT_ID" />
+		<result property="createDateTime" column="CREATE_DATETIME" />
+		<result property="createUser" column="CREATE_USER" />
+		<result property="updateDateTime" column="UPDATE_DATETIME" />
+		<result property="updateUser" column="UPDATE_USER" />
+		<result property="isActive" column="IS_ACTIVE" />
+	</resultMap>
+	<select id="SysOrganization.tree" resultMap="sysOrganizationResult">
+		SELECT * FROM
+		SYS_ORGANIZATION where
+		IS_ACTIVE = "Y" order by CREATE_DATETIME
+	</select>
+	<select id="SysOrganization.isrepeat" resultMap="sysOrganizationResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM SYS_ORGANIZATION where IS_ACTIVE = "Y"
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="orgName">
+				ORG_NAME = #orgName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="orgId">
+				ORG_ID !=  #orgId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="parentId">
+				PARENT_ID = #parentId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="SysOrganization.load" resultMap="sysOrganizationResult"
+		parameterClass="java.lang.String">
+		SELECT * FROM SYS_ORGANIZATION where ORG_ID=#orgId#
+	</select>
+	<select id="SysOrganization.loadChildren" resultClass="java.lang.String" parameterClass="java.lang.String">
+		SELECT group_concat(ORG_ID) ORG_ID FROM
+		SYS_ORGANIZATION where FIND_IN_SET(PARENT_ID,#orgId#)>0;
+	</select>
+
+	<update id="SysOrganization.update" parameterClass="com.git.cloud.sys.model.po.SysOrganizationPo">
+		update
+		SYS_ORGANIZATION
+		set
+		ORG_NAME=#orgName#,
+		REMARK=#remark#,
+		PARENT_ID=#parent.orgId#,
+		UPDATE_DATETIME=#updateDateTime#,
+		UPDATE_USER=#updateUser#
+		where
+		ORG_ID=#orgId#
+	</update>
+
+	<insert id="SysOrganization.insert" parameterClass="com.git.cloud.sys.model.po.SysOrganizationPo">
+		insert into
+		SYS_ORGANIZATION
+		(ORG_ID ,
+		ORG_NAME ,
+		REMARK ,
+		PARENT_ID ,
+		CREATE_DATETIME
+		,
+		CREATE_USER ,
+		UPDATE_DATETIME ,
+		UPDATE_USER ,
+		IS_ACTIVE )
+		values
+		(#orgId#,
+		#orgName#,
+		#remark#,
+		#parent.orgId#,
+		#createDateTime#,
+		#createUser#,
+		#updateDateTime#,
+		#updateUser#,
+		#isActive#)
+	</insert>
+	<update id="SysOrganization.delete0" parameterClass="java.lang.String">
+		update
+		SYS_ORGANIZATION set
+		IS_ACTIVE="N" where ORG_ID = #orgId#
+	</update>
+	<delete id="SysOrganization.delete" parameterClass="java.lang.String">
+		delete from
+		SYS_ORGANIZATION
+		where ORG_ID = #orgId#
+	</delete>
+
+</sqlMap>

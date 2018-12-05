@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="sysMailMsgHis">
+	<typeAlias alias="sysMailMsgHisPo" type="com.git.cloud.sys.model.po.SysMailMsgHisPo"></typeAlias>
+	
+	<!-- 系统邮件消息历史表（SYS_MAIL_MSG_HIS） -->
+	<insert id="saveSysMailMsgHisPo" parameterClass="sysMailMsgHisPo">
+		INSERT INTO SYS_MAIL_MSG_HIS(
+			ID,TYPE,RECEIVES,CARBON_COPY,TITLE,CONTENT,SEND_STATUS,SEND_TIME
+		)
+		VALUES(
+			#id#,#type#,#receives#,#carbonCopy#,#title#,#content#,#sendStatus#,#sendTime#
+		)
+	</insert>
+</sqlMap>

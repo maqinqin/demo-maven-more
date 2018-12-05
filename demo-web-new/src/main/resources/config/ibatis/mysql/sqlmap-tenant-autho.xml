@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="tenantManager.tenant.autho"> 
+	<typeAlias alias="TenantVo" type="com.git.cloud.tenant.model.vo.TenantVo" />
+	<typeAlias alias="TenantPo" type="com.git.cloud.tenant.model.po.TenantPo" />
+	<typeAlias alias="TenantUsersPo" type="com.git.cloud.tenant.model.po.TenantUsersPo" />
+	<typeAlias alias="TenantResPoolPo" type="com.git.cloud.tenant.model.po.TenantResPoolPo" />
+	
+	
+	
+	<!-- 根据租户Id获取租户用户信息和非租户用户列表 -->
+	<select id="selTenAndNotUsersByTenantId" parameterClass="java.util.Map" resultClass="TenantUsersPo">
+		select 
+		sy.user_id userId,
+		sy.first_name firstName,
+		sy.last_name lastName,
+		sy.login_name loginName,
+		ctur.role_name roleName,
+		ctur.tenant_id tenantId
+		from SYS_USER  sy left join CLOUD_TENANT_USER_REF ctur on  sy.user_id= ctur.user_id 
+		where (sy.plat_user="01" or sy.plat_user="11") and sy.IS_ACTIVE = 'Y' and ( ctur.tenant_id =#tenantId#  or  sy.user_id not in ( select ctur1.user_id from CLOUD_TENANT_USER_REF ctur1  )) order by convert(sy.FIRST_NAME using gbk)  ASC	
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 根据租户Id获取租户用户信息和非租户用户总数 -->
+	<select id="selTenAndNotUsersTotalByTenantId" parameterClass="java.util.Map" resultClass="java.lang.Integer">
+		select count(1)
+		from SYS_USER  sy left join CLOUD_TENANT_USER_REF ctur on  sy.user_id= ctur.user_id 
+		where (sy.plat_user="01" or sy.plat_user="11") and sy.IS_ACTIVE = 'Y' and ( ctur.tenant_id =#tenantId#  or  sy.user_id not in ( select ctur1.user_id from CLOUD_TENANT_USER_REF ctur1  )) order by ctur.tenant_id desc			
+	</select>
+	<!-- 根据租户Id获取租户用户信息总数 -->
+	<select id="selTenantUsersCount" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		select count(1)
+		from CLOUD_TENANT_USER_REF ctur 
+		where ctur.tenant_id =#tenantId# 			
+	</select>
+	
+	<!-- 删除租户和用户关联信息 -->
+	<delete id="deleteTenantAndUserRelation" parameterClass="java.lang.String">
+		delete from CLOUD_TENANT_USER_REF
+		where tenant_id = #tenantId#
+	</delete>
+	
+	<!-- 添加租户和用户关联信息 -->
+	<delete id="addTenantAndUserRelation" parameterClass="TenantUsersPo">	 
+		insert into CLOUD_TENANT_USER_REF(id,tenant_id,user_id,role_name) values
+		(#id#,#tenantId#,#userId#,#roleName#)				
+	</delete>
+	<!-- 修改租户  -->
+	<update id="updateTenantUserRoleName" parameterClass="TenantUsersPo">
+		UPDATE CLOUD_TENANT_USER_REF
+      <dynamic prepend="set">  
+          <isNotNull prepend="," property="roleName">            
+               role_name=#roleName#  
+           </isNotNull>  
+      </dynamic>  
+     where user_id=#userId#    
+	</update>
+	<!--添加租户  -->
+	<insert id="addTenant" parameterClass="TenantPo">
+		INSERT INTO CLOUD_TENANT (id, name, CREATE_USER, CREATE_TIME,remark) 
+		VALUES (#id#,#name#,#createUser#,#createTime#,#remark#)
+	</insert>
+	<!-- 修改租户  -->
+	<update id="updateTenant" parameterClass="TenantPo">
+		UPDATE CLOUD_TENANT
+      <dynamic prepend="set">  
+          <isNotNull prepend="," property="name">            
+               name=#name#  
+           </isNotNull>  
+          <isNotNull prepend="," property="createUser">            
+               CREATE_USER=#createUser#  
+           </isNotNull> 
+           <isNotNull prepend="," property="createTime">            
+               CREATE_TIME=#createTime#  
+           </isNotNull>  
+           <isNotNull prepend="," property="remark">            
+               remark=#remark#  
+           </isNotNull>  
+      </dynamic>  
+     where id=#id#    
+	</update>
+	<!--删除租户  -->
+	<delete id="deleteTenant" parameterClass="java.lang.String">
+		delete from CLOUD_TENANT
+		where id=#tenantId#
+	</delete>
+	<!-- 查询租户 -->
+	<select id="selectTenant" parameterClass="java.lang.String" resultClass="TenantPo">
+	select
+		ct.id id,
+		name name,
+		LOGIN_NAME createUser,
+		CREATE_TIME createTime,
+		remark remark,
+		quota_limit quotaLimit
+	from CLOUD_TENANT ct,SYS_USER su
+	where ct.id = #tenantId# and  su.USER_ID = ct.CREATE_USER
+	</select>
+	<!-- 查询租户列表 -->
+	<select id="selectTenants" parameterClass="java.util.Map" resultClass="TenantPo">
+	select
+		ct.id id,
+		name name,
+		LOGIN_NAME createUser,
+		CREATE_TIME createTime,
+		remark remark
+	from CLOUD_TENANT ct,SYS_USER su
+	where su.USER_ID = ct.CREATE_USER
+	<dynamic prepend="">  
+      <isNotNull prepend="and" property="tenantName">            
+           name like '%$tenantName$%'  
+      </isNotNull>  
+      <isNotEmpty prepend="and" property="tenantId">            
+          ct.id = #tenantId#  
+      </isNotEmpty>     
+  	</dynamic>  
+	limit #startIndex# ,#pageSize#	
+	</select>
+	<!-- 查询租户数目 -->
+	<select id="selectTenantsCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+	select count(1)
+	from CLOUD_TENANT
+	<dynamic prepend="where">  
+       <isNotNull prepend=" and " property="tenantName">            
+            name like '%$tenantName$%'   
+       </isNotNull>  
+        <isNotEmpty prepend="and" property="tenantId">            
+          id = #tenantId#  
+      </isNotEmpty>     
+  	</dynamic>  	
+	</select>
+	<select id="selectTenantsWithoutLimit"  resultClass="TenantPo">
+	select 
+		id id, 
+		name name, 
+		LOGIN_NAME createUser, 
+		CREATE_TIME createTime,
+		remark remark
+	from CLOUD_TENANT ct,SYS_USER su
+	where su.USER_ID = ct.CREATE_USER
+	</select>
+	<select id="selectTenantByUserId" parameterClass="String" resultClass="String">
+		select 
+			tenant_id tenantId
+		from CLOUD_TENANT_USER_REF
+		where user_id = #userId#		
+	</select>
+	<!-- 租户和计算资源池关系 -->
+	
+	<!-- 添加租户和资源池关联信息 -->
+	<insert id="addTenantAndResPoolRelation" parameterClass="java.util.List">
+        <![CDATA[ 
+              insert into tenant_res_pool_ref(id,tenant_id,res_pool_id) values
+        ]]>
+        <iterate conjunction=",">
+            <![CDATA[
+                (#boList[].id#,#boList[].tenantId#,#boList[].resPoolId#)
+            ]]>
+        </iterate>
+    </insert>
+    <!-- 删除租户和资源池关联信息 -->
+    <delete id="deleteTenantAndResPoolRelation" parameterClass="java.lang.String">
+        delete from tenant_res_pool_ref
+        where tenant_id = #tenantId#
+    </delete>
+    
+    <select id="selectTenantPoolsPage" parameterClass="java.util.Map" resultClass="TenantResPoolPo">
+		 SELECT
+                p.ID resPoolId,
+                p.POOL_NAME resPoolName,
+                (
+                    SELECT
+                        count(*)
+                    FROM
+                        tenant_res_pool_ref r
+                    WHERE
+                        r.res_pool_id = p.ID
+                    AND r.TENANT_ID = #tenantId#
+                )AS selectFlag
+            FROM
+                rm_res_pool p
+            WHERE
+                p.POOL_TYPE = 'COMPUTE'
+            AND p.IS_ACTIVE = 'Y'
+        limit #startIndex# ,#pageSize#
+    </select>
+    <select id="selectTenantPoolsCount" resultClass="java.lang.Integer" parameterClass="java.util.Map">
+         SELECT
+                count(*)
+            FROM
+                rm_res_pool p
+            WHERE
+                p.POOL_TYPE = 'COMPUTE'
+            AND p.IS_ACTIVE = 'Y'           
+    </select>
+	<!-- 查询租户关联的资源池 -->
+	<select id="selectTenantPoolList" resultClass="TenantResPoolPo" parameterClass="java.lang.String" >
+		SELECT
+		 r.id id
+		 ,r.TENANT_ID tenantId
+		 ,r.RES_POOL_ID resPoolId
+		 ,p.POOL_NAME resPoolName
+		FROM
+		tenant_res_pool_ref r
+		inner join
+		rm_res_pool p
+		on
+		r.RES_POOL_ID = p.id
+		WHERE
+		p.IS_ACTIVE = 'Y'
+		AND r.res_pool_id = p.ID
+		AND r.TENANT_ID = #tenantId#
+	</select>
+	<!-- 查询租户关联的用户列表 -->
+	<select id="selectUserListByTenantId" parameterClass="java.lang.String" resultClass="TenantUsersPo">
+		select
+		`id` id,
+		`user_id` userId,
+		`tenant_id` tenantId,
+		`role_name` roleName
+		from
+		CLOUD_TENANT_USER_REF
+		where
+		tenant_id = #tenantId#
+	</select>
+</sqlMap>

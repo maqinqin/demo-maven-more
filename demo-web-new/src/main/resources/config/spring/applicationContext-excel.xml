@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	<!-- Action -->
+	<bean id="createExcelAction" class="com.git.cloud.excel.action.CreatExcelAction">
+        <property name="iExcelInfoService" ref="iExcelInfoService"  />
+	</bean>
+	
+	<bean id="excelEriteDataBaseAction" class="com.git.cloud.excel.action.ExcelWriteDataBaseAction">
+        <property name="iExcelWriteDataBaseService" ref="iExcelWriteDataBaseService"  />
+	</bean>
+	<bean id="scanVcAction" class="com.git.cloud.excel.action.ScanVcAction">
+        <property name="scanVcService" ref="scanVcService"  />
+	</bean>
+	
+	
+	<!-- Service -->
+	<bean id="iExcelInfoService" class="com.git.cloud.excel.service.impl.ExcelInfoServiceImpl">
+         <property name="iExcelInfoDao" ref="iExcelInfoDao" />
+          <property name="iCommonDAO" ref="comDAO" />
+         
+	</bean>
+	
+	<bean id="iExcelWriteDataBaseService" class="com.git.cloud.excel.service.impl.ExcelWriteDataBaseServiceImpl">
+		<property name="iCommonDAO" ref="comDAO" />
+		<property name="rmDataCenterService" ref="rmDataCenterService"/>
+		<property name="deployunitServiceImpl" ref="deployunitServiceImpl"/>
+		<property name="cmPasswordDAO" ref="cmPasswordDAO" />
+	</bean>
+	
+	<!-- DAO -->
+	<bean id="iExcelInfoDao" class="com.git.cloud.excel.dao.impl.ExcelInfoDaoImpl" scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+</beans>

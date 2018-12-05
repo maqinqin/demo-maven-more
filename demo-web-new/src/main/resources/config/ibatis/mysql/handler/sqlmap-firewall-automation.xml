@@ -1,0 +1,503 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="firewall-automation">
+	<typeAlias alias="RmNwFirewallRequestPo" type="com.git.cloud.handler.automation.fw.model.RmNwFirewallRequestPo"/>
+	<typeAlias alias="RmNwOutsideFirewallPo" type="com.git.cloud.handler.automation.fw.model.RmNwOutsideFirewallPo"/>
+	<typeAlias alias="RmNwFirewallNatPoolPo" type="com.git.cloud.handler.automation.fw.model.RmNwFirewallNatPoolPo"/>
+	<typeAlias alias="RmNwFirewallNatAddressPo" type="com.git.cloud.handler.automation.fw.model.RmNwFirewallNatAddressPo"/>
+	<typeAlias alias="RmNwFirewallPolicyNatPo" type="com.git.cloud.handler.automation.fw.model.RmNwFirewallPolicyNatPo"/>
+	<typeAlias alias="RmNwOutsideNatPolicyPo" type="com.git.cloud.handler.automation.fw.model.RmNwOutsideNatPolicyPo"/>
+	<typeAlias alias="RmNwOutsideFirewallPolicyPo" type="com.git.cloud.handler.automation.fw.model.RmNwOutsideFirewallPolicyPo"/>
+	<typeAlias alias="RmNwVfwPo" type="com.git.cloud.handler.automation.fw.model.RmNwVfwPo"/>
+	<typeAlias alias="RmNwVfwPolicyRulePo" type="com.git.cloud.handler.automation.fw.model.RmNwVfwPolicyRulePo"/>
+	<typeAlias alias="BmSrRrinfoPo" type="com.git.cloud.request.model.po.BmSrRrinfoPo"/>
+	<typeAlias alias="RmNwVfwPolicyVo" type="com.git.cloud.resmgt.openstack.model.vo.RmNwVfwPolicyVo"/>
+	
+	<select id="findRmNwFirewallRequestListBySrId" parameterClass="java.util.Map" resultClass="RmNwFirewallRequestPo">
+		SELECT
+			ID id,
+			SR_ID srId,
+			REQUEST_CODE requestCode, 
+			VISIT_POLICY visitPolicy,
+			EXTERNAL_ORG externalOrg,
+			PROTOCOL protocol,
+			DUE_DATE due_date,
+			REASON reason,
+			SRC_IP srcIp,
+			SRC_PORT srcPort,
+			SRC_DESC srcDesc,
+			DST_IP dstIp,
+			DST_PORT dstPort,
+			DST_DESC dstDesc,
+			`STATUS` status
+		FROM RM_NW_FIREWALL_REQUEST
+		WHERE SR_ID = #srId#
+		AND IS_ACTIVE = 'Y' 
+	</select>
+	
+	<select id="findRmNwFirewallRequestById" parameterClass="java.util.Map" resultClass="RmNwFirewallRequestPo">
+		SELECT
+			ID id,
+			SR_ID srId,
+			REQUEST_CODE requestCode, 
+			VISIT_POLICY visitPolicy,
+			EXTERNAL_ORG externalOrg,
+			PROTOCOL protocol,
+			DUE_DATE due_date,
+			REASON reason,
+			SRC_IP srcIp,
+			SRC_PORT srcPort,
+			SRC_DESC srcDesc,
+			DST_IP dstIp,
+			DST_PORT dstPort,
+			DST_DESC dstDesc,
+			`STATUS` status,
+			OPEN_EXECUTE_TYPE openExecuteType,
+		    OPEN_EXECUTE_TIME openExecuteTime,
+		    CLOSE_EXECUTE_TYPE closeExecuteType,
+		    CLOSE_EXECUTE_TIME closeExecuteTime
+		FROM RM_NW_FIREWALL_REQUEST
+		WHERE ID = #firewallRequestId#
+		AND IS_ACTIVE = 'Y' 
+	</select>
+	
+	<select id="findRmNwOutsideFirewallByFwId" parameterClass="java.util.Map" resultClass="RmNwOutsideFirewallPo">
+		SELECT
+			ID id,
+			NAME name,
+			NETWORK_AREA networkArea, 
+			IP ip,
+			PORT port,
+			LOGIN_USER loginUser,
+			LOGIN_PWD loginPwd
+		FROM RM_NW_OUTSIDE_FIREWALL
+		WHERE ID = #fwId#
+	</select>
+	
+	<select id="findRmNwOutsideFirewallListByNetworkArea" parameterClass="java.util.Map" resultClass="RmNwOutsideFirewallPo">
+		SELECT
+			ID id,
+			NAME name,
+			NETWORK_AREA networkArea,
+			IP ip,
+			PORT port,
+			LOGIN_USER loginUser,
+			LOGIN_PWD loginPwd
+		FROM RM_NW_OUTSIDE_FIREWALL
+		WHERE NETWORK_AREA = #networkArea#
+		AND IS_ACTIVE = 'Y' 
+	</select>
+	
+	<select id="findRmNwFirewallNatAddressForUsed" parameterClass="java.util.Map" resultClass="RmNwFirewallNatAddressPo">
+		SELECT
+			fna.ID id, fna.IP ip, fna.DNAT_IP dnatIp, fna.SNAT_IP snatIp, fna.`STATUS` status
+		FROM
+			RM_NW_FIREWALL_NAT_POOL fnp,
+			RM_NW_FIREWALL_NAT_ADDRESS fna
+		WHERE
+			fnp.ID = fna.NAT_ID
+		AND fnp.IS_ACTIVE = 'Y'
+		AND fna.IS_ACTIVE = 'Y'
+		<![CDATA[ 
+		AND fna.`STATUS` <> '可用'
+		]]>
+		AND fnp.NETWORK_AREA = #networkArea#
+		<dynamic prepend=" AND ">
+			<isNotEmpty property="externalOrg" prepend=" AND ">
+				fnp.EXTERNAL_ORG = #externalOrg#
+			</isNotEmpty>
+			<isNotEmpty property="operator" prepend=" AND ">
+				fnp.OPERATOR = #operator#
+			</isNotEmpty>
+			<isNotEmpty property="natPoolId" prepend=" AND ">
+				fnp.ID = #natPoolId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="findRmNwOutsideNatPolicyByNatIp" parameterClass="java.util.Map" resultClass="RmNwOutsideNatPolicyPo">
+		SELECT
+			ID id,
+			FIREWALL_REQUEST_ID firewallRequestId,
+			NAT_TYPE natType,
+			FW_ID fwId,
+			SRC_IP srcIp,
+			DST_IP dstIp,
+			NAT_IP natIp,
+			SRC_PORT srcPort,
+			DST_PORT dstPort,
+			FLAG flag,
+			`STATUS` status,
+			DESCRIPTION description,
+			IS_ACTIVE isActive,
+			TARGET_NAT_ID targetNatId
+		FROM
+			RM_NW_OUTSIDE_NAT_POLICY np
+		WHERE
+			is_active = 'Y'
+		AND NAT_IP = #natIp#
+		AND NAT_TYPE = #natType#
+	</select>
+	
+	<select id="findRmNwFirewallPolicyNatList" parameterClass="java.util.Map" resultClass="RmNwFirewallPolicyNatPo">
+		SELECT
+			fpn.NAT_ID natId, fpn.IP_ADDRESS ipAddress
+		FROM
+			RM_NW_FIREWALL_NAT_POOL fnp,
+			RM_NW_FIREWALL_POLICY_NAT fpn
+		WHERE
+			fnp.ID = fpn.NAT_ID
+		AND fnp.is_active = 'Y'
+		AND fpn.is_active = 'Y'
+		AND fnp.NETWORK_AREA = #networkArea#
+		<dynamic prepend=" AND ">
+			<isNotEmpty property="externalOrg" prepend=" AND ">
+				fnp.EXTERNAL_ORG = #externalOrg#
+			</isNotEmpty>
+			<isNotEmpty property="operator" prepend=" AND ">
+				fnp.OPERATOR = #operator#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY fnp.ASSIGN_ORDER
+	</select>
+	
+	<select id="findRmNwFirewallNatAddressByNatPoolId" parameterClass="java.util.Map" resultClass="RmNwFirewallNatAddressPo">
+		SELECT
+			fna.ID id, fna.IP ip, fna.DNAT_IP dnatIp, fna.SNAT_IP snatIp, fna.EXTERNAL_IP externalIp
+		FROM
+			RM_NW_FIREWALL_NAT_ADDRESS fna
+		WHERE
+			fna.NAT_ID = #natPoolId#
+		AND fna.`STATUS` = '可用'
+		ORDER BY LENGTH(fna.IP), fna.IP
+	</select>
+	
+	<select id="findRmNwFirewallNatPoolList" parameterClass="java.util.Map" resultClass="RmNwFirewallNatPoolPo">
+		SELECT
+			fnp.ID id,
+			fnp.NETWORK_AREA networkArea,
+			fnp.EXTERNAL_ORG externalOrg,
+			fnp.OPERATOR operator,
+			fnp.IP_ADDRESS ipAddress,
+			fnp.ASSIGN_ORDER assignOrder
+		FROM
+			RM_NW_FIREWALL_NAT_POOL fnp
+		WHERE
+			fnp.is_active = 'Y'
+		AND fnp.`STATUS` = 'on'
+		AND fnp.NETWORK_AREA = #networkArea#
+		<dynamic prepend=" AND ">
+			<isNotEmpty property="externalOrg" prepend=" AND ">
+				fnp.EXTERNAL_ORG = #externalOrg#
+			</isNotEmpty>
+			<isNotEmpty property="operator" prepend=" AND ">
+				fnp.OPERATOR = #operator#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY fnp.ASSIGN_ORDER
+	</select>
+	
+	<select id="findRmNwVfwByIp" parameterClass="java.util.Map" resultClass="RmNwVfwPo">
+		SELECT
+			DISTINCT
+			vfw.VFW_ID vfwId,
+			vfw.PROJECT_ID projectId,
+			vfw.VFW_POLICY_ID vfwPolicyId,
+			vfw.VROUTER_ID vrouterId,
+			vfw.VFW_NAME vfwName
+		FROM
+			rm_nw_openstack_ip_address ip,
+			rm_nw_openstack_virtual_network vn,
+			rm_nw_openstack_virtual_subnet vs,
+			rm_nw_openstack_virtual_router vr,
+			rm_nw_openstack_vfw vfw
+		WHERE
+		ip.NETWORK_ID = vn.id
+		AND vn.VROUTER_ID = vr.ID
+		AND vn.ID = vs.VIRTUAL_NETWORK_ID
+		AND vr.ID = vfw.VROUTER_ID
+		AND vn.IS_ACTIVE = 'Y'
+		AND vs.IS_ACTIVE = 'Y'
+		AND vr.IS_ACTIVE = 'Y'
+		AND vfw.IS_ACTIVE = 'Y'
+		AND (ip.ip = #ip# OR vs.GATEWAY = #ip#)
+	</select>
+	
+	<update id="updateRmNwFirewallNatAddress" parameterClass="RmNwFirewallNatAddressPo">
+		update RM_NW_FIREWALL_NAT_ADDRESS set
+			`STATUS` = #status#,
+			SNAT_IP = #snatIp#,
+			DNAT_IP = #dnatIp#,
+			EXTERNAL_IP = #externalIp#
+		where ID = #id#
+	</update>
+	
+	<insert id="insertRmNwOutsideNatPolicy" parameterClass="java.util.List"> 
+		<![CDATA[ 
+			insert into RM_NW_OUTSIDE_NAT_POLICY (
+				ID, FIREWALL_REQUEST_ID, NAT_TYPE, FW_ID,
+				SRC_IP, DST_IP, NAT_IP, SRC_PORT, DST_PORT,
+				FLAG, STATUS, DESCRIPTION, IS_ACTIVE,
+				CREATE_TIME, CREATE_USER
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#list[].id#, #list[].firewallRequestId#, #list[].natType#, #list[].fwId#,
+				 #list[].srcIp#, #list[].dstIp#, #list[].natIp#, #list[].srcPort#, #list[].dstPort#,
+				 #list[].flag#, #list[].status#, #list[].description#, #list[].isActive#,
+				 #list[].createTime#, #list[].createUser#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<insert id="insertRmNwOutsideNatPolicyRef" parameterClass="java.util.List"> 
+		<![CDATA[ 
+			insert into RM_NW_OUTSIDE_NAT_POLICY_REF (
+				ID, NAT_POLICY_ID, FIREWALL_REQUEST_ID
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#list[].id#, #list[].natPolicyId#, #list[].firewallRequestId#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<insert id="insertRmNwOutsideFirewallPolicy" parameterClass="java.util.List"> 
+		<![CDATA[ 
+			insert into RM_NW_OUTSIDE_FIREWALL_POLICY (
+				ID, FIREWALL_REQUEST_ID, REQUEST_CODE, FW_ID,
+				PROTOCOL, ACTION, SRC_IP, DST_IP, SRC_PORT, DST_PORT,
+				IS_ACTIVE, STATUS, DESCRIPTION, CREATE_TIME, CREATE_USER
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#list[].id#, #list[].firewallRequestId#, #list[].requestCode#, #list[].fwId#,
+				 #list[].protocol#, #list[].action#, #list[].srcIp#, #list[].dstIp#, #list[].srcPort#, #list[].dstPort#,
+				#list[].isActive#,  #list[].status#, #list[].description#, #list[].createTime#, #list[].createUser#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<insert id="insertRmNwVfwPolicyRule" parameterClass="java.util.List">
+		<![CDATA[ 
+			insert into RM_NW_OPENSTACK_VFW_POLICY_RULE (
+				VFW_POLICY_RULE_ID, FIREWALL_REQUEST_ID, VFW_POLICY_ID, VFW_POLICY_RULE_NAME,
+				REMARK, IS_SHARE, PROTOCOL_TYPE, IP_VERSION, STATUS,
+				SOURCE_IP_ADDRESS, DEST_IP_ADDRESS, SOURCE_PORT, DESC_PORT,
+				RULE_ACTION, ENABLED, IS_ACTIVE
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#list[].vfwPolicyRuleId#, #list[].firewallRequestId#, #list[].vfwPolicyId#, #list[].vfwPolicyRuleName#,
+				 #list[].remark#, #list[].isShare#, #list[].protocolType#, #list[].ipVersion#, #list[].status#,
+				 #list[].sourceIpAddress#, #list[].destIpAddress#, #list[].sourcePort#, #list[].descPort#,
+				 #list[].ruleAction#, #list[].enabled#, #list[].isActive#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<select id="findBmSrRrinfoBySrId" parameterClass="java.util.Map" resultClass="BmSrRrinfoPo">
+		SELECT
+			PARAMETERS_JSON parametersJson
+		FROM
+			BM_SR_RRINFO
+		WHERE
+			SR_ID = #srId#
+	</select>
+	
+	<select id="findRmNwOutsideNatPolicyListByFirewallRequestId" parameterClass="java.util.Map" resultClass="RmNwOutsideNatPolicyPo">
+		SELECT
+			ID id,
+			FIREWALL_REQUEST_ID firewallRequestId,
+			NAT_TYPE natType,
+			FW_ID fwId,
+			SRC_IP srcIp,
+			DST_IP dstIp,
+			NAT_IP natIp,
+			SRC_PORT srcPort,
+			DST_PORT dstPort,
+			FLAG flag,
+			`STATUS` status,
+			DESCRIPTION description,
+			IS_ACTIVE isActive,
+			TARGET_NAT_ID targetNatId
+		FROM
+			RM_NW_OUTSIDE_NAT_POLICY np
+		WHERE
+			is_active = 'Y'
+		AND FIREWALL_REQUEST_ID = #firewallRequestId#
+	</select>
+	
+	<delete id="deleteRmNwOutsideNatPolicyRefByFirewallRequestId"  parameterClass="java.lang.String">
+		 delete from RM_NW_OUTSIDE_NAT_POLICY_REF where FIREWALL_REQUEST_ID=#firewallRequestId#
+	</delete>
+	
+	<select id="findRmNwOutsideFirewallPolicyListByFirewallRequestId" parameterClass="java.util.Map" resultClass="RmNwOutsideFirewallPolicyPo">
+		SELECT
+			ID id,
+			FIREWALL_REQUEST_ID firewallRequestId,
+			REQUEST_CODE requestCode,
+			FW_ID fwId,
+			ACTION action,
+			SRC_IP srcIp,
+			DST_IP dstIp,
+			SRC_PORT srcPort,
+			DST_PORT dstPort,
+			PROTOCOL protocol,
+			`STATUS` status,
+			DESCRIPTION description,
+			TARGET_POLICY_ID targetPolicyId
+		FROM
+			RM_NW_OUTSIDE_FIREWALL_POLICY fp
+		WHERE
+			is_active = 'Y'
+		AND FIREWALL_REQUEST_ID = #firewallRequestId#
+	</select>
+	
+	<select id="findRmNwInsideFirewallPolicyListByFirewallRequestId" parameterClass="java.util.Map" resultClass="RmNwVfwPolicyRulePo">
+		SELECT
+			fpr.VFW_POLICY_RULE_ID vfwPolicyRuleId,
+			fpr.FIREWALL_REQUEST_ID firewallRequestId,
+			fpr.VFW_POLICY_ID vfwPolicyId,
+			fpr.VFW_POLICY_RULE_NAME vfwPolicyRuleName,
+			fpr.REMARK remark,
+			fpr.IS_SHARE isShare,
+			fpr.PROTOCOL_TYPE protocolType,
+			fpr.IP_VERSION ipVersion,
+			fpr.`STATUS` status,
+			fpr.SOURCE_IP_ADDRESS sourceIpAddress,
+			fpr.DEST_IP_ADDRESS destIpAddress,
+			fpr.SOURCE_PORT sourcePort,
+			fpr.DESC_PORT descPort,
+			fpr.RULE_ACTION ruleAction,
+			fpr.ENABLED enabled,
+			fpr.IS_ACTIVE isActive,
+			p.ID projectId,
+			p.NAME projectName,
+			p.VM_MS_ID vmMsId,
+			vms.MANAGE_IP openstackIp,
+			vms.DOMAIN_NAME domainName,
+			vms.version version,
+			vms.manage_one_ip manageOneIp
+		FROM
+			RM_NW_OPENSTACK_VFW_POLICY_RULE fpr,
+			RM_NW_OPENSTACK_VFW_POLICY fp,
+			CLOUD_PROJECT p,
+			RM_VM_MANAGE_SERVER vms
+		WHERE
+			fpr.VFW_POLICY_ID = fp.VFW_POLICY_ID
+		AND fp.PROJECT_ID = p.ID
+		AND p.VM_MS_ID = vms.ID
+		AND fpr.IS_ACTIVE = 'Y'
+		AND fpr.FIREWALL_REQUEST_ID = #firewallRequestId#
+	</select>
+	
+	<select id="findRmNwFirewallNatAddressByIp" parameterClass="java.util.Map" resultClass="RmNwFirewallNatAddressPo">
+		SELECT
+			fna.ID id, fna.IP ip, fna.DNAT_IP dnatIp, fna.SNAT_IP snatIp, fna.`STATUS` status
+		FROM
+			RM_NW_FIREWALL_NAT_POOL fnp,
+			RM_NW_FIREWALL_NAT_ADDRESS fna
+		WHERE
+			fna.IP = #natIp#
+		AND fnp.IS_ACTIVE = 'Y'
+	</select>
+	
+	<update id = "updateOutsideNatPolicyValidStatus" parameterClass="RmNwOutsideNatPolicyPo">
+		update RM_NW_OUTSIDE_NAT_POLICY set
+			`STATUS` = #status#,
+			TARGET_NAT_ID = #targetNatId#
+		where ID = #id#
+	</update>
+	
+	<update id = "updateOutsideNatPolicyDeleteStatus" parameterClass="RmNwOutsideNatPolicyPo">
+		update RM_NW_OUTSIDE_NAT_POLICY set
+			`STATUS` = #status#,
+			IS_ACTIVE = 'N'
+		where ID = #id#
+	</update>
+	
+	<update id = "updateOutsideFirewallPolicyValidStatus" parameterClass="RmNwOutsideFirewallPolicyPo">
+		update RM_NW_OUTSIDE_FIREWALL_POLICY set
+			`STATUS` = #status#,
+			TARGET_POLICY_ID = #targetPolicyId#
+		where ID = #id#
+	</update>
+	
+	<update id = "updateOutsideFirewallPolicyDeleteStatus" parameterClass="RmNwOutsideFirewallPolicyPo">
+		update RM_NW_OUTSIDE_FIREWALL_POLICY set
+			`STATUS` = #status#,
+			IS_ACTIVE = 'N'
+		where ID = #id#
+	</update>
+	
+	<update id = "updateInsideFirewallPolicyValidStatus" parameterClass="RmNwVfwPolicyRulePo">
+		update RM_NW_OPENSTACK_VFW_POLICY_RULE set
+			`STATUS` = #status#
+		where VFW_POLICY_RULE_ID = #vfwPolicyRuleId#
+	</update>
+	
+	<update id = "updateInsideFirewallPolicyDeleteStatus" parameterClass="RmNwVfwPolicyRulePo">
+		update RM_NW_OPENSTACK_VFW_POLICY_RULE set
+			`STATUS` = #status#,
+			IS_ACTIVE = 'N'
+		where VFW_POLICY_RULE_ID = #vfwPolicyRuleId#
+	</update>
+	
+	<update id = "updateFirewallRequestStatus" parameterClass="RmNwFirewallRequestPo">
+		update RM_NW_FIREWALL_REQUEST set
+			`STATUS` = #status#,
+			IS_ACTIVE = #isActive#
+		where ID = #id#
+	</update>
+	
+	   
+    <update id = "updateInsideFirewallPolicyRuleIaasUuid" parameterClass="RmNwVfwPolicyRulePo">
+        update RM_NW_OPENSTACK_VFW_POLICY_RULE set
+            `IAAS_UUID` = #iaasUuid#
+        where VFW_POLICY_RULE_ID = #vfwPolicyRuleId#
+    </update>
+    
+    <select id="selectRmNwVfwPolicyRulePoById" parameterClass="java.lang.String" resultClass="RmNwVfwPolicyRulePo">
+       SELECT
+		    fpr.VFW_POLICY_RULE_ID vfwPolicyRuleId,
+		    fpr.FIREWALL_REQUEST_ID firewallRequestId,
+		    fpr.VFW_POLICY_ID vfwPolicyId,
+		    fpr.VFW_POLICY_RULE_NAME vfwPolicyRuleName,
+		    fpr.REMARK remark,
+		    fpr.IS_SHARE isShare,
+		    fpr.PROTOCOL_TYPE protocolType,
+		    fpr.IP_VERSION ipVersion,
+		    fpr.`STATUS` STATUS,
+		    fpr.SOURCE_IP_ADDRESS sourceIpAddress,
+		    fpr.DEST_IP_ADDRESS destIpAddress,
+		    fpr.SOURCE_PORT sourcePort,
+		    fpr.DESC_PORT descPort,
+		    fpr.RULE_ACTION ruleAction,
+		    fpr.ENABLED enabled,
+		    fpr.IS_ACTIVE isActive,
+		    fpr.IAAS_UUID iaasUuid
+		FROM
+		    RM_NW_OPENSTACK_VFW_POLICY_RULE fpr
+		WHERE
+		    fpr.IS_ACTIVE = 'Y'
+		AND fpr.VFW_POLICY_RULE_ID = #vfwPolicyRuleId#
+    </select>
+    <select id="selectRmNwVfwPolicyVoById" parameterClass="java.lang.String" resultClass="RmNwVfwPolicyVo">
+       SELECT
+		    VFW_POLICY_ID vfwPolicyId,
+		    PROJECT_ID projectId,
+		    VFW_POLICY_NAME vfwPolicyName,
+		    IAAS_UUID iaasUuid
+		FROM
+		    RM_NW_OPENSTACK_VFW_POLICY
+		WHERE
+		    IS_ACTIVE = 'Y'
+		AND VFW_POLICY_ID = #vfwPolicyId#
+    </select>
+</sqlMap>

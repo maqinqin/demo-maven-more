@@ -1,0 +1,49 @@
+{
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "NETAPP",
+		"OPERATION": 3017
+	},
+	"BODY":{
+		"DATACENTER_ENAME":"NH/YQ",
+		"NAS_MODEL":"NETAPP FAS",
+		"NAS_SN":"000292603714",
+		"SERVICE_IP":"128.192.162.48",
+		"USER_NAME":"admin",
+		"USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+		"VOL_INFO":[
+			{
+				"VOL_NAME":"Vol1",
+				"VOL_SIZE":"8",
+				"POOL_NAME":"aggr0",
+				"QTREES":[
+					{
+						"QTREE_NAME":"Qtree1",
+						"QTREE_MODE":"4/2/1"
+					},
+					{
+						"QTREE_NAME":"Qtree2",
+						"QTREE_MODE":"4/2/1"
+					}
+				]
+				
+			},
+			{
+				"VOL_NAME":"Vol2",
+				"VOL_SIZE":"8",
+				"POOL_NAME":"aggr0",
+				"QTREES":[
+					{
+						"QTREE_NAME":"Qtree1",
+						"QTREE_MODE":"4/2/1"
+					},
+					{
+						"QTREE_NAME":"Qtree2",
+						"QTREE_MODE":"4/2/1"
+					}
+				]
+			}			
+		]
+		
+	}
+}

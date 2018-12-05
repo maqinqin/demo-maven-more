@@ -1,0 +1,25 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="dic-package" extends="icms-package" namespace="/dic">
+	</package>
+
+	<!-- 字典管理 -->
+	<package name="dic" extends="dic-package,json-default,struts-default"
+		namespace="/dic">
+		<action name="findDicTypePage" class="dicAction" method="findDicTypePage"></action>
+		<action name="saveDicType" class="dicAction" method="saveDicType"></action>
+		<action name="findDicTypeByCode" class="dicAction" method="findDicTypeByCode"></action>
+		<action name="deleteDicType" class="dicAction" method="deleteDicType"></action>
+		
+		<action name="findDicPage" class="dicAction" method="findDicPage"></action>
+		<action name="saveDic" class="dicAction" method="saveDic"></action>
+		<action name="findDicById" class="dicAction" method="findDicById"></action>
+		<action name="deleteDic" class="dicAction" method="deleteDic"></action>
+		<!--wmy,验证字典名称不能重复  -->
+		<action name="validateDicTypeName" class="dicAction" method="validateDicTypeName"></action>
+	</package>
+
+</struts>

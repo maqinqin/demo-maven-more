@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	 <!-- DAO -->
+	 <bean id="parameterDaoImpl" class="com.git.cloud.parame.dao.Impl.ParameterDaoImpl" scope="singleton">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- SERVICE -->
+	<bean id="parameterServiceImpl" class="com.git.cloud.parame.service.Impl.ParameterServiceImpl" scope="singleton">
+		<property name="parameterDaoImpl" ref="parameterDaoImpl" />
+		<property name="comDAO" ref="comDAO" />
+	</bean>
+	<bean id="serviceRequestImpl" class="com.git.cloud.rest.service.impl.ServiceRequestImpl" scope="singleton"/>
+	<!-- ACTION -->
+	<bean id="parameterTestAction" class="com.git.cloud.parame.action.ParameterTestAction" scope="prototype">
+         <property name="parameterServiceImpl" ref="parameterServiceImpl"/>
+	</bean>
+	<bean id="bizParamInstAction" class="com.git.cloud.parame.action.BizParamInstAction" scope="prototype">
+         <property name="bizParamInstServiceImpl" ref="bizParamInstServiceImpl"/>
+	</bean>
+	</beans>

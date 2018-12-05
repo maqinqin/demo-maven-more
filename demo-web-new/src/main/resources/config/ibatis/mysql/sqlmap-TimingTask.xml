@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+        "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="TimingTask">
+  <typeAlias alias="timingTaskPo" type="com.git.cloud.sys.model.po.TimingTaskPo" />
+  <select id="queryAllUnexecutedTask" resultClass="timingTaskPo">
+    select
+    id, target_bean targetBean, target_method targetMethod, exec_time execTime, status
+    , create_user createUser, create_time createTime, update_time updateTime,
+    update_user updateUser, parameter_json parameterJson
+    from timing_task
+    where
+    status = 'wait'
+  </select>
+  <update id="updateFinishTask" parameterClass="timingTaskPo" >
+    update timing_task
+    set status = 'complete'
+    ,update_time = now()
+    ,update_user = 'ScanTimingTask'
+    where
+    id = #id#
+  </update>
+</sqlMap>

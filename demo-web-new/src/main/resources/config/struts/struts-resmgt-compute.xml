@@ -1,0 +1,42 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-compute-package" extends="icms-package" namespace="/resmgt-compute">
+	</package>
+	<!-- HOST -->
+	<package name="resmgt-compute-host" namespace="/resmgt-compute/host" extends="resmgt-compute-package">
+		<action name="updateDevice" class="cmDeviceAction" method="updateDevice">
+		</action>
+		<action name="getAllHostCanRelevanceInfo" class="cmDeviceAction" method="getAllHostCanRelevanceInfo">
+		</action>
+		<action name="getCmClusterHostInfo" class="cmDeviceAction" method="getCmClusterHostInfo">
+		</action>
+		<action name="getCmDeviceHostInfo1" class="cmDeviceAction" method="getCmDeviceHostInfo1">
+		</action>
+		<action name="getCmDeviceHostInfo" class="cmDeviceAction" method="getCmDeviceHostInfo">
+		</action>
+		<action name="getCmDeviceVMInfo" class="cmDeviceAction" method="getCmDeviceVMInfo">
+		</action>
+		<action name="deleteCmClusterHostInfo" class="cmDeviceAction" method="deleteCmClusterHostInfo">
+		</action>
+		<!-- 新增加验证工作 -->
+		<action name="validateNaguan" class="cmDeviceAction" method="validateNaguan"> </action>
+		<!-- 判断集群下面是否含有纳管主机 -->
+		<action name="selectCmClusterHostInfoss" class="cmDeviceAction" method="selectCmClusterHostInfoss"> </action>
+		<action name="getCmDeviceHosRunningState" class="cmDeviceAction" method="getCmDeviceHosRunningState"> </action>
+	</package>
+	<!-- cluster -->
+	<package name="resmgt-compute-cluster" extends="resmgt-compute-package" namespace="/resmgt-compute/cluster">
+		<action name="findClusterByIdAct" class="rmClusterAction" method="findClusterById"/>
+		<action name="updateRmClusterPoByIdAct" class="rmClusterAction" method="updateRmClusterPoById"/>
+		<action name="savaRmClusterPoAct" class="rmClusterAction" method="savaRmClusterPo"/>
+		<action name="deleteRmClusterPoByIdAct" class="rmClusterAction" method="deleteRmClusterPoById"/>
+		<!-- 通过集群名称查询集群 -->
+		<action name="findRmClusterPoByName" class="rmClusterAction" method="findRmClusterPoByName"/>
+		<!-- 通过英文编码查询集群 -->
+		<action name="findRmClusterPoByEname" class="rmClusterAction" method="findRmClusterPoByEname"/>
+	</package>
+	
+</struts>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<!-- **************** DAO层 ******************* -->
+	
+	<bean id="networkAbstractDao" class="com.git.cloud.resmgt.network.dao.impl.NetworkAbstractDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- ***********DAO层结束 ******************* -->
+	<!-- 显示仪表详情  service、action-->
+	<bean id="networkAbstractAction" class="com.git.cloud.resmgt.network.action.NetworkAbstractAction">
+         <property name="networkAbstaractService" ref="networkAbstaractServiceImpl" />
+	</bean>
+	<bean id="networkAbstaractServiceImpl" class="com.git.cloud.resmgt.network.service.impl.NetworkAbstaractServiceImpl">
+		<property name="networkAbstractDao" ref="networkAbstractDao" />
+	</bean>
+	
+	<!-- 安全区域维护 -->
+	 <!-- DAO -->
+	 <bean id="rmNwSecureDAO" class="com.git.cloud.resmgt.network.dao.impl.RmNwSecureDAO" scope="singleton">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- SERVICE -->
+	<bean id="rmNwSecureService" class="com.git.cloud.resmgt.network.service.impl.RmNwSecureServiceImpl" scope="singleton">
+		<property name="rmNwSecureDAO" ref="rmNwSecureDAO" />
+	</bean>
+	<!-- ACTION -->
+	<bean id="rmNwSecureAction" class="com.git.cloud.resmgt.network.action.RmNwSecureAction" scope="prototype">
+         <property name="rmNwSecureService" ref="rmNwSecureService"/>
+	</bean>
+	
+	<!-- projectVpc -->
+	<bean id="projectVpcDao" class="com.git.cloud.resmgt.network.dao.impl.ProjectVpcDaoImpl" >
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<!-- virtualNetwork -->
+	<bean id="virtualNetworkDao" class="com.git.cloud.resmgt.network.dao.impl.VirtualNetworkDaoImpl" >
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="virtualNetworkService" class="com.git.cloud.resmgt.network.service.impl.VirtualNetworkServiceImpl" >
+		<property name="virtualNetworkDao" ref="virtualNetworkDao"/>
+	</bean>
+	<bean id="virtualNetworkAction" class="com.git.cloud.resmgt.network.action.VirtualNetworkAction" >
+		<property name="virtualNetworkService" ref="virtualNetworkService"/>
+	</bean>
+	<bean id="virtualSubnetDao" class="com.git.cloud.resmgt.network.dao.impl.VirtualSubnetDaoImpl" >
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="firewallRequestDaoImpl" class="com.git.cloud.network.dao.impl.FirewallRequestDaoImpl" >
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="firewallRequestServiceImpl" class="com.git.cloud.network.service.impl.FirewallRequestServiceImpl" >
+		<property name="firewallRequestDaoImpl" ref="firewallRequestDaoImpl"/>
+	</bean>
+	<bean id="virtualRouterDao" class="com.git.cloud.resmgt.network.dao.impl.VirtualRouterDaoImpl" >
+        <property name="dataSource" ref="jndiDataSource" />
+        <property name="sqlMapClient" ref="sqlMapClient" />
+    </bean>
+</beans>

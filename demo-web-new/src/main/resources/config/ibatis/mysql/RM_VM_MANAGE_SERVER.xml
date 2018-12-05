@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="rmVmManageServer">
+	<typeAlias alias="rmVmManageServerPo" type="com.git.cloud.resmgt.common.model.po.RmVmManageServerPo" />
+	<select id="getRmVmMsIpById" parameterClass="java.lang.String" resultClass="rmVmManageServerPo">
+		<![CDATA[
+			SELECT
+				ms.id as id,
+				ms.USER_NAME as userName,
+				ms.SERVER_NAME as serverName,
+				ms.PLATFORM_TYPE as platformType,
+				ms.VM_TYPE as vmType,
+				ms.MANAGE_IP as manageIp,
+				ms.DOMAIN_NAME as domainName,
+				ms.DATACENTER_ID as datacenterId,
+				ms.SUB_MASK as subMask,
+				ms.manage_project_id as manageProjectId
+			FROM
+				RM_VM_MANAGE_SERVER ms
+			WHERE
+			    ms.id = #vmMsId#
+		]]>
+	</select>
+	<select id="getRmVmMsIpByVmMsIp" parameterClass="java.util.HashMap" resultClass="rmVmManageServerPo">
+		<![CDATA[
+			SELECT
+				ms.id as id,
+				ms.USER_NAME as userName,
+				ms.SERVER_NAME as serverName,
+				ms.PLATFORM_TYPE as platformType,
+				ms.VM_TYPE as vmType,
+				ms.MANAGE_IP as manageIp,
+				ms.DOMAIN_NAME as domainName,
+				ms.DATACENTER_ID as datacenterId,
+				ms.SUB_MASK as subMask,
+				ms.manage_project_id as manageProjectId
+			FROM
+				RM_VM_MANAGE_SERVER ms
+			WHERE
+			    ms.MANAGE_IP = #vmMsHostIp#
+			AND ms.IS_ACTIVE='Y'
+		]]>
+	</select>
+</sqlMap>

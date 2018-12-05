@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMapConfig PUBLIC "-//ibatis.apache.org//DTD SQL Map Config 2.0//EN"   
+  "http://ibatis.apache.org/dtd/sql-map-config-2.dtd"> 
+<sqlMapConfig>
+
+	<settings
+	cacheModelsEnabled="true"
+	enhancementEnabled="true"
+	lazyLoadingEnabled="true"
+	
+	maxRequests="100"
+	maxSessions="100"
+	maxTransactions="150"/>
+	
+	
+	<sqlMap resource="config/ibatis/oracle/common/sqlmap-general.xml" />
+	<sqlMap resource="config/ibatis/oracle/common/sqlmap-page.xml" />
+	<sqlMap resource="config/ibatis/oracle/common/sqlmap-taglib.xml" />
+	<sqlMap resource="config/ibatis/oracle/common/sqlmap-key-map.xml" />
+	
+	<sqlMap resource="config/ibatis/oracle/sqlmap-shiro.xml" />  
+	<sqlMap resource="config/ibatis/oracle/sqlmap-appmgt.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-handler-sa.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-novnc.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-vmrc.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-policy-compute.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-policy-ip.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-report.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-common-1.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-common.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-compute.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-network.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-network-converge.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-network-use.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-storage.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-diagram.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-sys-resource.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-sys-role.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-sys-user.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-sys-organization.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-component.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-designer.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-instance.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-model.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-instanceOatask.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-modelOatask.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-workflow-turnrecord.xml" />
+
+	<sqlMap resource="config/ibatis/oracle/request/sqlmap-request-operate.xml" />
+	<sqlMap resource="config/ibatis/oracle/request/sqlmap-request-query.xml" />
+	<sqlMap resource="config/ibatis/oracle/request/sqlmap-request-other.xml" />
+		
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-cloud-service-3.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-cloud-service-attr-Sel.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-cloud-service-attr.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-cloud-service-flowRef.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-cloud-service.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-script-model.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-script-package.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-script-param.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-script.xml" />
+	<sqlMap resource="config/ibatis/oracle/cloudservice/sqlmap-flavor.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-dic.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-log.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-check-param.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resource.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-common-server.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-common-datacenter.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-common-platform.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-cm-route.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-network-secureArea.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-network-rule.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-certificate-validate.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-network-ip.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-compute.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-excel.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-appmgt.xml"/>
+	<!--查询设备类型及运行状态  -->
+	<sqlMap resource="config/ibatis/oracle/sqlmap-resmgt-common-device.xml"/>
+	<sqlMap resource="config/ibatis/oracle/sqlmap-notification.xml" />
+	<sqlMap resource="config/ibatis/oracle/sqlmap-virtual-switch.xml" />
+	
+	
+	<sqlMap resource="config/ibatis/oracle/sqlmap-handler-se.xml" />
+</sqlMapConfig>

@@ -1,0 +1,60 @@
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="script">
+	 <typeAlias alias="scriptModel" type="com.git.cloud.cloudservice.model.po.ScriptModel" />
+
+	 <resultMap id="scriptModelResult" class="scriptModel">
+		<result property="id" column="ID"/>
+		<result property="name" column="NAME"/>
+		<result property="fileName" column="FILE_NAME"/>
+		<result property="hadFz" column="HAD_FZ"/>
+		<result property="checkCode" column="CHECK_CODE"/>
+		<result property="runUser" column="RUN_USER"/>
+		<result property="remark" column="REMARK"/>
+		<result property="modelModel.id" column="MODEL_MODEL_FK"/>
+		<result property="isActive" column="IS_ACTIVE" />
+		<result property="createUser" column="CREATE_USER" />
+		<result property="createDateTime" column="CREATE_DATETIME" />
+		<result property="updateUser" column="UPDATE_USER" />
+		<result property="updateDateTime" column="UPDATE_DATETIME" />
+	</resultMap> 
+
+	<select id="script.selectAll" resultClass="scriptModel">
+		SELECT * FROM CLOUD_SCRIPT where IS_ACTIVE = "Y" order by ID
+	</select>
+	
+	<select id="script.load" resultMap="scriptModelResult" parameterClass="java.lang.String">
+		SELECT * FROM CLOUD_SCRIPT where IS_ACTIVE = "Y" and ID=#id#
+	</select>
+
+	<update  id="script.update" parameterClass="scriptModel">
+		update CLOUD_SCRIPT 
+		set NAME = #name#,
+			FILE_NAME = #fileName#,
+			HAD_FZ = #hadFz#,
+			CHECK_CODE = #checkCode#,
+			RUN_USER = #runUser#,
+			REMARK = #remark#,
+			MODEL_MODEL_FK = #modelModel.id#,UPDATE_USER = #updateUser#,UPDATE_DATETIME = #updateDateTime# 
+		where ID = #id#
+	</update>
+
+	<insert id="script.insert" parameterClass="scriptModel">
+	    insert into CLOUD_SCRIPT (ID, NAME, FILE_NAME,HAD_FZ , CHECK_CODE, RUN_USER,MODEL_MODEL_FK,REMARK,IS_ACTIVE)
+	    values (#id#, #name#, #fileName#,  #hadFz#,  #checkCode#, #runUser#, #modelModel.id#,#remark#,#isActive#)
+	</insert>
+	<update id="script.delete0" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT set IS_ACTIVE="N" where id = #id#
+	</update>
+	<update id="script.delete01" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT_PARAM set IS_ACTIVE="N" WHERE ID IN(SELECT X.ID FROM (SELECT A.ID,B.ID PID FROM CLOUD_SCRIPT_PARAM A JOIN CLOUD_SCRIPT B ON A.SCRIPT_MODEL_FK = B.ID )X WHERE PID = #id#)
+	    
+	</update>
+	<delete id="script.delete" parameterClass="java.lang.String">
+	    delete from CLOUD_SCRIPT where ID = #id#
+	</delete>
+
+	<delete id="script.delete1" parameterClass="java.lang.String">
+	    DELETE FROM CLOUD_SCRIPT_PARAM WHERE ID IN(SELECT X.ID FROM (SELECT A.ID,B.ID PID FROM CLOUD_SCRIPT_PARAM A JOIN CLOUD_SCRIPT B ON A.SCRIPT_MODEL_FK = B.ID )X WHERE PID = #id#)
+	</delete>
+	
+</sqlMap>

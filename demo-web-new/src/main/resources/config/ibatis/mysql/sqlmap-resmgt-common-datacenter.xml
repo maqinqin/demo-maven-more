@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCmDevice-datacenter">
+<typeAlias alias="RmDatacenterPo" type="com.git.cloud.resmgt.common.model.po.RmDatacenterPo"/>
+<typeAlias alias="DateCenterVo" type="com.git.cloud.workbench.vo.DateCenterVo"/>
+<typeAlias alias="ResourcePoolVo" type="com.git.cloud.workbench.vo.ResourcePoolVo"/>
+<!-- 查询数据中心列表 -->
+	<sql id="selectRmDatacenterList">
+		<![CDATA[
+		 select 
+		 d.ID as id,
+		 d.DATACENTER_CODE as datacenterCode,
+		 d.DATACENTER_CNAME as datacenterCname,
+		 d.ENAME as ename,
+		 d.ADDRESS as address,
+		 d.STATUS as status,
+		 d.IS_ACTIVE as isActive,
+		 d.REMARK as remark,
+		 d.QUEUE_IDEN as queueIden,
+		 d.CREATE_USER as createUser, 
+		 d.CREATE_DATETIME as createDatetime,
+		 d.UPDATE_USER as updateUser,
+		 d.UPDATE_DATETIME as updateDatetime
+		 from RM_DATACENTER d
+		 where d.IS_ACTIVE='Y' 
+		 ]]>
+		  <dynamic prepend=" and ">
+			<isNotEmpty property="datacenterCname" prepend=" and ">
+				d.DATACENTER_CNAME LIKE '%$datacenterCname$%'
+			</isNotEmpty>
+			<isNotEmpty property="queueIden" prepend=" and ">
+				d.QUEUE_IDEN LIKE '%$queueIden$%'
+			</isNotEmpty>
+			</dynamic>
+			ORDER BY $sidx$ $sord$ 
+			</sql>
+	<select id="findRmDatacenterTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRmDatacenterList"/>
+        ) as recordTable
+    </select>
+    <select id="findRmDatacenterPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRmDatacenterList"/> limit #startIndex# ,#pageSize#
+    </select>
+	<!-- 添加一条数据中心信息 -->
+	<insert id="insertRmDatacenter"  parameterClass="RmDatacenterPo">  
+      insert into RM_DATACENTER(
+	      ID,DATACENTER_CODE,DATACENTER_CNAME,ENAME,ADDRESS,IS_ACTIVE,REMARK,QUEUE_IDEN,CREATE_USER,CREATE_DATETIME
+      ) VALUES(
+	      #id#,#datacenterCode#,#datacenterCname#,#ename#,#address#,#isActive#,#remark#,#queueIden#,
+	      #createUser#,#createDateTime#
+      )
+	</insert> 
+	<!-- 修改数据中心  -->
+	<update id="updateRmDatacenter"  parameterClass="RmDatacenterPo">
+		 update RM_DATACENTER set  
+		 DATACENTER_CODE=#datacenterCode#,
+		 DATACENTER_CNAME=#datacenterCname#,
+		 ENAME=#ename#,
+		 ADDRESS=#address#,
+		 REMARK=#remark#,
+		 QUEUE_IDEN=#queueIden#,
+		 UPDATE_DATETIME=#updateDateTime#,
+		 UPDATE_USER=#updateUser#
+		 where ID=#id#
+	</update>
+	<!-- 根据数据中心id查询数据中心下资源池的数量 -->
+	<select id="selectPoolByDatacenterId" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		<![CDATA[
+		SELECT 
+				count(id) as count 
+			FROM 
+				RM_RES_POOL d
+			WHERE 
+				d.IS_ACTIVE='Y' 
+			AND 
+			    d.DATACENTER_ID=#dataCenterId#	
+		 ]]>
+			</select>
+	<delete id="deleteDatacenter" parameterClass="java.lang.String">
+		update RM_DATACENTER set IS_ACTIVE = 'N' WHERE ID = #id#
+	</delete>
+	<!-- 根绝queueIden查询数据中心 -->
+	<select id="selectQueueIdenfortrim" parameterClass="String" resultClass="RmDatacenterPo">
+		 select 
+		 d.QUEUE_IDEN as queueIden,
+		  d.ID as id
+		 from RM_DATACENTER d 
+		 where d.IS_ACTIVE='Y'
+		 and d.QUEUE_IDEN=#queueIden#
+	</select>
+	<!-- 根绝ename查询数据中心 -->
+	<select id="selectDCenamefortrim" parameterClass="String" resultClass="RmDatacenterPo">
+		 select 
+		 d.ENAME as ename,
+		  d.ID as id
+		 from RM_DATACENTER d 
+		 where d.IS_ACTIVE='Y'
+		 and d.ENAME=#ename#
+	</select>		
+	<!-- 查询数据中心 -->
+	
+	<select id="selectDataCenterALL" resultClass="DateCenterVo" >
+	   select SUM(IFNULL(cpu,0) * factor) AS cpu, SUM(IFNULL(cpuUsed,0)) AS cpuUsed,
+               SUM(IFNULL(ram,0) * factorm) AS ram, SUM(IFNULL(ramUsed,0)) AS ramUsed, a.dcode, a.dname, a.id, factor, factorm
+        from (
+            SELECT
+                    case when pr.`VALUE` is not null then pr.`VALUE` else pall.`VALUE`  
+                end as factor, 
+                    case when prm.`VALUE` is not null then prm.`VALUE` else pallm.`VALUE`  
+                end as factorm, 
+                RMDATACENTER.ID AS id, RMDATACENTER.DATACENTER_CNAME AS dname, RMDATACENTER.DATACENTER_CODE as dcode, RMDATACENTER.SORT,
+                (IFNULL(CMHOST.CPU,0))AS cpu, (IFNULL(CMHOST.CPU_USED,0)) AS cpuUsed,
+                (IFNULL(CMHOST.MEM,0)) AS ram, (IFNULL(CMHOST.MEM_USED,0)) AS ramUsed
+            FROM RM_DATACENTER RMDATACENTER
+                         LEFT JOIN RM_RES_POOL RMRESPOOL ON RMRESPOOL.DATACENTER_ID = RMDATACENTER.ID AND RMRESPOOL.IS_ACTIVE = 'Y'
+                       LEFT JOIN RM_CLUSTER RMCLUSTER ON RMRESPOOL.ID = RMCLUSTER.RES_POOL_ID AND RMCLUSTER.IS_ACTIVE = 'Y'
+                     LEFT JOIN CM_HOST CMHOST ON CMHOST.CLUSTER_ID = RMCLUSTER.ID and (CMHOST.IS_INVC='Y')
+                     LEFT JOIN CM_DEVICE CMDEVICE ON CMHOST.ID = CMDEVICE.ID AND CMDEVICE.IS_ACTIVE = 'Y'
+                        LEFT JOIN RM_VM_PARAM pr on RMRESPOOL.ID = pr.OBJECT_ID and pr.PARAM_TYPE='MAX_CPU_UTILIZATION' and pr.IS_ACTIVE='Y'
+                        left JOIN RM_VM_PARAM pall on pall.OBJECT_TYPE='GLOBAL' and pall.PARAM_TYPE='MAX_CPU_UTILIZATION' and pall.IS_ACTIVE='Y'
+                        LEFT JOIN RM_VM_PARAM prm on RMRESPOOL.ID = prm.OBJECT_ID and prm.PARAM_TYPE='MAX_MEM_UTILIZATION' and prm.IS_ACTIVE='Y'
+                        left JOIN RM_VM_PARAM pallm on pallm.OBJECT_TYPE='GLOBAL' and pallm.PARAM_TYPE='MAX_MEM_UTILIZATION' and pallm.IS_ACTIVE='Y'
+                WHERE RMDATACENTER.IS_ACTIVE = 'Y'  ) a
+        GROUP BY a.dname ORDER BY a.sort ;
+	</select>	
+	<!-- 根据数据中心ID查询资源池  -->
+	
+	<select id="selectResourcePool" resultClass="ResourcePoolVo" parameterClass="String">
+			SELECT
+            SUM(IFNULL(cpu, 0) * factor)AS cpu,
+            SUM(IFNULL(cpuUsed, 0))AS cpuUsed,
+            SUM(IFNULL(ram, 0) * factorm)AS ram,
+            SUM(IFNULL(ramUsed, 0))AS ramUsed,
+            pid,
+            pname,
+            dname
+        FROM
+            (
+                SELECT
+                    RMRESPOOL.ID pid,
+                    RMRESPOOL.ENAME pname,
+                    RMDATACENTER.ID AS datacenterId,
+                    RMDATACENTER.DATACENTER_CNAME AS dname,
+                    CMHOST.ID AS cId,
+                    CMHOST.CPU AS cpu,
+                    CPU_USED AS cpuUsed,
+                    CMHOST.MEM AS ram,
+                    MEM_USED AS ramUsed,
+                    CMHOST.DEFAULT_DATASTORE_TYPE AS dataDeTreType,
+                    RMRESPOOL.ID AS RMRESPOOL_ID,
+                    RMCLUSTER.ID AS RMCLUSTER_ID,
+                    RMCLUSTER.VM_TYPE AS vchvmType,
+                    RMRESPOOL.POOL_TYPE AS vcmPoolType,
+                    CMDEVICE.ID AS CMDEVICE_ID,
+                    CASE
+                WHEN pr.`VALUE` IS NOT NULL THEN
+                    pr.`VALUE`
+                ELSE
+                    pall.`VALUE`
+                END AS factor,
+                CASE
+            WHEN prm.`VALUE` IS NOT NULL THEN
+                prm.`VALUE`
+            ELSE
+                pallm.`VALUE`
+            END AS factorm
+            FROM
+                RM_DATACENTER RMDATACENTER
+                RIGHT JOIN RM_RES_POOL RMRESPOOL ON RMRESPOOL.DATACENTER_ID = RMDATACENTER.ID
+            AND RMRESPOOL.IS_ACTIVE = 'Y'
+            AND RMRESPOOL.POOL_TYPE = 'COMPUTE'
+            LEFT JOIN RM_CLUSTER RMCLUSTER ON RMRESPOOL.ID = RMCLUSTER.RES_POOL_ID
+            AND RMCLUSTER.IS_ACTIVE = 'Y'
+            LEFT JOIN CM_HOST CMHOST ON CMHOST.CLUSTER_ID = RMCLUSTER.ID
+            LEFT JOIN CM_DEVICE CMDEVICE ON CMHOST.ID = CMDEVICE.ID
+            LEFT JOIN RM_VM_PARAM pr ON RMRESPOOL.ID = pr.OBJECT_ID
+            AND pr.PARAM_TYPE = 'MAX_CPU_UTILIZATION'
+            AND pr.IS_ACTIVE = 'Y'
+            LEFT JOIN RM_VM_PARAM pall ON pall.OBJECT_TYPE = 'GLOBAL'
+            AND pall.PARAM_TYPE = 'MAX_CPU_UTILIZATION'
+            AND pall.IS_ACTIVE = 'Y'
+            LEFT JOIN RM_VM_PARAM prm ON RMRESPOOL.ID = prm.OBJECT_ID
+            AND prm.PARAM_TYPE = 'MAX_MEM_UTILIZATION'
+            AND prm.IS_ACTIVE = 'Y'
+            LEFT JOIN RM_VM_PARAM pallm ON pallm.OBJECT_TYPE = 'GLOBAL'
+            AND pallm.PARAM_TYPE = 'MAX_MEM_UTILIZATION'
+            AND pallm.IS_ACTIVE = 'Y'
+            WHERE
+                RMDATACENTER.IS_ACTIVE = 'Y'
+            AND(
+                CMDEVICE.IS_ACTIVE = 'Y'
+                OR CMDEVICE.IS_ACTIVE IS NULL
+            )
+            AND RMDATACENTER.ID = #id#
+            )a
+        GROUP BY
+            a.pid;
+	</select>		
+	<select id="selectVCenterAccessData" resultClass="RmDatacenterPo">
+		<![CDATA[
+		SELECT
+			CONCAT('https://',u.MANAGE_IP,'/sdk') url,
+			u.USER_NAME username,
+			p.PASSWORD password
+		FROM
+			RM_VM_MANAGE_SERVER u
+			INNER JOIN
+			CM_PASSWORD p
+			ON
+				u.ID = p.RESOURCE_ID
+		WHERE
+			u.VM_TYPE = '1' AND u.IS_ACTIVE = 'Y'
+		]]>
+	</select>
+</sqlMap>

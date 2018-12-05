@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="resmgtDiagram">
+	<typeAlias alias="DeviceDiagramVo" type="com.git.cloud.resmgt.common.model.vo.DeviceDiagramVo" />
+	<typeAlias alias="DeviceVmTypeNumDiagramVo" type="com.git.cloud.resmgt.common.model.vo.DeviceVmTypeNumDiagramVo" />
+	<typeAlias alias="ResPoolHostVmInfoVo" type="com.git.cloud.resmgt.common.model.vo.ResPoolHostVmInfoVo" />
+	
+	<!-- 查询最新入库设备 -->
+	<select id="selectDeviceDiagram" resultClass="DeviceDiagramVo">
+	SELECT 
+		 d.ID AS id,
+		 d.DEVICE_NAME AS deviceName,
+		 d.SN AS sn,
+		 d.DEVICE_MODEL_ID AS deviceModelId,
+		 d.SEAT_ID AS seatId,
+		 d.RES_POOL_ID AS resPoolId,
+		 d.DEVICE_STATUS AS deviceStatus,
+		 d.DESCRIPTION AS description, 
+		 z.DIC_NAME AS deviceType,
+		 a.DEVICE_MANUFACTURER AS deviceManufacturer,
+		 a.DEVICE_MODEL AS deviceModel,
+		 d.CREATE_DATETIME AS createDateTime,
+		 p.POOL_NAME AS poolName,
+		 d.CREATE_USER AS createUser
+		 FROM CM_DEVICE d
+		 LEFT JOIN 
+		 CM_DEVICE_MODEL a ON d.DEVICE_MODEL_ID=a.ID
+		 LEFT JOIN
+			 RM_RES_POOL p ON p.ID=d.RES_POOL_ID
+		 LEFT JOIN
+			 ADMIN_DIC z ON z.DIC_CODE=a.DEVICE_TYPE
+			 AND z.DIC_TYPE_CODE='DEVICE_TYPE'
+		 WHERE d.IS_ACTIVE='Y' 
+		 AND d.DEVICE_MODEL_ID IS NOT NULL
+		 AND d.DEVICE_MODEL_ID!=''
+		 AND d.CREATE_DATETIME IS NOT NULL
+		 ORDER BY d.CREATE_DATETIME DESC 
+		 LIMIT 5;
+	</select>
+
+	<select id="selectResComputeVmNumber" resultClass="DeviceVmTypeNumDiagramVo">
+	SELECT 
+	  rvt.VIRTUAL_TYPE_NAME vmType,
+	  IFNULL(t.vcount, 0) AS vmNum 
+	FROM
+	  RM_VIRTUAL_TYPE rvt 
+	  LEFT JOIN 
+	    (SELECT 
+	      COUNT(v.id) AS vcount,
+	      vt.VIRTUAL_TYPE_ID 
+	    FROM
+	      (SELECT VM.ID AS ID,VM.HOST_ID AS HOST_ID FROM CM_VM VM,CM_DEVICE DEV WHERE VM.ID=DEV.ID AND DEV.IS_ACTIVE='Y' AND DEV.DEVICE_STATUS ='ONLINE')  v,
+	      CM_DEVICE d,
+	      CM_HOST h,
+	      RM_CLUSTER cl,
+	      RM_VIRTUAL_TYPE vt 
+	    WHERE 1 = 1 
+	      AND v.HOST_ID = d.ID 
+	      AND h.ID = d.ID 
+	      AND h.CLUSTER_ID = cl.ID 
+	      AND vt.VIRTUAL_TYPE_ID = cl.VM_TYPE 
+	      AND vt.IS_ACTIVE = 'Y' 
+	      AND cl.IS_ACTIVE = 'Y' 
+	      AND d.IS_ACTIVE = 'Y' 
+	    GROUP BY vt.VIRTUAL_TYPE_ID) AS t 
+	    ON rvt.VIRTUAL_TYPE_ID = t.VIRTUAL_TYPE_ID ;
+	</select>
+	
+	<select id = "selectResPoolHostVmInfoVo" resultClass="ResPoolHostVmInfoVo">
+	SELECT a.poolName AS poolName,
+		a.poolEName AS poolEName, 
+		a.pool AS poolId,
+		IFNULL(a.cpu,0) AS hcpu,
+		IFNULL(a.idcount,0) AS hmem,
+		IFNULL(b.cpu,0) AS vcpu,
+		IFNULL(b.idcount,0) AS vmem 
+	FROM 
+	   (SELECT 
+		  P.ID AS pool, COUNT(D.ID) AS idcount,SUM(H.CPU) AS cpu,P.pool_name AS poolName,P.ename AS poolEName
+	    FROM
+		CM_DEVICE D,
+		CM_HOST H,
+		RM_RES_POOL P 
+	    WHERE D.RES_POOL_ID = P.ID 
+		AND D.ID = H.ID 
+		AND D.IS_ACTIVE = 'Y'
+		AND P.IS_ACTIVE='Y' 
+		AND D.DEVICE_MODEL_ID IS NOT NULL
+	    GROUP BY P.ID) a 
+	LEFT JOIN 
+	   (SELECT 
+		 P.ID AS pool, COUNT(D.ID) AS idcount,SUM(V.CPU) AS cpu,P.pool_name AS poolName,P.ename AS poolEName
+	    FROM 
+		CM_DEVICE D,
+		CM_VM V,
+		RM_RES_POOL P 
+	    WHERE D.RES_POOL_ID = P.ID 
+		AND V.ID = D.ID 
+		AND D.IS_ACTIVE = 'Y' 
+		AND P.IS_ACTIVE = 'Y' 
+		AND D.DEVICE_STATUS ='ONLINE'
+	    GROUP BY P.ID ) b
+	ON a.pool = b.pool;
+	</select>
+
+</sqlMap>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="rmNwSecurityGroupsVmref">
+	<typeAlias alias="securityGroupsDeviceRefVo" type="com.git.cloud.resmgt.openstack.model.vo.SecurityGroupsDeviceRefVo" />
+	<insert id="saveVmRef" parameterClass="securityGroupsDeviceRefVo">
+		INSERT INTO RM_NW_SECURITY_GROUPS_DEVICE_REF(
+			ID,
+			SECURITY_GROUPS_ID,
+			DEVICE_ID
+		)
+		VALUES
+			(
+			#id#,#securityGroupId#,#deviceId#
+			)
+	</insert>
+	
+</sqlMap>

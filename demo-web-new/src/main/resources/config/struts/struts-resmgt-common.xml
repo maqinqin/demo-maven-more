@@ -1,0 +1,218 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-common-package" extends="icms-package" namespace="/resmgt-common">
+	</package>
+	<package name="resmgt-common-device" extends="resmgt-common-package" namespace="/resmgt-common/device">
+	   <action name="cmDeviceView" class="cmDeviceAction" method="cmDeviceView">
+			<result name="success">/pages/resmgt/common/CmDeviceList.jsp</result>
+		</action>
+		<action name="getDeviceList" class="cmDeviceAction" method="getDeviceList">
+		</action>
+		<!-- 进入添加页面 -->
+		<action name="addCmDevicePageAction" class="cmDeviceAction" method="addCmDevicePage">
+		</action>
+		<!-- 添加设备物理机信息 -->
+		<action name="addCmDeviceHostAction" class="cmDeviceAction" method="addCmDeviceHost">
+		</action>
+		<!-- 添加设备存储信息 -->
+		<action name="addCmDeviceStorageAction" class="cmDeviceAction" method="addCmDeviceStorage">
+		</action>
+		<!-- 查询出设备物理机信息，并且跳转到修改界面 -->
+		<action name="updateCmDeviceHostPageAction" class="cmDeviceAction" method="updateCmDeviceHostPage">
+		</action>
+		<!-- 修改设备和物理机信息 -->
+		<action name="updateCmDeviceHostAction" class="cmDeviceAction" method="updateCmDeviceHost">
+		</action>
+		<!-- 查询出存储设备信息，并且跳转到修改界面 -->
+		<action name="updateCmDeviceStoragePageAction" class="cmDeviceAction" method="updateCmDeviceStoragePage">
+		</action>
+		<!-- 修改设备和存储信息 -->
+		<action name="updateCmDeviceStorageAction" class="cmDeviceAction" method="updateCmDeviceStorage">
+		</action>
+		<!-- 删除物理机信息 -->
+		<action name="deleteDeviceListAction" class="cmDeviceAction" method="deleteDeviceList">
+		</action>
+		<!-- 查询所有sn号-->
+		<action name="getSnForTrim" class="cmDeviceAction" method="getSnForTrim">
+		</action>
+		<!-- 查询所有seatId-->
+		<action name="getSeatIdForTrim" class="cmDeviceAction" method="getSeatIdForTrim">
+		</action>
+		<!-- 查询所有设备名称-->
+		<action name="getDeviceNameForTrim" class="cmDeviceAction" method="getDeviceNameForTrim">
+		</action>
+		<action name="getDatastoreList" class="cmDeviceAction" method="getDatastoreList">
+		</action>
+		<action name="addCmDevicePage" class="cmDeviceAction" method="addCmDevicePage">
+		</action>
+		<!--验证存储设备下管理IP不能重复  -->
+		<action name="storageDeviceMgrIpCheck" class="cmDeviceAction" method="storageDeviceMgrIpCheck">
+		</action>
+		<action name="addCmDatastoreVo" class="cmDeviceAction" method="addCmDatastoreVo">
+		</action>
+		<action name="deleteCmtDatastoreVo" class="cmDeviceAction" method="deleteCmtDatastoreVo">
+		</action>
+		<action name="deleteCmtDatastoreVoById" class="cmDeviceAction" method="deleteCmtDatastoreVoById">
+		</action>
+		<action name="updateCmtDatastoreVo" class="cmDeviceAction" method="updateCmtDatastoreVo">
+		</action>
+		<action name="selectCmtDatastoreVoById" class="cmDeviceAction" method="selectCmtDatastoreVoById">
+		</action>
+		<action name="selectDeviceDiagramInfo" class="cmDeviceAction" method="getDeviceDiagramInfo"/>
+		<action name="selectVmTypeNumInfo" class="cmDeviceAction" method="getVmTypeNumInfo"/>
+		<action name="selectResPoolHostVmInfo" class="cmDeviceAction" method="getPoolHostAndVmInfo"/>
+		<action name="inVCtrole" class="cmDeviceAction" method="getInVCtrole"/>
+		<action name="outVCtrole" class="cmDeviceAction" method="getOutVCtrole"/>
+		<action name="matchDeviceListAction" class="cmDeviceAction" method="getDeviceSnForMatch"/>
+		<action name="saveDatastoreInfo" class="cmDeviceAction" method="saveDatastoreInfo"/>
+		<action name="deleteDatastoreInfo" class="cmDeviceAction" method="deleteDatastoreInfo"/>
+		<action name="saveDefaultDatastore" class="cmDeviceAction" method="saveDefaultDatastore"/>
+		<action name="getDefaultDatastore" class="cmDeviceAction" method="getDefaultDatastore"/>
+		<action name="getHost" class="cmDeviceAction" method="getHost"/>
+		<action name="getPmRunningState" class="cmDeviceAction" method="getPmRunningState"/>
+		<action name="isCmVm" class="cmDeviceAction" method="isCmVm"/>
+		<action name="getHostConfigure" class="cmDeviceAction" method="getHostConfigure"/>
+		<action name="getRmDeviceVolumesRefPoList" class="cmDeviceAction" method="getRmDeviceVolumesRefPoList"/>
+		<action name="getMountedServerVolume" class="cmDeviceAction" method="getMountedServerVolume"/>
+		<action name="findVolumeTypeList" class="cmDeviceAction" method="findVolumeTypeList"/>
+		<action name="mountVolume" class="cmDeviceAction" method="mountVolume"/>
+		<action name="unmountServerVolume" class="cmDeviceAction" method="unmountServerVolume"/>
+		
+	</package>
+	<!--  -->
+	<package name="resmgt-common-cmHostDatastoreRef" namespace="/resmgt-common/cmHostDatastoreRef" extends="resmgt-common-package">
+	</package>
+	<!-- 数据中心维护 -->
+	<package name="resmgt-common-datacenter" namespace="/resmgt-common/datacenter" extends="resmgt-common-package">
+		<action name="getDataCenterById" class="dataCenterAction" method="getDataCenterById">
+		</action>
+		
+		<action name="getDataCenters" class="dataCenterAction" method="getDataCenters">
+		</action>
+		<action name="cmDatacenterView" class="dataCenterAction" method="cmDatacenterView">
+			<result name="success">/pages/resmgt/common/RmDatacenterView.jsp</result>
+		</action>
+		<action name="getDatacenterList" class="dataCenterAction" method="getDatacenterList">
+		</action>
+		<action name="saveRmDatacenter" class="dataCenterAction" method="saveRmDatacenter">
+		</action>
+		<action name="updateRmDatacenter" class="dataCenterAction" method="updateRmDatacenter">
+		</action>
+		<action name="selectPoolByDatacenterId" class="dataCenterAction" method="selectPoolByDatacenterId">
+		</action>
+		<action name="deleteDatacenter" class="dataCenterAction" method="deleteDatacenter">
+		</action>
+		<action name="selectQueueIdenfortrim" class="dataCenterAction" method="selectQueueIdenfortrim">
+		</action>
+		<action name="selectDCenamefortrim" class="dataCenterAction" method="selectDCenamefortrim">
+		</action>
+		<!-- 卷查询 -->
+		<action name="getDiskList" class="dataCenterAction" method="getDiskList">
+		</action>
+		<action name="getDiskDetailed" class="dataCenterAction" method="getDiskDetailed">
+		</action>
+	</package>
+	
+	<!-- 虚机管理服务器维护 -->
+	<package name="resmgt-common-vmmanageserver" namespace="/resmgt-common/vmmanageserver" extends="resmgt-common-package">
+		<action name="getPlatformInfo" class="rmVmManageServerAction" method="getPlatformInfo">
+		</action>
+		<action name="getVmTypeNameInfo" class="rmVmManageServerAction" method="getVmTypeNameInfo">
+		</action>
+		<action name="vmManageServerView" class="rmVmManageServerAction" method="vmManageServerView">
+			<result name="success">/pages/resmgt/common/CmDeviceVMServerList.jsp</result>
+		</action>
+		<action name="getvmManageServerList" class="rmVmManageServerAction" method="getvmManageServerList">
+		</action>
+		<action name="getvmManageServerInfo" class="rmVmManageServerAction" method="getvmManageServerInfo">
+		</action>
+		<action name="insertvmManageServer" class="rmVmManageServerAction" method="insertvmManageServer">
+		</action>
+		<action name="checkServerName" class="rmVmManageServerAction" method="checkServerName">
+		</action>
+		<action name="checkServerIp" class="rmVmManageServerAction" method="checkServerIp">
+		</action>
+		<action name="deleteVMServerList" class="rmVmManageServerAction" method="deleteVMServerList">
+		</action>
+	</package>
+	<!-- 物理机管理维护 -->
+	<package name="resmgt-common-phycial_mac_manageserver" namespace="/resmgt-common/phymacmanageserver" extends="resmgt-common-package">
+		<action name="hostManageView" class="rmPhysicalMacManageServerAction" method="hostManageView">
+			<result name="success">/pages/resmgt/phymacmanage/hostManagerServerList.jsp</result>
+		</action>
+		<action name="getHostList" class="rmPhysicalMacManageServerAction" method="getHostList">
+		</action>
+		<action name="getUserInfo" class="rmPhysicalMacManageServerAction" method="getUserNamePasswdInfo">
+		</action>
+		<action name="updateHostPasswd" class="rmPhysicalMacManageServerAction" method="updateHostPasswd">
+		</action>
+		<action name="updataAutomationHost" class="rmPhysicalMacManageServerAction" method="updataAutomationHost">
+		</action>
+	</package>
+	
+	<!-- 位置信息维护 -->
+	<package name="resmgt-common-cmseat" namespace="/resmgt-common/cmseat" extends="resmgt-common-package">
+		<action name="cmseatView" class="cmSeatAction" method="cmseatView">
+			<result name="success">/pages/resmgt/common/CmseatView.jsp</result>
+		</action>
+		<action name="getCmSeatTreeList" class="cmSeatAction" method="getCmSeatTreeList">
+		</action>
+		<action name="getComputerRoomByDcId" class="cmSeatAction" method="getComputerRoomByDcId">
+		</action>
+		<action name="getComputerCabinetByRoomCode" class="cmSeatAction" method="getComputerCabinetByRoomCode">
+		</action>
+		<action name="getUByCabinetCode" class="cmSeatAction" method="getUByCabinetCode">
+		</action>
+		
+		<action name="getComputerRoomByRoomId" class="cmSeatAction" method="getComputerRoomByRoomId">
+		</action>
+		<action name="getComputerCabinetByCabinetId" class="cmSeatAction" method="getComputerCabinetByCabinetId">
+		</action>
+		<action name="getUByUId" class="cmSeatAction" method="getUByUId">
+		</action>
+		
+		<action name="deleteUInfo" class="cmSeatAction" method="deleteUInfo">
+		</action>
+		<action name="deleteCabinetInfo" class="cmSeatAction" method="deleteCabinetInfo">
+		</action>
+		<action name="deleteRoomInfo" class="cmSeatAction" method="deleteRoomInfo">
+		</action>
+		
+		<action name="insertSeatInfoOfRoom" class="cmSeatAction" method="insertSeatInfoOfRoom">
+		</action>
+		<action name="insertSeatInfoOfCabinet" class="cmSeatAction" method="insertSeatInfoOfCabinet">
+		</action>
+		<action name="insertSeatInfoOfU" class="cmSeatAction" method="insertSeatInfoOfU">
+		</action>
+		
+		<action name="updateSeatInfo" class="cmSeatAction" method="updateSeatInfo">
+		</action>
+		
+		<action name="updateDeviceSeat" class="cmSeatAction" method="updateDeviceSeat">
+		</action>
+		
+		<action name="getCmseatAllHostCanRelevanceInfo" class="cmSeatAction" method="getCmseatAllHostCanRelevanceInfo">
+		</action>
+		
+	</package>
+	
+	<!-- 路由信息维护 -->
+	<package name="resmgt-common-route"  namespace="/resmgt/common/route" extends="resmgt-common-package">
+     <action name="init" class="cmRouteAction"  method="init">
+         <result name="success">/pages/resmgt/common/CmRouteView.jsp</result>
+     </action>
+     <action name="getDeviceList" class="cmRouteAction" method="getDeviceList"></action>
+     <action name="saveCmRoute" class="cmRouteAction" method="saveCmRoute"></action>
+     <action name="viewCmRoute" class="cmRouteAction" method="viewCmRoute"></action>
+     <action name="deleteCmRoute" class="cmRouteAction" method="deleteCmRoute"></action>
+    <!-- 我的工作台数据中心计算资源 -->
+    <action name="selectDateCenter" class="showDateCenterAction" method="getDateCenter"/>
+    <!-- 我的工作台资源池计算资源 -->
+    <action name="selectResourcePool" class="showResourcePoolAction" method="getResourcePool"/>
+    
+</package>
+	
+</struts>

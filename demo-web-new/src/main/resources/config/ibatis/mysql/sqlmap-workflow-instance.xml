@@ -1,0 +1,929 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="workflowInstance">
+	<!-- 流程实例 -->
+	<typeAlias alias="BpmInstancePo" type="com.gitcloud.tankflow.model.po.BpmInstancePo" />
+	<typeAlias alias="BpmInstanceVo" type="com.gitcloud.tankflow.model.vo.BpmInstanceVo" />
+	<typeAlias alias="BpmInstanceNodePo" type="com.gitcloud.tankflow.model.po.BpmInstanceNodePo" />
+	<typeAlias alias="BpmInstanceNodeCommandsPo" type="com.gitcloud.tankflow.model.po.BpmInstanceNodeCommandsPo" />
+	<typeAlias alias="BpmInstanceNodeScriptsPo" type="com.gitcloud.tankflow.model.po.BpmInstanceNodeScriptsPo" />
+	<!-- 查询组件信息列表  -->
+	<sql id="findAllBpmInstance">
+		<![CDATA[
+			 select 
+				 	bi.INSTANCE_ID				instanceId,              
+					bi.INSTANCE_NAME			instanceName,
+					bi.TYPE_ID					typeId,
+					btt.TYPE_NAME				typeName,
+					bi.APP_ID					appId,
+					bi.CREATOR_ID				creatorId,               
+					bi.START_DATE				startDate,               
+					bi.END_DATE					endDate,                 
+					bi.MODEL_ID					modelId,                 
+					bi.WF_MODEL_ID				wfModelId,               
+					bi.WF_INSTANCE_ID			wfInstanceId,            
+					bi.INSTANCE_STATE_ID		instanceStateId,         
+					bi.SERVICE_REQ_ID		    serviceReqId,            
+					bi.SERVICE_RES_REQ_ID		serviceResReqId,         
+					bi.IS_ACTIVE				isActive,
+					bs.SR_CODE					srCode                 
+			 from  
+			 	BPM_TEMPLATE_TYPE btt,
+			 	BPM_INSTANCE bi left join BM_SR bs on bs.SR_ID = bi.SERVICE_REQ_ID
+			 where 
+			 	 bi.IS_ACTIVE = 'Y' 
+			 and bi.TYPE_ID = btt.TYPE_ID 
+		 ]]>
+		 <dynamic prepend="and"> 
+			<isNotEmpty prepend=" and " property="instanceName"><!-- 模糊查询不能用#,#在是用prepareStatement的?插入参数,$是文本替换  -->           
+				bi.INSTANCE_NAME like CONCAT('%',trim(#instanceName#),'%')             
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="instanceStateId">          
+				bi.INSTANCE_STATE_ID = trim(#instanceStateId#)             
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="typeId">           
+				bi.TYPE_ID = trim(#typeId#)             
+			</isNotEmpty>         
+			<isNotEmpty prepend=" and " property="srCode">          
+				bs.SR_CODE like CONCAT('%',trim(#srCode#),'%')   
+			</isNotEmpty>         
+		</dynamic>
+	</sql>
+	
+	<select id="findAllBpmInstanceTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="findAllBpmInstance"/>
+        ) as recordTable
+    </select>
+    <select id="findAllBpmInstancePage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="findAllBpmInstance"/> $_orderby$ limit #startIndex# ,#pageSize#
+    </select>
+    
+	<!-- 根据Id查询组件信息 -->
+	<select id="findBpmInstanceById"  resultClass="BpmInstanceVo">
+		<![CDATA[
+			 select 
+				 	bi.INSTANCE_ID				instanceId,              
+					bi.INSTANCE_NAME			instanceName,
+					bi.TYPE_ID					typeId,
+					btt.TYPE_NAME				typeName,
+					bi.APP_ID					appId,
+					bi.CREATOR_ID				creatorId,               
+					date_format(bi.START_DATE,'%Y-%m-%d  %H:%i:%s')  startDate,        
+					date_format(bi.END_DATE,'%Y-%m-%d %H:%i:%s')       endDate,                             
+					bi.MODEL_ID					modelId,                 
+					bi.WF_MODEL_ID				wfModelId,               
+					bi.WF_INSTANCE_ID			wfInstanceId,            
+					bi.INSTANCE_STATE_ID		instanceStateId,         
+					bi.SERVICE_REQ_ID		    serviceReqId,            
+					bi.SERVICE_RES_REQ_ID		serviceResReqId,         
+					bi.IS_ACTIVE				isActive,   
+					bs.SR_CODE					srCode              
+			 from  
+			 	BPM_TEMPLATE_TYPE btt,
+			 	BPM_INSTANCE bi left join BM_SR bs on bs.SR_ID = bi.SERVICE_REQ_ID
+			 where 
+			 	 bi.IS_ACTIVE = 'Y' 
+			 and bi.TYPE_ID = btt.TYPE_ID 
+			 and bi.INSTANCE_ID = #instanceId#
+		 ]]>
+	</select>
+	<!-- 根据Id查询组件信息 -->
+	<select id="findInstancePoInfoById"  resultClass="BpmInstancePo">
+		<![CDATA[
+			 select 
+				 	bi.INSTANCE_ID				instanceId,              
+					bi.INSTANCE_NAME			instanceName,
+					bi.TYPE_ID					typeId,
+					bi.APP_ID					appId,
+					bi.CREATOR_ID				creatorId,               
+					bi.START_DATE				startDate,               
+					bi.END_DATE					endDate,                 
+					bi.MODEL_ID					modelId,                 
+					bi.WF_MODEL_ID				wfModelId,               
+					bi.WF_INSTANCE_ID			wfInstanceId,            
+					bi.INSTANCE_STATE_ID		instanceStateId,         
+					bi.SERVICE_REQ_ID		   serviceReqId,            
+					bi.SERVICE_RES_REQ_ID		serviceResReqId,         
+					bi.IS_ACTIVE				isActive                 
+			 from  
+			 	BPM_INSTANCE bi
+			 where 
+			 	 bi.IS_ACTIVE = 'Y' 
+			 and bi.INSTANCE_ID = #instanceId#
+		 ]]>
+	</select>
+	<!-- 添加组件信息  -->
+	<insert id="insertBpmInstanceInfo"  parameterClass="BpmInstancePo">  
+      INSERT INTO BPM_INSTANCE (
+	      INSTANCE_ID, INSTANCE_NAME,  TYPE_ID, APP_ID,   CREATOR_ID,     START_DATE, END_DATE, MODEL_ID, 
+	      WF_MODEL_ID, WF_INSTANCE_ID, INSTANCE_STATE_ID, SERVICE_REQ_ID, SERVICE_RES_REQ_ID,   IS_ACTIVE
+      ) VALUES (
+	     	#instanceId#,
+			#instanceName#,
+			#typeId#,
+			#appId#,
+			#creatorId#,
+			#startDate#,
+			#endDate#,
+			#modelId#,
+			#wfModelId#,
+			#wfInstanceId#,
+			#instanceStateId#,
+			#serviceReqId#,
+			#serviceResReqId#,
+			#isActive#
+      )
+	</insert>
+	<!-- 流程实例end -->
+	<select id="findInstanceListByParam" parameterClass="java.util.Map"  resultClass="BpmInstancePo">
+		<![CDATA[
+			 select 
+				 	bi.INSTANCE_ID				instanceId,              
+					bi.INSTANCE_NAME			instanceName,
+					bi.TYPE_ID					typeId,
+					bi.APP_ID					appId,
+					bi.CREATOR_ID				creatorId,               
+					bi.START_DATE				startDate,               
+					bi.END_DATE					endDate,                 
+					bi.MODEL_ID					modelId,                 
+					bi.WF_MODEL_ID				wfModelId,               
+					bi.WF_INSTANCE_ID			wfInstanceId,            
+					bi.INSTANCE_STATE_ID		instanceStateId,         
+					bi.SERVICE_REQ_ID		    serviceReqId,            
+					bi.SERVICE_RES_REQ_ID		serviceResReqId,         
+					bi.IS_ACTIVE				isActive                 
+			 from  
+			 	BPM_INSTANCE bi
+			 where 
+			 	 bi.IS_ACTIVE = 'Y' 
+		 ]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="instanceId">
+		 		bi.INSTANCE_ID = #instanceId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="serviceReqId">
+		 		bi.SERVICE_REQ_ID = #serviceReqId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="serviceResReqId">
+		 		bi.SERVICE_RES_REQ_ID = #serviceResReqId#
+		 	</isNotEmpty>
+		 </dynamic>
+		 order by $orderFile$ $orderType$
+	</select>
+	<select id="findInstanceIdByServiceReqId" parameterClass="java.util.Map"  resultClass="BpmInstancePo">
+		<![CDATA[
+			 select 
+				 	bi.INSTANCE_ID				instanceId,              
+					bi.INSTANCE_NAME			instanceName,
+					bi.TYPE_ID					typeId,
+					bi.APP_ID					appId,
+					bi.CREATOR_ID				creatorId,               
+					bi.START_DATE				startDate,               
+					bi.END_DATE					endDate,                 
+					bi.MODEL_ID					modelId,                 
+					bi.WF_MODEL_ID				wfModelId,               
+					bi.WF_INSTANCE_ID			wfInstanceId,            
+					bi.INSTANCE_STATE_ID		instanceStateId,         
+					bi.SERVICE_REQ_ID		    serviceReqId,            
+					bi.SERVICE_RES_REQ_ID		serviceResReqId,         
+					bi.IS_ACTIVE				isActive                 
+			 from  
+			 	BPM_INSTANCE bi
+			 where 
+			 	 bi.IS_ACTIVE = 'Y' 
+			 and bi.SERVICE_REQ_ID = #serviceReqId#
+			 and bi.SERVICE_RES_REQ_ID is null
+		 ]]>
+	</select>
+	<select id="findSubInstanceIdByServiceReqId" parameterClass="java.util.Map"  resultClass="BpmInstancePo">
+		<![CDATA[
+			 select 
+				 	bi.INSTANCE_ID				instanceId,              
+					bi.INSTANCE_NAME			instanceName,
+					bi.TYPE_ID					typeId,
+					bi.APP_ID					appId,
+					bi.CREATOR_ID				creatorId,               
+					bi.START_DATE				startDate,               
+					bi.END_DATE					endDate,                 
+					bi.MODEL_ID					modelId,                 
+					bi.WF_MODEL_ID				wfModelId,               
+					bi.WF_INSTANCE_ID			wfInstanceId,            
+					bi.INSTANCE_STATE_ID		instanceStateId,         
+					bi.SERVICE_REQ_ID		    serviceReqId,            
+					bi.SERVICE_RES_REQ_ID		serviceResReqId,         
+					bi.IS_ACTIVE				isActive                 
+			 from  
+			 	BPM_INSTANCE bi
+			 where 
+			 	 bi.IS_ACTIVE = 'Y' 
+			 and bi.SERVICE_REQ_ID = #serviceReqId#
+			 and bi.SERVICE_RES_REQ_ID is not null
+		 ]]>
+	</select>
+	<!-- 修改流程实例信息 -->
+	<update id="updateBpmInstance" parameterClass="BpmInstancePo">
+		update BPM_INSTANCE set 
+					INSTANCE_NAME = #instanceName#,
+					TYPE_ID	= #typeId#,
+					APP_ID = #appId#,					
+					CREATOR_ID = #creatorId#,				
+					START_DATE = #startDate#,				
+					END_DATE = #endDate#,					
+					MODEL_ID = #modelId#,					
+					WF_MODEL_ID = #wfModelId#,				
+					WF_INSTANCE_ID = #wfInstanceId#,		
+					INSTANCE_STATE_ID = #instanceStateId#,	
+					SERVICE_REQ_ID = #serviceReqId#,		
+					SERVICE_RES_REQ_ID = #serviceResReqId#
+		where 
+			INSTANCE_ID	= #instanceId#
+	</update>
+	
+	<!-- 查询所有CONTROL_TYPE为RUNNING的已启动的子流程任务  -->
+	<typeAlias alias="BpmTaskControlPo" type="com.gitcloud.tankflow.model.po.BpmTaskControlPo" />
+	<select id="getTaskControlByCtrType" parameterClass="hashMap" resultClass="BpmTaskControlPo">
+		SELECT t.TASK_ID taskId,
+			t.TASK_OBJ_ID taskObjId,
+			t.TASK_OBJ_TYPE taskObjType,
+			t.WF_TASK_ID wfTaskId,
+			t.CONTROL_TYPE controlType
+		FROM BPM_TASK_CONTROL t 
+		WHERE t.CONTROL_TYPE = #controlType#
+		AND t.DEAL_FLAG = '4'
+	</select>
+	
+	<update id="updateTaskControlFlag" parameterClass="BpmTaskControlPo">
+		 update BPM_TASK_CONTROL set  
+		        DEAL_FLAG = 'dealFlag'
+	     where TASK_ID = #taskId#
+	</update>
+	<update id="updateTaskControlType" parameterClass="BpmTaskControlPo">
+		 update BPM_TASK_CONTROL set  
+		        CONTROL_TYPE = #controlType#
+	     where TASK_ID = #taskId#
+	</update>
+	
+	<select id="getTaskControlById" parameterClass="hashMap" resultClass="BpmTaskControlPo">
+		SELECT t.TASK_ID taskId,
+			t.TASK_OBJ_ID taskObjId,
+			t.TASK_OBJ_TYPE taskObjType,
+			t.WF_TASK_ID wfTaskId,
+			t.CONTROL_TYPE controlType
+		FROM BPM_TASK_CONTROL t 
+		WHERE t.TASK_ID = #taskId#
+	</select>
+	
+	<select id="getTaskControlRecordById" parameterClass="hashMap" resultClass="com.gitcloud.tankflow.model.po.BpmTaskControlRecordPo">
+		SELECT RESULT_RECORD_LOB as resultRecordLob, RECORD_ID as recordId
+		FROM BPM_TASK_CONTROL_RECORD 
+		WHERE TASK_ID = #taskId#
+	</select>
+	
+	<!-- 查询子流实例节点的节点数量和完成节点数量  -->
+	<select id="getInstanceSpnodeById" parameterClass="java.lang.String"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceSpnodePo">
+		SELECT t.SPNODE_ID spnodeId,
+			t.SUB_COUNT subCount,
+			t.FIN_COUNT finCount
+		FROM BPM_INSTANCE_NODE_SP t 
+		WHERE t.SPNODE_ID = #id#
+	</select>
+	
+	<!-- 更新taskControlRecord，添加结束时间  -->
+	<typeAlias alias="BpmTaskControlRecordPo" type="com.gitcloud.tankflow.model.po.BpmTaskControlRecordPo" />
+	<update id="saveTcRecord" parameterClass="BpmTaskControlRecordPo">
+		 update BPM_TASK_CONTROL_RECORD set  
+		        END_TIME = #endTime#
+	     where TASK_ID = #taskId#
+	</update>
+	
+	<update id="updateTaskControlRecord" parameterClass="BpmTaskControlRecordPo">
+		update BPM_TASK_CONTROL_RECORD set
+			TASK_OBJ_ID				=#taskObjId#,
+			TASK_OBJ_TYPE			=#taskObjType#,
+			WF_TASK_ID				=#wfTaskId#,
+			INST_NODE_ID			=#instNodeId#,
+			BEGIN_TIME				=#beginTime#,
+			END_TIME				=#endTime#,
+			RESULT_STATUS			=#resultStatus#,
+			RESULT_RECORD			=#resultRecord#,
+			LOG_ID					=#logId#,
+			RESULT_RECORD_LOB		=#resultRecordLob#
+	     where TASK_ID = #taskId#
+	</update>
+	
+	<update id="updateTaskControlRecordState" parameterClass="BpmTaskControlRecordPo">
+		 update BPM_TASK_CONTROL_RECORD set  
+		        RESULT_RECORD_LOB = #resultRecordLob#,
+		        RESULT_RECORD = #resultRecord#,
+		        END_TIME = #endTime#,
+		        RESULT_STATUS = #resultStatus#
+	     where RECORD_ID = #recordId#
+	</update>
+	
+	<!-- 删除完成的任务项  -->
+	<delete id="removeTaskControlByTaskId" parameterClass="java.lang.String">
+		DELETE FROM BPM_TASK_CONTROL WHERE TASK_ID=#taskId#;
+	</delete>
+	
+	<!-- 更新spnode状态  -->
+	<update id="updateSpnodeState" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceSpnodePo">
+		 update BPM_INSTANCE_NODE_SP set  
+		        SPNODE_STATE = #spnodeState#
+	     where SPNODE_ID = #spnodeId#
+	</update>
+	
+	<!-- 查询子流实例节点的节点数量和完成节点数量  -->
+	<select id="getInstanceNode" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodePo">
+		SELECT t.INSTANCE_NODE_ID instanceNodeId,
+			t.NODE_NAME nodeName,
+			t.IS_NEED_EXECUTE isNeedExecute,
+			t.IS_AUTO_NODE isAutoNode,
+			t.TYPE_ID typeId,
+			t.outtime,
+			t.exception_code  exceptionCode
+		FROM BPM_INSTANCE_NODE t 
+		WHERE t.INSTANCE_ID = #instanceId# 
+		  AND t.WF_NODE_ID  = #wfNodeId#
+	</select>
+	
+	<!-- 添加任务  -->
+	<insert id="addTaskControl" parameterClass="BpmTaskControlPo">  
+      INSERT INTO BPM_TASK_CONTROL(TASK_ID,TASK_OBJ_ID,TASK_OBJ_TYPE,WF_TASK_ID,CONTROL_TYPE,DEAL_FLAG) 
+      	                  VALUES(#taskId#,#taskObjId#,#taskObjType#,#wfTaskId#,#controlType#,"4")
+	</insert>
+	
+	<!-- 添加任务记录  -->
+	<insert id="addTaskControlRecord" parameterClass="BpmTaskControlRecordPo">  
+      INSERT INTO BPM_TASK_CONTROL_RECORD(RECORD_ID,TASK_ID,TASK_OBJ_ID,TASK_OBJ_TYPE,WF_TASK_ID,INST_NODE_ID,BEGIN_TIME,END_TIME,RESULT_STATUS,RESULT_RECORD,LOG_ID,RESULT_RECORD_LOB,CREAT_TIME) 
+      	                  VALUES(#recordId#,#taskId#,#taskObjId#,#taskObjType#,#wfTaskId#,#instNodeId#,#beginTime#,#endTime#,#resultStatus#,#resultRecord#,#logId#,#resultRecordLob#,#createTime#)
+	</insert>
+	<!-- 查询任务记录 -->
+	<select id="findTaskControlRecord" parameterClass="java.util.Map"
+			resultClass="com.gitcloud.tankflow.model.po.BpmTaskControlRecordPo">
+		SELECT 
+			RECORD_ID 				recordId,
+			TASK_ID					taskId,
+			TASK_OBJ_ID				taskObjId,
+			TASK_OBJ_TYPE			taskObjType,
+			WF_TASK_ID				wfTaskId,
+			INST_NODE_ID			instNodeId,
+			BEGIN_TIME				beginTime,
+			END_TIME				endTime,
+			RESULT_STATUS			resultStatus,
+			RESULT_RECORD			resultRecord,
+			LOG_ID					logId,
+			RESULT_RECORD_LOB		resultRecordLob,
+			CREAT_TIME				createTime
+		FROM 
+			BPM_TASK_CONTROL_RECORD t 
+		WHERE TASK_ID = #taskId# 
+	</select>
+	
+	
+	<!-- 更新instanceNode  -->
+	<update id="updateInstanceNode" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodePo">
+		 update BPM_INSTANCE_NODE set  
+		        NODE_NAME = #nodeName#,
+		        OUTTIME   = #outtime#,
+		        EXCEPTION_CODE = #exceptionCode#,
+		        IS_AUTO_NODE = #isAutoNode#
+	     where INSTANCE_NODE_ID = #instanceNodeId#
+	</update>
+	<!-- 更新instanceNode状态 -->
+	<update id="updateInstanceNodeState" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodePo">
+		 update BPM_INSTANCE_NODE set  
+		        NODE_STATE_ID = #nodeStateId#
+	     where INSTANCE_NODE_ID = #instanceNodeId#
+	</update>
+	<!-- wmy,更新instanceNode状态 -->
+	<update id="updateNodeStateId" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodePo">
+		UPDATE BPM_INSTANCE_NODE BIN
+		SET BIN.NODE_STATE_ID = #nodeStateId#
+		WHERE
+		IS_ACTIVE = 'Y'
+		AND INSTANCE_ID = #instanceId#
+		AND NODE_STATE_ID NOT IN(0, 5)
+	</update>
+	<!-- 更新instance的状态  -->
+	<update id="updateInstanceState" parameterClass="com.gitcloud.tankflow.model.po.BpmInstancePo">
+		 update BPM_INSTANCE set  
+		        INSTANCE_STATE_ID = #instanceStateId#
+	     where INSTANCE_ID = #instanceId#
+	</update>
+	
+	<!-- 查询实例节点列表 -->
+	<select id="findInstanceNodeListByParam" parameterClass="java.util.Map" resultClass="BpmInstanceNodePo">  
+	   <![CDATA[   
+	   		select 
+		      	INSTANCE_NODE_ID 	instanceNodeId,
+		      	NODE_NAME			nodeName,
+		      	TYPE_ID				typeId,
+		      	OPERATOR_ID			operatorId,
+		      	MODEL_NODE_ID		modelNodeId,
+		      	INSTANCE_ID			instanceId,
+		      	WF_NODE_ID			wfNodeId,
+		      	NODE_STATE_ID		nodeStateId,
+		      	OUTTIME				outtime,
+		      	EXCEPTION_CODE		exceptionCode,
+		      	IS_AUTO_NODE		isAutoNode,
+		      	IS_NEED_EXECUTE		isNeedExecute,
+		      	IS_ACTIVE			isActive
+		    from
+		    	BPM_INSTANCE_NODE
+		    where 
+		    	IS_ACTIVE = 'Y'
+      	 ]]>
+      	  <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="instanceId">
+		 		INSTANCE_ID = #instanceId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="wfNodeId">
+		 		WF_NODE_ID = #wfNodeId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="instanceNodeId">
+		 		INSTANCE_NODE_ID = #instanceNodeId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="modelNodeId">
+		 		MODEL_NODE_ID = #modelNodeId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	
+	<!-- 批量添加实例节点  -->
+	<insert id="addInstanceNodes" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_NODE(
+				INSTANCE_NODE_ID,NODE_NAME,TYPE_ID,OPERATOR_ID,MODEL_NODE_ID,INSTANCE_ID,
+				WF_NODE_ID,NODE_STATE_ID,OUTTIME,EXCEPTION_CODE,IS_AUTO_NODE,IS_NEED_EXECUTE,IS_ACTIVE) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#modelNodeParams[].instanceNodeId#,#modelNodeParams[].nodeName#,#modelNodeParams[].typeId#,#modelNodeParams[].operatorId#,
+				 #modelNodeParams[].modelNodeId#,#modelNodeParams[].instanceId#,#modelNodeParams[].wfNodeId#,#modelNodeParams[].nodeStateId#,#modelNodeParams[].outtime#,
+				 #modelNodeParams[].exceptionCode#,#modelNodeParams[].isAutoNode#,#modelNodeParams[].isNeedExecute#,#modelNodeParams[].isActive#) 
+			]]>
+		</iterate>
+	</insert>
+	<!-- 添加实例节点  -->
+	<insert id="addInstanceNode" parameterClass="BpmInstanceNodePo">
+		insert into BPM_INSTANCE_NODE(
+				INSTANCE_NODE_ID,NODE_NAME,TYPE_ID,OPERATOR_ID,MODEL_NODE_ID,INSTANCE_ID,
+				WF_NODE_ID,NODE_STATE_ID,OUTTIME,EXCEPTION_CODE,IS_AUTO_NODE,IS_NEED_EXECUTE,IS_ACTIVE)
+		 values (
+				 #instanceNodeId#, #nodeName#,
+				 #typeId#, #operatorId#,
+				 #modelNodeId#, #instanceId#,
+				 #wfNodeId#, #nodeStateId#,
+				 #outtime#, #exceptionCode#,
+				 #isAutoNode#, #isNeedExecute#, #isActive#
+				)
+	</insert>
+	<!-- 批量添加实例节点业务关联记录  -->
+	<insert id="addInstanceNodeOriginals" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_NODE_ORIGINAL(ORIGINAL_ID,INSTANCE_NODE_ID,SERVICE_MODULE_ID) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#modelNodeParams[].originalId#,#modelNodeParams[].instanceNodeId#,#modelNodeParams[].serviceModuleId#) 
+			]]>
+		</iterate>
+	</insert>
+	<!-- 添加实例节点业务关联记录  -->
+	<insert id="addInstanceNodeOriginal" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeOriginalPo">	
+			insert into BPM_INSTANCE_NODE_ORIGINAL(
+				ORIGINAL_ID,INSTANCE_NODE_ID,SERVICE_MODULE_ID) 
+			values 
+				( #originalId#,#instanceNodeId#,#serviceModuleId# ) 
+	</insert>
+	
+	<select id="getInstanceNodeOriginal" parameterClass="java.lang.String"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeOriginalPo">
+		SELECT t.ORIGINAL_ID originalId,
+			t.INSTANCE_NODE_ID instanceNodeId,
+			t.SERVICE_MODULE_ID serviceModuleId
+		FROM BPM_INSTANCE_NODE_ORIGINAL t 
+		WHERE t.INSTANCE_NODE_ID = #instanceNodeId# 
+	</select>
+	<!-- 更新NodeOriginal -->
+	<update id="updateInstanceNodeOriginal" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeOriginalPo">
+		UPDATE BPM_INSTANCE_NODE_ORIGINAL set
+			SERVICE_MODULE_ID = #serviceModuleId#
+		WHERE t.INSTANCE_NODE_ID = #instanceNodeId# 
+	</update>
+	
+	<!-- 批量添加实例节点参数  -->
+	<insert id="addInstanceNodeParams" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_NODE_PARAMS(PARAM_ID, PARAM_KEY, PARAM_NAME, PARAM_VALUE, PARAM_IO_CODE, PARAM_OPER_CODE, ORIGINAL_ID) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#params[].paramId#,#params[].paramKey#,#params[].paramName#,#params[].paramValue#,#params[].paramIoCode#,#params[].paramOperCode#,#params[].originalId#) 
+			]]>
+		</iterate>
+	</insert>
+	<insert id="addInstanceNodeParam" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_NODE_PARAMS(PARAM_ID, PARAM_KEY, PARAM_NAME, PARAM_VALUE, PARAM_IO_CODE, PARAM_OPER_CODE, ORIGINAL_ID) values 
+			(#paramId#,#paramKey#,#paramName#,#paramValue#,#paramIoCode#,#paramOperCode#,#originalId#) 
+		]]>
+	</insert>
+	
+	<!-- 获取实例参数 -->
+	<select id="getInstanceNodeParams" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">
+		SELECT t.PARAM_KEY paramKey,
+			t.PARAM_NAME paramName,
+			t.PARAM_VALUE paramValue,
+			t.PARAM_OPER_CODE paramOperCode
+		FROM BPM_INSTANCE_NODE_PARAMS t 
+		WHERE t.ORIGINAL_ID = #originalId# AND t.PARAM_IO_CODE = #paramIoCode#
+	</select>
+	<!-- 根据ORIGINAL_ID读取服务策略的输出参数 -->
+	<select id="getInstanceNodeOutputParams" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmServiceModuleParamPo">
+		select m.PARAM_KEY as paramKey, m.PARAM_NAME as paramName, m.PARAM_VALUE as paramValue, m.PARAM_OPER_CODE as paramOperCode 
+			from BPM_INSTANCE_NODE_ORIGINAL o, BPM_SERVICE_MODULE_PARAM m 
+			where m.MODULE_ID=o.SERVICE_MODULE_ID and o.ORIGINAL_ID= #originalId#  and m.PARAM_IO_CODE=#paramIoCode#;
+	</select>
+	
+	<select id="getInstanceNodeParamsByParamKey" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">
+		SELECT t.PARAM_KEY paramKey,
+			t.PARAM_NAME paramName,
+			t.PARAM_VALUE paramValue
+		FROM BPM_INSTANCE_NODE_PARAMS t 
+		WHERE t.ORIGINAL_ID = #originalId# AND t.PARAM_KEY = #paramKey#
+	</select>
+	
+	<!-- 更新instanceNodeParam  -->
+	<update id="updateInstanceNodeParam" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">
+		 update BPM_INSTANCE_NODE_PARAMS set  
+		        PARAM_VALUE = #paramValue#
+	     where PARAM_ID = #paramId#
+	</update>
+	<!-- 批量更新instanceNodeParam -->
+	<update id="batchUpdateInstanceNodeParam" parameterClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">
+		update BPM_INSTANCE_NODE_PARAMS set
+			PARAM_KEY 		= #paramKey#,
+			PARAM_NAME 		= #paramName#,
+			PARAM_VALUE 	= #paramValue#,
+			PARAM_IO_CODE 	= #paramIoCode#,
+			PARAM_OPER_CODE = #paramOperCode#,
+			ORIGINAL_ID 	= #originalId#
+		where PARAM_ID = #paramId#
+	</update>
+	<!-- 删除instanceNodeParam -->
+	<delete id="removeinstanceNodeParamByOriginalId" parameterClass="java.lang.String">
+		DELETE FROM BPM_INSTANCE_NODE_PARAMS WHERE ORIGINAL_ID=#originalId#;
+	</delete>
+	<!-- 批量添加实例脚本节点数据  -->
+	<insert id="addInstanceNodeScripts" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_NODE_SCRIPTS(SCRIPT_ID, REL_SCRIPT_ID, ORIGINAL_ID, EXE_ORDER) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#params[].scriptId#,#params[].relScriptId#,#params[].originalId#,#params[].exeOrder#) 
+			]]>
+		</iterate>
+	</insert>
+	<!-- 添加实例脚本节点数据  -->
+	<insert id="addInstanceNodeScript" parameterClass="BpmInstanceNodeScriptsPo">	
+			insert into BPM_INSTANCE_NODE_SCRIPTS(SCRIPT_ID, REL_SCRIPT_ID, ORIGINAL_ID) values 
+				(#scriptId#,#relScriptId#,#originalId#) 
+	</insert>
+	<!-- 更新脚本关联 -->
+	<update id="updateInstanceNodeScript">
+		update BPM_INSTANCE_NODE_SCRIPTS set
+			REL_SCRIPT_ID = #relScriptId#
+		where SCRIPT_ID = #scriptId#
+	</update>
+	
+	<!-- 批量添加实例命令节点数据  -->
+	<insert id="addInstanceNodeCommands" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_NODE_COMMANDS(COMMAND_ID, COMMAND_CONTENT, ORIGINAL_ID, EXE_ORDER) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#params[].commandId#,#params[].commandContent#,#params[].originalId#,#params[].exeOrder#) 
+			]]>
+		</iterate>
+	</insert>
+	<!-- 添加实例命令节点数据  -->
+	<insert id="addInstanceNodeCommand" parameterClass="BpmInstanceNodeCommandsPo">	
+			insert into BPM_INSTANCE_NODE_COMMANDS(COMMAND_ID, COMMAND_CONTENT, ORIGINAL_ID) values 
+				(#commandId#,#commandContent#,#originalId#) 
+	</insert>
+	<!-- 更新命令内容 -->
+	<update id="updateInstanceNodeCommand" parameterClass="BpmInstanceNodeCommandsPo">
+		update BPM_INSTANCE_NODE_COMMANDS set
+			COMMAND_CONTENT = #commandContent#
+		where ORIGINAL_ID = #originalId#
+	</update>
+	
+	<!-- 批量添加实例参数  -->
+	<insert id="addInstanceParams" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_INSTANCE_PARAMS(PARAM_ID, PARAM_KEY, PARAM_NAME, PARAM_VALUE, INSTANCE_ID, IS_AUTO) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#params[].paramId#,#params[].paramKey#,#params[].paramName#,#params[].paramValue#,#params[].instanceId#,#params[].isAuto#) 
+			]]>
+		</iterate>
+	</insert>
+	
+	<!-- 获取实例参数 -->
+	<select id="getInstanceParams" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceParamsPo">
+		SELECT t.PARAM_KEY paramKey,
+			t.PARAM_VALUE paramValue
+		FROM BPM_INSTANCE_PARAMS t 
+		WHERE t.INSTANCE_ID = #instanceId# 
+	</select>
+	
+	<!-- 获取命令节点信息 -->
+	<select id="findComandByField" parameterClass="hashMap" resultClass="BpmInstanceNodeCommandsPo">
+		<![CDATA[
+			select 
+				COMMAND_ID 			commandId,
+				COMMAND_CONTENT  	commandContent,
+				ORIGINAL_ID 		originalId,
+				EXE_ORDER 			exeOrder
+			from 
+				BPM_INSTANCE_NODE_COMMANDS
+			where 1 = 1
+		]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="commandId">
+		 		COMMAND_ID = #commandId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="originalId">
+		 		ORIGINAL_ID = #originalId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	<!-- 获脚本借点信息 -->
+	<select id="findScriptsByFile" parameterClass="hashMap" resultClass="BpmInstanceNodeScriptsPo">
+		<![CDATA[
+			select 
+				SCRIPT_ID 			scriptId,
+				REL_SCRIPT_ID  		relScriptId,
+				ORIGINAL_ID 		originalId,
+				EXE_ORDER 			exeOrder
+			from 
+				BPM_INSTANCE_NODE_SCRIPTS
+			where 1 = 1
+		]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="scriptId">
+		 		SCRIPT_ID = #scriptId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="originalId">
+		 		ORIGINAL_ID = #originalId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="relScriptId">
+		 		REL_SCRIPT_ID = #relScriptId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	
+	<!-- 获取任务节点记录 -->
+	<select id="findControlRecordListByParam" parameterClass="java.util.Map"  resultClass="BpmTaskControlRecordPo">
+	<![CDATA[
+			 select 
+				 	RECORD_ID			recordId,              
+					TASK_ID				taskId,
+					TASK_OBJ_ID			taskObjId,
+					TASK_OBJ_TYPE		taskObjType,
+					WF_TASK_ID			wfTaskId,               
+					INST_NODE_ID		instNodeId,               
+					BEGIN_TIME			beginTime,                 
+					END_TIME			endTime,                 
+					RESULT_STATUS		resultStatus,               
+					RESULT_RECORD		resultRecord,            
+					LOG_ID				logId,         
+					RESULT_RECORD_LOB	resultRecordLob,            
+					CREAT_TIME			createTime                 
+			 from  
+			 	BPM_TASK_CONTROL_RECORD
+			 where 
+			 	 1 = 1
+		 ]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="recordId">
+		 		RECORD_ID = #recordId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="taskId">
+		 		TASK_ID	= #taskId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="taskObjId">
+		 		TASK_OBJ_ID	= #taskObjId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="wfTaskId">
+		 		WF_TASK_ID	= #wfTaskId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="instNodeId">
+		 		INST_NODE_ID	= #instNodeId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="logId">
+		 		LOG_ID	= #logId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" " property="orderFile">
+		 		order by $orderFile$ $orderType$
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	
+	<!-- 获取实例节点参数 -->
+	<select id="getInstanceNodeParamsByNodeId" parameterClass="String"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">
+		select p.PARAM_KEY paramKey,p.PARAM_VALUE paramValue 
+		from BPM_INSTANCE_NODE_PARAMS p 
+		where p.original_id = (select o.original_id from BPM_INSTANCE_NODE_ORIGINAL o where o.instance_node_id = #nodeId#)
+	</select>
+	
+	<!-- 获取实例节点脚本数据 -->
+	<resultMap class="java.util.HashMap" id="getScriptResult">
+		<result property="scriptCode" column="name"/>
+		<result property="scriptId" column="id"/>
+	</resultMap>
+	<select id="getInstanceNodeScriptByNodeId" parameterClass="String" resultMap="getScriptResult">
+		<![CDATA[
+		select scr.id,scr.name from CLOUD_SCRIPT scr where scr.ID = 
+			(select s.rel_script_id from BPM_INSTANCE_NODE_SCRIPTS s where s.original_id = 
+				(select o.original_id from BPM_INSTANCE_NODE_ORIGINAL o where o.instance_node_id = #nodeId#));
+		]]>
+	</select>
+	<select id="findInstanceNodeOrgByParam" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeOriginalPo">
+		<![CDATA[
+			SELECT t.ORIGINAL_ID originalId,
+				t.INSTANCE_NODE_ID instanceNodeId,
+				t.SERVICE_MODULE_ID serviceModuleId
+			FROM BPM_INSTANCE_NODE_ORIGINAL t 
+			WHERE 1 = 1
+		]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="originalId">
+		 		t.ORIGINAL_ID = #originalId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="instanceNodeId">
+		 		t.INSTANCE_NODE_ID	= #instanceNodeId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="serviceModuleId">
+		 		t.SERVICE_MODULE_ID	= #serviceModuleId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	<select id="getInstanceNodeListByMap" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmInstanceNodeParamsPo">
+		<![CDATA[
+			SELECT
+				t.PARAM_ID 			paramId,
+				t.PARAM_KEY 		paramKey,
+				t.PARAM_NAME 		paramName,
+				t.PARAM_VALUE 		paramValue,
+				t.PARAM_IO_CODE		paramIoCode,
+				t.PARAM_OPER_CODE	paramOperCode,
+				t.ORIGINAL_ID		originalId
+			FROM BPM_INSTANCE_NODE_PARAMS t 
+			WHERE 1 = 1
+		]]>
+		<dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="paramId">
+		 		t.PARAM_ID = #paramId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="paramKey">
+		 		t.PARAM_KEY = #paramKey#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="paramName">
+		 		t.PARAM_NAME = #paramName#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="paramValue">
+		 		t.PARAM_VALUE = #paramValue#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="paramIoCode">
+		 		t.PARAM_IO_CODE = #paramIoCode#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="paramOperCode">
+		 		t.PARAM_OPER_CODE = #paramOperCode#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="originalId">
+		 		t.ORIGINAL_ID = #originalId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	<select id="getInstanceReportNodes" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.vo.BpmInstanceNodeReportQueryVo">
+			<![CDATA[
+			SELECT
+				A.INSTANCE_NODE_ID	instanceNodeId,
+				A.NODE_NAME			nodeName,
+				A.TYPE_ID			exeTypeCode,
+				A.OUTTIME			outtime,
+				F.DIC_NAME	exceptionCode,
+				A.IS_AUTO_NODE		isAutoNode,
+				A.NODE_STATE_ID		nodeStateId,
+				A.WF_NODE_ID		wfNodeId,
+				B.ORIGINAL_ID		originalId,
+				C.MODULE_NAME		moduleName,
+				C.EXE_PATH			exePath,
+				C.CHECK_CODE		checkCode,
+				E.COMPONENT_ICON	componentIcon
+			FROM BPM_INSTANCE_NODE A,BPM_INSTANCE_NODE_ORIGINAL B,BPM_SERVICE_MODULE C,BPM_NODE_COMPONENT E,ADMIN_DIC F
+			WHERE A.INSTANCE_NODE_ID = B.INSTANCE_NODE_ID 
+				AND   A.TYPE_ID = E.COMPONENT_TYPE 
+				AND   B.SERVICE_MODULE_ID = C.MODULE_ID 
+				AND   A.EXCEPTION_CODE = F.DIC_CODE
+			]]>
+			<dynamic prepend=" and " >
+			 	<isNotEmpty prepend=" and " property="instanceId">
+			 		A.INSTANCE_ID = #instanceId#
+			 	</isNotEmpty>
+			 	<isNotEmpty prepend=" and " property="instanceNodeId">
+			 		A.INSTANCE_NODE_ID = #instanceNodeId#
+			 	</isNotEmpty>
+		 	</dynamic>
+		 	order by A.WF_NODE_ID asc
+	</select>
+	<!-- 传入list返回list -->
+	<select id="getInstanceNodeListByList" parameterClass="java.util.List" resultClass="java.util.HashMap" remapResults="true">
+			SELECT
+				t.PARAM_NAME 		paramName,
+				t.PARAM_VALUE 		paramValue,
+				t.ORIGINAL_ID		originalId
+			FROM 	BPM_INSTANCE_NODE_PARAMS t 
+			WHERE 	t.ORIGINAL_ID IN
+				<iterate open="(" close=")" conjunction="," >   
+                    #[]#   
+                </iterate>  
+	</select>		
+	<!-- 传入获取命令信息 -->
+	<select id="getCommandsByOriginals" parameterClass="java.util.List" resultClass="java.util.HashMap">
+			SELECT
+				t.COMMAND_CONTENT 		commandContent,
+				t.ORIGINAL_ID		originalId
+			FROM 	BPM_INSTANCE_NODE_COMMANDS t 
+			WHERE 	t.ORIGINAL_ID IN
+				<iterate open="(" close=")" conjunction="," >   
+                    #[]#   
+                </iterate>  
+	</select>		
+	<!-- 传入获取脚本信息 -->
+	<select id="getScriptsByOriginals" parameterClass="java.util.List" resultClass="java.util.HashMap">
+			SELECT 
+				PAK.NAME packageName,MO.NAME moduleName,SCR.FILE_NAME scriptFileName, S.ORIGINAL_ID
+				 FROM 
+					CLOUD_SCRIPT SCR,
+					CLOUD_SCRIPT_MODEL MO,
+					CLOUD_SCRIPT_PACKAGE PAK,
+					BPM_INSTANCE_NODE_SCRIPTS S 
+				WHERE  S.rel_script_id = SCR.ID
+				AND	      SCR.MODEL_MODEL_FK = MO.ID
+				AND	      MO.PACKAGE_MODEL_FK = PAK.ID
+				AND	      S.ORIGINAL_ID IN
+				<iterate open="(" close=")" conjunction="," >   
+                    #[]#   
+                </iterate>  
+	</select>
+	
+	<update id="closeInstanceBySrId" parameterClass="BpmInstancePo">
+		<![CDATA[
+			update BPM_INSTANCE set END_DATE = #endDate#, INSTANCE_STATE_ID = #instanceStateId# where SERVICE_REQ_ID = #serviceReqId#
+		]]>
+	</update>
+	<!-- 根据srId，查询子流程列表信息 TYPE_ID：3是审批流，4是子流-->
+	<select id="findSubInstanceListBySrId" parameterClass="java.util.Map"  resultClass="BpmInstancePo">
+		<![CDATA[
+		SELECT
+			bi.INSTANCE_ID instanceId,
+			bi.INSTANCE_NAME instanceName,
+			bi.TYPE_ID typeId,
+			bi.APP_ID appId,
+			bi.CREATOR_ID creatorId,
+			bi.START_DATE startDate,
+			bi.END_DATE endDate,
+			bi.MODEL_ID modelId,
+			bi.WF_MODEL_ID wfModelId,
+			bi.WF_INSTANCE_ID wfInstanceId,
+			bi.INSTANCE_STATE_ID instanceStateId,
+			bi.SERVICE_REQ_ID serviceReqId,
+			bi.SERVICE_RES_REQ_ID serviceResReqId,
+			bi.IS_ACTIVE isActive
+		FROM
+			BPM_INSTANCE bi
+		WHERE
+			bi.IS_ACTIVE = 'Y'
+		AND bi.SERVICE_REQ_ID = #srId#
+		AND bi.TYPE_ID = '4'
+		 ]]>
+	</select>
+</sqlMap>

@@ -1,0 +1,16 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="log-package" extends="icms-package" namespace="/log">
+	</package>
+
+	<!-- 字典管理 -->
+	<package name="log" extends="log-package,json-default,struts-default"
+		namespace="/log">
+		
+		<action name="findLogPage" class="logAction" method="findLogPage"></action>
+	</package>
+
+</struts>

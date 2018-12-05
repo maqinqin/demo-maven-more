@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="workflowModel">
+
+	<typeAlias alias="BpmModelPo" type="com.gitcloud.tankflow.model.po.BpmModelPo" />
+
+	<typeAlias alias="BpmModelDiagramPo"
+		type="com.gitcloud.tankflow.model.po.BpmModelDiagramPo" />
+	<typeAlias alias="BpmModelNodePo"
+		type="com.gitcloud.tankflow.model.po.BpmModelNodePo" />
+
+	<typeAlias alias="BpmTemplateTypePo"
+		type="com.gitcloud.tankflow.model.po.BpmTemplateTypePo" />
+
+	<!-- 通过主键编号查询相应流程模板对象 -->
+	<select id="findModelDiagramByModelIdSQL" resultClass="BpmModelDiagramPo">
+		select
+		MODEL_ID modelId,
+		DIAGRAM_XML diagramXml,
+		JSON_DATA jsonData
+		from
+		BPM_MODEL_DIAGRAM
+		where
+		MODEL_ID = #modelId#
+	</select>
+
+	<!-- 通过主键编号查询相应流程模板对象 -->
+	<select id="selTTPoSQL" resultClass="BpmTemplateTypePo">
+		select
+		TYPE_ID
+		typeId,
+		TYPE_NAME typeName,PARENT_ID parentId,TYPE_DESC typeDesc,TYPE_LEVEL
+		typeLevel
+		from
+		BPM_TEMPLATE_TYPE
+		where
+		TYPE_ID =
+		#tid#
+	</select>
+
+	<select id="selAllTTPoSQL" resultClass="BpmTemplateTypePo">
+		select
+		TYPE_ID
+		typeId,
+		TYPE_NAME typeName,PARENT_ID parentId,TYPE_DESC typeDesc,TYPE_LEVEL
+		typeLevel
+		from
+		BPM_TEMPLATE_TYPE
+	</select>
+
+	<!-- 通过模板编号查询相应的最新的流程模板 -->
+	<select id="findBpmModelByTempleIdSQL" resultClass="BpmModelPo">
+		select
+		MODEL_ID
+		modelId,
+		MODEL_NAME modelName,
+		TYPE_ID
+		typeId,
+		APP_ID
+		appId,
+		CREATOR_ID
+		creatorId,
+		CREATE_DATE createDate,
+		WF_MODEL_ID
+		wfModelId,
+		REMARK remark,
+		IS_ACTIVE isActive
+		from
+		BPM_MODEL
+		where
+		TEMPLATE_ID =
+		#templeId#
+		order by CREATE_DATE desc
+		limit 0,1
+	</select>
+
+	<!-- 根据Id查询组件信息 -->
+	<select id="findBpmModelById" resultClass="BpmModelPo">
+		select
+		MODEL_ID
+		modelId,
+		MODEL_NAME modelName,
+		TYPE_ID
+		typeId,
+		APP_ID
+		appId,
+		CREATOR_ID
+		creatorId,
+		CREATE_DATE createDate,
+		WF_MODEL_ID
+		wfModelId,
+		REMARK remark,
+		IS_ACTIVE isActive
+		from
+		BPM_MODEL
+		where
+		MODEL_ID = #modelId#
+	</select>
+
+
+
+	<!-- 查询流程模板数据SQL语句 -->
+	<sql id="findAllModel">
+		<![CDATA[
+				SELECT
+			MODEL_ID modelId,
+			MODEL_NAME modelName,
+			TYPE_ID typeId,
+			APP_ID appId,
+			CREATOR_ID creatorId,
+			CREATE_DATE createDate,
+			WF_MODEL_ID wfModelId,
+			IS_ACTIVE isActive
+		FROM
+			BPM_MODEL AS bm
+		
+		]]>
+	</sql>
+
+	<!-- 统计流程模板总数 -->
+	<select id="countModelTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="findAllModel" />
+		) as recordTable
+	</select>
+
+	<!-- 查询流程模板数据SQL -->
+	<select id="findAllModel" parameterClass="hashMap" resultClass="hashMap"
+		remapResults="true">
+		<include refid="findAllModel" />
+		<!--  $_orderby$
+		ORDER BY
+			bm.CREATE_DATE DESC-->
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+
+	<sql id="modelSearchSQL">
+		<![CDATA[
+		select
+		MODEL_ID
+		modelId,
+		MODEL_NAME modelName,
+		TYPE_ID
+		typeId,
+		APP_ID
+		appId,
+		CREATOR_ID creatorId,
+		CREATE_DATE createDate,
+		WF_MODEL_ID
+		wfModelId,
+		REMARK remark,
+		IS_ACTIVE isActive
+		from
+		BPM_MODEL
+		where 1=1 
+		]]>
+		<dynamic prepend="and">
+			<isNotEmpty prepend=" and " property="selName"><!-- 模糊查询不能用#,#在是用prepareStatement的?插入参数,$是文本替换 -->
+				MODEL_NAME like '%$selName$%'
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="selType">
+				TYPE_ID = #selType#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+
+	<!-- 统计搜索总数 -->
+	<select id="countModelSearchSQL" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="modelSearchSQL" />
+		) as recordTable
+	</select>
+
+	<!-- 分布请求搜索查询SQL -->
+	<select id="pageModelSearchSQL" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="modelSearchSQL" />
+		$_orderby$
+		limit #startIndex# ,#pageSize#
+	</select>
+
+
+	<!-- 获取子流节点 -->
+	<select id="getModelSpnodeByParams" parameterClass="hashMap"
+		resultClass="com.gitcloud.tankflow.model.po.BpmModelSpnodePo">
+		SELECT
+		t.SPNODE_ID instanceNodeId,
+		t.NODE_NAME nodeName,
+		t.IS_NEED_EXECUTE isNeedExecute,
+		t.IS_AUTO_NODE isAutoNode,
+		t.TYPE_ID
+		typeId
+		FROM BPM_MODEL_NODE_SP t
+		WHERE t.INSTANCE_ID = #instanceId#
+		AND
+		t.WF_NODE_ID = #wfNodeId#
+	</select>
+
+	<select id="findModelNodeListByParam" parameterClass="java.util.Map"
+		resultClass="BpmModelNodePo">  
+	   <![CDATA[   
+	   		select 
+		      	MODEL_NODE_ID   modelNodeId,
+		      	NODE_NAME		modelNodeName,
+		      	TYPE_ID			typeId,
+		      	EXCEPTION_CODE	exceptionCode,
+		      	MODEL_ID		modelId,
+		      	WF_NODE_ID		wfNodeId,
+		      	OUTTIME			outtime,
+		      	IS_AUTO_NODE	isAutoNode,
+		      	IS_ACTIVE		isActive
+		      	
+		    from
+		    	BPM_MODEL_NODE
+		    where 
+		    	IS_ACTIVE = 'Y'
+      	 ]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty prepend=" and " property="modelNodeId">
+				MODEL_NODE_ID =
+				#modelNodeId#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="wfNodeId">
+				WF_NODE_ID =
+				#wfNodeId#
+			</isNotEmpty>
+			<isNotEmpty prepend=" and " property="modelId">
+				MODEL_ID = #modelId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<!-- 查询子modelnodeOriginal -->
+	<select id="getModelNodeOriginals" parameterClass="hashMap"
+		resultClass="com.gitcloud.tankflow.model.po.BpmModelNodeOriginalPo">
+		SELECT t.ORIGINAL_ID originalId,
+		t.MODEL_NODE_ID
+		modelNodeId,
+		t.SERVICE_MODULE_ID serviceModuleId
+		FROM
+		BPM_MODEL_NODE_ORIGINAL t
+		WHERE t.MODEL_NODE_ID = #modelNodeId#
+	</select>
+
+
+	<!-- 查询ModelNodeScripts -->
+	<select id="getModelNodeScripts" parameterClass="hashMap"
+		resultClass="com.gitcloud.tankflow.model.po.BpmModelNodeScriptsPo">
+		SELECT t.SCRIPT_ID scriptId,
+		t.REL_SCRIPT_ID relScriptId,
+		t.ORIGINAL_ID originalId,
+		t.EXE_ORDER exeOrder
+		FROM
+		BPM_MODEL_NODE_SCRIPTS t
+		WHERE t.ORIGINAL_ID = #originalId#
+	</select>
+
+
+	<!-- 查询ModelNodeCommands -->
+	<select id="getModelNodeCommands" parameterClass="hashMap"
+		resultClass="com.gitcloud.tankflow.model.po.BpmModelNodeCommandsPo">
+		SELECT t.COMMAND_ID commandId,
+		t.COMMAND_CONTENT
+		commandContent,
+		t.ORIGINAL_ID originalId,
+		t.EXE_ORDER exeOrder
+		FROM
+		BPM_MODEL_NODE_COMMANDS t
+		WHERE t.ORIGINAL_ID = #originalId#
+	</select>
+
+
+	<!-- 查询模板全局变量ModelParams -->
+	<select id="getModelParams" parameterClass="hashMap"
+		resultClass="com.gitcloud.tankflow.model.po.BpmModelParamsPo">
+		SELECT t.PARAM_ID paramId,
+		t.PARAM_KEY paramKey,
+		t.PARAM_NAME paramName,
+		t.PARAM_VALUE paramValue,
+		t.MODEL_ID modelId,
+		t.IS_AUTO isAuto
+		FROM BPM_MODEL_PARAMS t
+		WHERE t.MODEL_ID = #modelId#
+	</select>
+
+	<!-- 查询模板全局变量ModelParams -->
+	<select id="getModelNodeParams" parameterClass="hashMap"
+		resultClass="com.gitcloud.tankflow.model.po.BpmModelNodeParamsPo">
+		SELECT t.PARAM_ID paramId,
+		t.PARAM_KEY paramKey,
+		t.PARAM_NAME paramName,
+		t.PARAM_VALUE paramValue,
+		t.PARAM_IO_CODE paramIoCode,
+		t.PARAM_OPER_CODE paramOperCode,
+		t.ORIGINAL_ID originalId
+		FROM BPM_MODEL_NODE_PARAMS t
+		WHERE t.ORIGINAL_ID = #originalId#
+	</select>
+</sqlMap>

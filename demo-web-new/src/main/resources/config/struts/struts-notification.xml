@@ -1,0 +1,13 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="notification-package" extends="icms-package" namespace="/notification">
+	</package>
+	
+	<package name="log-notification" extends="notification-package" namespace="/log/notification" >
+		<action name="findNotificationsPage" class="notiAction" method="findNotificationsPage"></action>
+		<action name="updateNotiState" class="notiAction" method="updateNotiState"></action>
+	</package>
+</struts>

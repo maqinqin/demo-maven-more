@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCmDevice-device">
+	<typeAlias alias="disPortGroupPo" type="com.git.cloud.resmgt.compute.model.po.CmDistributePortGroupPo" />
+	<typeAlias alias="cmHostePo" type="com.git.cloud.resmgt.common.model.po.CmHostPo" />
+	<typeAlias alias="cmDevicePo" type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="RmClusterPo" type="com.git.cloud.resmgt.compute.model.po.RmClusterPo" />
+	<typeAlias alias="hostVo" type="com.git.cloud.excel.model.vo.HostVo" />
+	<select id="isCmHost" parameterClass="java.util.Map" resultClass="cmDevicePo">
+	 SELECT
+		 c.ID as id
+	 FROM
+		 CM_HOST c
+	 WHERE
+		 c.ID = #id#
+	</select>
+	<select id="isCmVm" parameterClass="java.util.Map" resultClass="cmDevicePo">
+	 SELECT
+		 v.ID as id
+	 FROM
+		 CM_VM v
+	 WHERE
+		 v.ID = #id#
+	</select>
+	<update id="updateCmdeviceRunningState" parameterClass="cmDevicePo">
+		<![CDATA[
+			UPDATE 
+				CM_DEVICE 
+			SET 
+				RUNNING_STATE=#runningState# 
+			WHERE ID = #id#
+		]]>
+	</update>
+	<select id="findAllHostDevice" parameterClass="java.util.Map" resultClass="cmDevicePo">
+	SELECT
+		ho.ID id,					<!-- 物理机id -->
+		de.DEVICE_NAME deviceName	<!-- 物理机名称 -->
+	FROM
+		CM_HOST ho,
+		CM_DEVICE de,
+		RM_CLUSTER cl
+	WHERE
+		cl.ID = ho.CLUSTER_ID
+	AND ho.ID = de.ID
+	AND cl.ID = #clusterId#
+	AND de.IS_ACTIVE = 'Y'
+	</select>
+	<select id="findAllVmDevice" parameterClass="java.util.Map" resultClass="cmDevicePo">
+	SELECT
+		vm.ID id ,					
+		de.DEVICE_NAME deviceName	
+	FROM 
+		CM_DEVICE de,CM_VM vm LEFT JOIN CM_HOST h ON h.ID = vm.HOST_ID 
+	WHERE
+		de.ID = vm.ID AND h.CLUSTER_ID = #clusterId#
+	 AND de.IS_ACTIVE = 'Y' AND de.DEVICE_STATUS = 'ONLINE'
+	</select>
+	<select id="findAllCluster"  resultClass="RmClusterPo" parameterClass="java.util.Map">
+	SELECT
+		rm.ID AS id,
+		rm.CDP_ID cdpId,
+		rm.CLUSTER_NAME clusterName,
+		rm.ENAME ename,
+		rm.STORAGE_ID storage_id,
+		rm.VM_TYPE vmType,
+		rm.VM_DISTRI_TYPE vmDistriType,
+		rm.MANAGE_SERVER manageServer,
+		rm.MANAGE_SERVER_BAK manageServerBak,
+		rm.DATASTORE_TYPE datastoreType,
+		rm.NETWORK_CONVERGENCE networkConvergence,
+		rm.PLATFORM_TYPE platformType,
+		rm.RES_POOL_ID resPoolId,
+		rv.VIRTUAL_TYPE_CODE virtualTypeCode
+	FROM
+		RM_CLUSTER rm LEFT JOIN RM_VIRTUAL_TYPE rv ON rv.VIRTUAL_TYPE_ID = rm.VM_TYPE AND rv.IS_ACTIVE='Y'
+	WHERE
+		rm.IS_ACTIVE = 'Y' 
+	</select>
+	<select id="findVMByHostId" parameterClass="java.util.Map" resultClass="cmDevicePo">
+		SELECT
+			d.DEVICE_NAME as deviceName,
+			d.ID as id
+		FROM
+			CM_VM v,
+			CM_DEVICE d
+		WHERE
+			v.ID = d.ID
+		AND d.IS_ACTIVE = 'Y'
+		AND v.HOST_ID = #hostId# 
+		AND d.DEVICE_STATUS = 'ONLINE'
+	</select>
+	<select id="findHostInfoListByParams" parameterClass="java.util.Map" resultClass="hostVo">
+		SELECT
+		    d.DEVICE_NAME AS hostName,
+		    d.ID AS id,
+		    i.IP AS hostIp,
+		    h.MEM AS hostMem,
+		    h.MEM_USED AS usedMem,
+		    h.CPU AS hostCpu,
+		    h.CPU_USED AS usedCpu
+		FROM
+		    CM_HOST h
+		LEFT JOIN CM_DEVICE d ON h.ID = d.ID
+		LEFT JOIN rm_nw_openstack_ip_address i ON i.INSTANCE_ID = h.ID
+		WHERE
+		    d.IS_ACTIVE = 'Y'
+		AND h.CLUSTER_ID = #clusterId#
+	</select>
+	<!-- 查询最新的虚拟机信息 -->
+	<select id="findNewDevcieByHostId"  resultClass="cmDevicePo">
+		SELECT
+			SUBSTRING(d.DEVICE_NAME,LENGTH(d.DEVICE_NAME)-2,2) AS deviceName,
+			d.ID AS id,
+			v.CREATE_TIME AS createDateTime,
+			v.ORDER_NUM AS orderNum
+		FROM
+			CM_VM v,
+			CM_DEVICE d
+		WHERE
+			v.ID = d.ID
+		AND d.IS_ACTIVE = 'Y'
+		ORDER BY
+			createDateTime DESC,deviceName DESC,
+			orderNum DESC LIMIT 1
+	</select>
+	
+	<select id="findDistribHost"  parameterClass="java.lang.String" resultClass="cmHostePo">
+		SELECT
+			c.CPU cpu,
+			c.CPU_USED cpuUsed,
+			c.MEM_USED memUsed,
+			c.MEM mem,
+			(c.MEM-c.MEM_USED) lastMemSum,
+			c.ID AS Id,
+			c.CLUSTER_ID clusterId,
+			r.RES_POOL_ID resPoolId
+		FROM
+			CM_HOST c
+		LEFT JOIN RM_CLUSTER r ON r.ID = c.CLUSTER_ID
+		AND r.IS_ACTIVE = 'Y'
+		LEFT JOIN CM_DEVICE d ON d.ID = c.ID
+		AND d.IS_ACTIVE = 'Y'
+		WHERE
+			c.id IN(
+				SELECT
+					h.HOST_ID
+				FROM
+					CM_DISTRIBUTED_PORT_GROUP p,
+					CM_DISTRIBUTED_SWITCH_HOST h
+				WHERE
+					p.SWITCH_ID = h.SWITCH_ID
+				AND p.PORT_GROUP_NAME LIKE concat('%', #ipInfo#, '%')
+				AND p.IS_ACTIVE = 'Y'
+			)
+		AND c.IS_INVC = 'Y'
+		ORDER BY
+			lastMemSum DESC
+		LIMIT 1
+	</select>
+	<!-- 根据物理机和端口组部分信息，获取端口组ID -->
+	<select id="findDisPortGroupId"  parameterClass="java.util.Map" resultClass="disPortGroupPo">
+		SELECT
+			p.PORT_GROUP_ID portGroupId,
+			p.SWITCH_ID switchId,
+			s.DATACENTER_ID datacenterId
+		FROM
+			CM_DISTRIBUTED_SWITCH_HOST h,
+			CM_DISTRIBUTED_PORT_GROUP p
+		LEFT JOIN CM_DISTRIBUTED_SWITCH s ON s.SWITCH_ID = p.SWITCH_ID
+		WHERE
+			h.HOST_ID = #hostId#
+		AND p.SWITCH_ID = h.SWITCH_ID
+		AND p.PORT_GROUP_NAME LIKE concat('%', #ipInfo#, '%')
+		AND p.IS_ACTIVE = 'Y'
+	</select>
+</sqlMap>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<!-- 启动触发器的配置开始 -->  
+    <bean name="startQuertz" lazy-init="false" autowire="no"  
+        class="org.springframework.scheduling.quartz.SchedulerFactoryBean">  
+        <property name="triggers">  
+            <list>
+                <ref bean="autoScanTimingTaskJobDetailCronTrigger" />
+                <ref bean="myJobTrigger" />
+                <!-- <ref bean="synTrigger" /> -->
+                 <!-- <ref bean="synStorageTrigger" />  -->
+<!--                 <ref bean="mailTrigger" /> -->
+            </list>  
+        </property>  
+    </bean>  
+    <!-- 启动触发器的配置结束 -->  
+
+    <!-- 调度的配置开始 -->  
+	<bean id="myJobTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">  
+        <property name="jobDetail" ref="myJobDetail" /> 
+        <property name="cronExpression" value="0/5 * * * * ?" />  
+    </bean>  
+    <!-- 调度的配置结束 -->  
+  
+    <!-- job的配置开始 -->  
+    <bean id="myJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject" ref="taskDisposeJob" />
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false"/>
+    </bean> 
+    <!-- job的配置结束 -->  
+  
+    <!-- 工作的bean -->  
+    <bean id="taskDisposeJob" class="com.gitcloud.tankflow.quartz.TaskDisposeJob">
+		<property name="businessService" ref="bpmBusinessServiceImpl"/>
+	</bean> 
+	<!-- 流程模块 end -->
+	
+	<!-- 邮件定时器 -->
+    <bean id="mailTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">  
+        <property name="jobDetail">  
+            <ref bean="mailJobDetail" />  
+        </property>  
+        <property name="cronExpression">  
+            <value>0/30 * * * * ?</value>  
+        </property>  
+    </bean>  
+  
+	<!-- job的配置开始 -->
+    <bean id="mailJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">  
+        <property name="targetObject">  
+            <ref bean="mailDisposeJob" />  
+        </property>  
+        <property name="targetMethod">  
+            <value>execute</value>  
+        </property>  
+        <property name="concurrent" value="false"/>
+    </bean>  
+	<!-- job的配置结束 -->
+	<!-- 工作的bean -->
+    <bean id="mailDisposeJob" class="com.git.cloud.sys.task.ScanSysMailTask">
+		<property name="sysMailMsgServiceImpl" ref="sysMailMsgServiceImpl"/>
+	</bean>
+  
+  
+    <!-- 定时任务扫描 -->
+    <bean id="autoScanTimingTaskJobDetail"	class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <!-- 指定任务类 -->
+        <property name="targetObject" ref="scanTimingTask" />
+        <!-- 指定任务方法 -->
+        <property name="targetMethod" value="execute" />
+        <property name="concurrent" value="false" />
+    </bean>
+    <!-- 定义时间间隔触发器 -->
+    <bean id="autoScanTimingTaskJobDetailCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+        <property name="jobDetail">
+            <ref bean="autoScanTimingTaskJobDetail" />
+        </property>
+        <property name="cronExpression">
+            <value>0 */5 * * * ?</value>
+        </property>
+    </bean>
+    <!-- 扫描定时任务类的Bean的定义 -->
+    <bean id="scanTimingTask" class="com.git.cloud.sys.task.ScanTimingTask">
+        <property name="timingTaskExecService" ref="timingTaskExecService"/>
+    </bean>
+  
+</beans>

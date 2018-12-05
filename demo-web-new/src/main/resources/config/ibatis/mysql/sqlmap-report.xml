@@ -1,0 +1,294 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="Report">
+
+	<typeAlias alias="propertyParamPo" type="com.git.cloud.reports.model.po.PropertyParamPo"></typeAlias>
+	<typeAlias alias="conProParamPo" type="com.git.cloud.reports.model.po.ConProParamPo"></typeAlias>
+	<typeAlias alias="sqlParamPo" type="com.git.cloud.reports.model.po.SqlParamPo"></typeAlias>
+	<typeAlias alias="createReportParamPo" type="com.git.cloud.reports.model.po.CreateReportParamPo"></typeAlias>
+
+	<resultMap id="propertyParamResult" class="propertyParamPo">
+		<result property="id" column="ID"></result>
+		<result property="propertyKey" column="PROPERTYKEY"></result>
+		<result property="propertyValue" column="PROPERTYVALUE"></result>
+		<result property="conditionId" column="CONDITION_ID"></result>
+	</resultMap>
+	<resultMap id="ConProParamResult" class="ConProParamPo">
+		<result property="id" column="ID"></result>
+		<result property="conKey" column="CONKEY"></result>
+		<result property="conValue" column="CONVALUE"></result>
+		<result property="conType" column="CONTYPE"></result>
+		<result property="conType_dec" column="CONTYPE_DEC"></result>
+		<result property="reportId" column="REPORT_ID"></result>
+		<result property="isSqlParam" column="IS_SQLPARAM"></result>
+	</resultMap>
+	<resultMap id="sqlParamResult" class="sqlParamPo">
+		<result property="id" column="ID"></result>
+		<result property="sqlKey" column="SQLKEY"></result>
+		<result property="sqlValue" column="SQLVALUE"></result>
+		<result property="reportId" column="REPORT_ID"></result>
+	</resultMap>
+	<resultMap id="createReportParamResult" class="createReportParamPo">
+		<result property="id" column="ID"></result>
+		<result property="reportNameKey" column="REPORTNAMEKEY"></result>
+		<result property="reportNameValue" column="REPORTNAMEVALUE"></result>
+		<result property="reportDecKey" column="REPORTDECKEY"></result>
+		<result property="reportDecValue" column="REPORTDECVALUE"></result>
+		<result property="jasperPath" column="JASPERPATH"></result>
+	</resultMap>
+	<!--   查询所有的设备信息记录 -->
+	<sql id="selectReportList">
+		<![CDATA[
+		 SELECT
+		 	a.ID as id,
+			a.REPORTNAMEKEY as reportNameKey,
+			a.REPORTNAMEVALUE as reportNameValue,
+			a.REPORTDECKEY as reportDecKey,
+			a.REPORTDECVALUE as reportDecValue,
+			a.JASPERPATH as jasperPath
+		FROM
+			REPORT a
+		WHERE
+			IS_ACTIVE = 'Y'
+		 ]]>
+		 <dynamic prepend=" and ">
+			<isNotEmpty property="reportName" prepend=" and ">
+				a.REPORTNAMEVALUE LIKE '%$reportName$%'
+			</isNotEmpty>
+			</dynamic>
+			ORDER BY $sidx$ $sord$ 
+			</sql>
+	<!-- 查找报表信息显示到前台的列表 -->
+	<select id="findReportTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectReportList"/>
+        ) as recordTable
+    </select>
+    <select id="findReportPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectReportList"/> limit #startIndex# ,#pageSize#
+    </select>
+
+	<!-- 插入REPORT表 -->
+	<insert id="Report.insert" parameterClass="com.git.cloud.reports.model.po.CreateReportParamPo">
+		INSERT INTO REPORT
+			(ID,REPORTNAMEKEY,REPORTNAMEVALUE,REPORTDECKEY,REPORTDECVALUE,JASPERPATH,IS_ACTIVE)
+		VALUES
+			(#id#,#reportNameKey#, #reportNameValue#, #reportDecKey#,#reportDecValue#,#jasperPath#,'Y')
+	</insert>
+	<!-- 插入REPORT_CONDITION表 -->
+	<insert id="ReportCondition.insert" parameterClass="java.util.List">
+		<![CDATA[
+			INSERT INTO REPORT_CONDITION
+				(ID,CONKEY,CONVALUE,CONTYPE,CONTYPE_DEC,REPORT_ID,IS_SQLPARAM,IS_ACTIVE)
+			VALUES
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#conList[].id#,#conList[].conKey#,#conList[].conValue#,#conList[].conType#,#conList[].conType_dec#,#conList[].reportId#,#conList[].isSqlParam#,'Y')
+			]]>
+		</iterate>
+	</insert>
+	
+	<!-- 插入REPORT_CONDITION_PROPERTY表 -->
+	<insert id="ReportConditionProperty.insert" parameterClass="java.util.List">
+		<![CDATA[
+			INSERT INTO REPORT_CONDITION_PROPERTY
+				(ID,PROPERTYKEY,PROPERTYVALUE,CONDITION_ID,IS_ACTIVE)
+			VALUES
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#proList[].id#,#proList[].propertyKey#,#proList[].propertyValue#,#proList[].conditionId#,'Y')
+			]]>
+		</iterate>
+	</insert>
+	
+	<!-- 插入REPORT_SQL表 -->
+	<insert id="ReportSql.insert" parameterClass="java.util.List">
+		<![CDATA[
+			INSERT INTO REPORT_SQL
+				(ID,SQLKEY,SQLVALUE,REPORT_ID,IS_ACTIVE)
+			VALUES
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#sqlList[].id#,#sqlList[].sqlKey#,#sqlList[].sqlValue#,#sqlList[].reportId#,'Y')
+			]]>
+		</iterate>
+	</insert>
+
+
+
+<!-- 更新REPORT表 -->
+	<update id="Report.update" parameterClass="com.git.cloud.reports.model.po.CreateReportParamPo">
+		UPDATE REPORT
+		SET 
+		 REPORTNAMEKEY = #reportNameKey#,
+		 REPORTNAMEVALUE = #reportNameValue#,
+		 REPORTDECKEY = #reportDecKey#,
+		 REPORTDECVALUE = #reportDecValue#,
+		 JASPERPATH = #jasperPath#,
+		 IS_ACTIVE = 'Y'
+		WHERE
+			ID = #id#
+	</update>
+	<!-- 更新REPORT_CONDITION表 -->
+	<update id="ReportCondition.update" parameterClass="ConProParamPo">
+		UPDATE REPORT_CONDITION
+		SET 
+		 CONKEY = #conKey#,
+		 CONVALUE = #conValue#,
+		 CONTYPE = #conType#,
+		 CONTYPE_DEC = #conType_dec#,
+		 REPORT_ID = #reportId#,
+		 IS_SQLPARAM = #isSqlParam#,
+		 IS_ACTIVE = 'Y'
+		WHERE
+			ID = #id#
+	</update>
+	
+	<!-- 更新REPORT_CONDITION_PROPERTY表 -->
+	<update id="ReportConditionProperty.update" parameterClass="propertyParamPo">
+	UPDATE REPORT_CONDITION_PROPERTY
+	SET 
+	 PROPERTYKEY = #propertyKey#,
+	 PROPERTYVALUE = #propertyValue#,
+	 CONDITION_ID = #conditionId#,
+	 IS_ACTIVE = 'Y'
+	WHERE
+		ID = #id#
+	</update>
+	
+	<!-- 更新REPORT_SQL表 -->
+	<update id="ReportSql.update" parameterClass="sqlParamPo">
+	UPDATE REPORT_SQL
+	SET 
+	 SQLKEY = #sqlKey#,
+	 SQLVALUE = #sqlValue#,
+	 REPORT_ID = #reportId#,
+	 IS_ACTIVE = 'Y'
+	WHERE
+		ID = #id#
+	</update>
+
+
+
+	<!-- 查找属性 -->
+	<select id="selectReportInfoOfProperty" parameterClass="java.lang.String" resultMap="propertyParamResult">
+		<![CDATA[
+			SELECT
+				p.*
+			FROM
+				REPORT_CONDITION_PROPERTY p
+				LEFT JOIN REPORT_CONDITION c ON c.ID = p.CONDITION_ID AND c.IS_ACTIVE = 'Y'
+			WHERE
+				c.REPORT_ID = #id# AND p.IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	
+	<!-- 查找条件 -->
+	<select id="selectReportInfoOfCondition" parameterClass="java.lang.String" resultMap="ConProParamResult">
+		<![CDATA[
+			SELECT
+				*
+			FROM
+				REPORT_CONDITION
+			WHERE
+				REPORT_ID = #id# AND IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	
+	<!-- 查找sql -->
+	<select id="selectReportInfoOfSql" parameterClass="java.lang.String" resultMap="sqlParamResult">
+		<![CDATA[
+			SELECT
+				*
+			FROM
+				REPORT_SQL
+			WHERE
+				REPORT_ID = #id# AND IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	
+	<!-- 查找表参数 -->
+	<select id="selectReportInfo" parameterClass="java.lang.String" resultMap="createReportParamResult">
+		<![CDATA[
+			SELECT
+				*
+			FROM
+				REPORT
+			WHERE
+				ID = #id# AND IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	<!--删除参数表  -->
+    <update id="deleteReport" parameterClass="createReportParamPo">
+		UPDATE REPORT
+		SET IS_ACTIVE = 'N'
+		WHERE
+			ID = #id#
+	</update>
+	
+	<!--删除条件表  -->
+    <update id="deleteReportOfCondition" parameterClass="ConProParamPo">
+		UPDATE REPORT_CONDITION
+		SET IS_ACTIVE = 'N'
+		WHERE
+			REPORT_ID = #reportId#
+	</update>
+	
+	<!--删除SQL表  -->
+    <update id="deleteReportOfSql" parameterClass="sqlParamPo">
+		UPDATE REPORT_SQL
+		SET IS_ACTIVE = 'N'
+		WHERE
+			REPORT_ID = #reportId#
+	</update>
+	
+	<!--删除属性表  -->
+    <update id="deleteReportOfProperty" parameterClass="ConProParamPo">
+		UPDATE REPORT_CONDITION_PROPERTY
+		SET IS_ACTIVE = 'N'
+		WHERE
+			CONDITION_ID = #id#
+	</update>
+	<!-- 根据报表名称查询报表 -->
+	<select id="selectReportByName" parameterClass="String" resultClass="createReportParamPo">
+		 SELECT
+				*
+			FROM
+				REPORT
+			WHERE
+				REPORTNAMEVALUE = #reportName# AND IS_ACTIVE = 'Y'
+	</select>
+	
+	<!--根据REPORT ID 重置report表 -->
+    <update id="resetReport.insert" parameterClass="String">
+		UPDATE REPORT
+		SET IS_ACTIVE = 'N'
+		WHERE ID = #id#
+	</update>
+	
+	<!--根据REPORT ID 重置reportCondition表 -->
+    <update id="resetReportCondition.insert" parameterClass="String">
+		UPDATE REPORT_CONDITION
+		SET IS_ACTIVE = 'N'
+		WHERE REPORT_ID = #id#
+	</update>
+	
+	<!--根据REPORT ID 重置reportConditionProperty表 -->
+    <update id="resetReportConditionProperty.insert" parameterClass="String">
+		UPDATE REPORT_CONDITION R LEFT JOIN REPORT_CONDITION_PROPERTY P ON R.ID = P.CONDITION_ID
+		SET P.IS_ACTIVE = 'N'
+		WHERE R.REPORT_ID = #id#
+	</update>
+	
+	<!--根据REPORT ID 重置reportSql表 -->
+    <update id="resetReportSql.insert" parameterClass="String">
+		UPDATE REPORT_SQL
+		SET IS_ACTIVE = 'N'
+		WHERE REPORT_ID = #id#
+	</update>
+</sqlMap>

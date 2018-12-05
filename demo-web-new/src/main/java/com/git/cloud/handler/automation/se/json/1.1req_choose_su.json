@@ -1,0 +1,34 @@
+//1.1获取可用构建单元信息
+
+{
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "CISCO",
+		"OPERATION": 3004
+	},
+	"BODY" :{
+		"DATACENTER_ENAME":"NH"/"YQ",
+		"HBA_PWWN":[c0:50:76:06:8f:31:00:3a,c0:50:76:06:8f:31:00:38],
+		"FABRIC_INFO":{
+		[
+			{
+				"SERVICE_IP": "128.192.162.9",
+				"USER_NAME":"admin",
+				"USER_PASSWD":"4KPPnJRAvXm6g2KFvEB%2B9S6BJQw%2FKl5R",
+				"SWITCH_TYPE":"CISCO",
+				"FABRIC_NAME": [Fabric_CCB-TEST,Fabric_CCB-TEST],
+				"SU_ID":[1111,112]
+			},
+			{
+				"SERVICE_IP": "128.192.162.9",
+				"USER_NAME":"admin",
+				"USER_PASSWD":"4KPPnJRAvXm6g2KFvEB%2B9S6BJQw%2FKl5R",
+				"SWITCH_TYPE":"CISCO",
+				"FABRIC_NAME": [Fabric_CCB-TEST,Fabric_CCB-TEST],
+				"SU_ID":[1113]
+			}
+		]
+		
+		}
+	}
+}

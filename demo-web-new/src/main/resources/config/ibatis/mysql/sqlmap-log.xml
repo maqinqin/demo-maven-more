@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="log">
+	
+	<typeAlias alias="logPo" type="com.git.cloud.log.model.po.LogPo" />
+	
+	<!--获取日志列表 -->
+	<sql id="queryLogList">
+		<![CDATA[
+		 select 
+		        t.ID as id,
+				t.MODULE_TYPE as moduleType,
+				t.MODULE_NAME as moduleName,
+				t.OPERATE_TYPE as operateType,
+				t.OPERATE_NAME as operateName,
+				t.OPERATE_CONTENT as operateContent,
+				t.OPERATOR as operator,
+				t.OPERATE_TIME as operateTime,
+				t.IP_ADDR as ipAddr,
+		 		t.LOGIN_NAME as loginName,
+				t.RESULT as result
+			from SYS_LOG t where 1=1 
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="moduleName" prepend=" and ">
+				t.MODULE_NAME like concat('%', #moduleName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="operateName" prepend=" and ">
+				t.OPERATE_NAME like concat('%', #operateName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="operateContent" prepend=" and ">
+				t.OPERATE_CONTENT like concat('%', #operateContent#, '%')
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="queryLogListTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="queryLogList" />
+		) as recordTable
+	</select>
+	<select id="queryLogListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="queryLogList" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+	
+	
+	<!--获得日志信息 -->
+	<select id="queryLogByParams" parameterClass="hashMap" resultClass="logPo">
+		<![CDATA[
+		   select 
+		        t.ID as id,
+				t.MODULE_TYPE as moduleType,
+				t.MODULE_NAME as moduleName,
+				t.OPERATE_TYPE as operateType,
+				t.OPERATE_NAME as operateName,
+				t.OPERATE_CONTENT as operateContent,
+				t.OPERATOR as operator,
+				t.OPERATE_TIME as operateTime,
+				t.IP_ADDR as ipAddr,
+				t.LOGIN_NAME as loginName,
+				t.RESULT as result
+			from SYS_LOG d where 1=1 
+		]]>
+		<isNotEmpty property="id" prepend=" and ">
+			<![CDATA[t.ID = #id#]]>
+		</isNotEmpty>
+	</select>
+	
+	<insert id="insertSystemLog" parameterClass="logPo">
+		<![CDATA[ 
+			insert into SYS_LOG (
+				id,module_type,module_name,operate_type,operate_name,operate_content,operator,operate_time,ip_addr,login_name,result
+			) values (
+				#id#,#moduleType#,#moduleName#,#operateType#,#operateName#,#operateContent#,#operator#,#operateTime#,#ipAddr#,#loginName#,#result#
+			)
+		]]>
+	</insert>
+</sqlMap>

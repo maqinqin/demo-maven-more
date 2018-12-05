@@ -1,0 +1,257 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{
+	height:100%;
+	padding:0;
+	margin:0;
+	font-size:12px;
+	font-family:"微软雅黑",arial, serif;
+	color:#fff;
+	background-color:#fff;
+	}
+h1,h2,h3,ul,li,dl,dt,dd,p,img,input,button,table{
+	padding:0;
+	margin:0;
+	border:0;
+	font-weight:normal;
+	list-style:none;
+	outline:none;
+	}
+/*----------------------------------------全局样式-------------------------------------------*/	
+.headerWrap{
+	height:51px;
+	width:100%;
+	background:#fff;
+	position:relative;
+	border-bottom:1px solid #e7eaec;
+	webkit-box-shadow: 0 -2px 8px 1px #bbb;
+	-moz-box-shadow: 0 -2px 8px 1px #bbb;
+	box-shadow: 0 -2px 8px 1px #bbb
+	}
+	
+.logo{
+	height:55px;
+	width:201px;
+	position:absolute;
+	top:0;
+	left:0;
+	background:#fff !important;
+	}
+.logo img{width:127px;height:35px;background-size: 100% 100%;margin: 10px 22px;}
+.sitNav .topOut{
+	background-image: url(../images/topOut_btn.png) no-repeat;
+	/* width:70px; */
+	height:33px;
+	font-size: 8px;
+	cursor: pointer;
+	border:none;
+	color:#4f5c63;
+	letter-spacing:2px;
+	
+}
+.sitNav li{border-left:1px solid #eee;}
+.sitNav .topOut:link,.sitNav .topOut:visited{
+	display:inline-block;
+	/* width:90px; */
+	text-decoration:none;
+	font-size:13px;
+	letter-spacing:1px;
+	line-heigth:51px;
+	height:51px;
+}	
+.sitNav li:hover{
+	background:#f8f8f8;
+}
+.sitNav li.noMargin{border-right:1px solid #eee;}
+.sitNav{
+	height:51px;
+	line-height:51px;
+	position:absolute;
+	top:0px;
+	right:20px;
+	}
+	
+.sitNav li{
+	padding: 0px 20px;
+	float:left;
+	font-size:14px;
+	height:51px;
+	}
+	
+.sitNav i{
+	font-size:14px;
+	color:#888;
+	}
+.sitNav .topTime1{
+	height:33px;
+	width:17px;
+	padding-left:4px;
+	margin-top:7px;
+	float:left;
+	}	
+.sitNav strong{
+	font-size:13px;
+	letter-space:1px;
+	color:#555;
+	font-weight:normal;
+}	
+.sitNav span{
+	color:#1c82b4;
+	padding-left:20px;}
+#server_time_span{
+	color:#666;
+}
+
+.noMargin{
+	padding-right:0;
+	margin-right:0;
+}
+
+/*----------------------------------------TOP样式-------------------------------------------*/	
+	
+.sildeWrap{
+	width:200px;
+	position:relative;
+	}
+		
+.side{
+	width:218px;
+	overflow:hidden;
+	background:#22222C;/* 要和menu.jsp里面的设置成一样的 */
+	padding:4px 0px;
+	}
+.side_btn1{
+	width:20px;
+	height:74px;
+	background:url(../images/side_btn1.png) no-repeat;
+	position:absolute;
+	top:40%;
+	right:-1px;
+	z-index:999;
+	}
+.side_btn2{
+	width:20px;
+	height:74px;
+	background:url(../images/side_btn2.png) no-repeat;
+	position:absolute;
+	top:40%;
+	right:-1px;
+	z-index:999;
+	}
+
+
+.menu1{
+	padding-bottom:50px;
+	}	
+	
+.menu1 li{
+	width:218px;
+	margin-bottom:5px;
+	cursor:pointer;
+	font-size:14px;
+	}
+	
+.menu1 span{ 
+	position:relative;
+	width:180px;
+	line-height:36px;
+	height:36px;
+	padding-left:20px;
+	display:block;
+	color:#fff;
+	opacity: 0.7;
+	}	
+.menu1 span:hover{opacity: 1;}		
+.menu1 i{
+	width:16px;
+	height:16px;
+	margin:11px 11px 0 0;
+	float:left;
+	}
+		
+.menu1 .current1{
+	/* background:url(../images/menu/menu1_liBg.jpg) no-repeat; */
+	font-weight:bold;
+	background:#18a689;
+	}	
+	
+.menu2 li.cur{
+	/* background:url(../images/menu/menu2_curbg1.jpg) no-repeat; */
+	background:#18a689;
+	}
+	
+.menu2{
+	overflow:hidden;
+	display: none;
+	margin: 0;
+	padding: 0;
+	}	
+	
+.menu2 li{
+	/* width:160px; */
+	line-height:36px;
+	height:36px;
+	padding-left:10px;
+	margin-bottom:0;
+	display:block;
+	/* background:url(../images/menu/menu2_libg.jpg) no-repeat; */
+	}
+/**#last_li{
+	width:160px;
+	line-height:36px;
+	height:36px;
+	padding-left:40px;
+	margin-bottom:0;
+	display:block;
+	background:url(../images/menu/menu2_libgList.jpg) no-repeat;
+	}*/
+.menu2 li a{opacity: 0.7;}
+.menu2 li a:hover{opacity: 1;}
+.menu2 li a:hover i.menu2-circle {background:#4aa574;}
+.menu2 li.cur a{opacity: 1;}
+.menu2 li.cur a:hover i.menu2-circle {background:#fff;}
+.menu2 li i.icon10_1{ background:url(../images/menu/menuIcon10-1.png) no-repeat;}	
+.menu2 li i.icon10_2{ background:url(../images/menu/menuIcon10-2.png) no-repeat;}	
+.menu2 li i.icon10_3{ background:url(../images/menu/menuIcon10-3.png) no-repeat;}	
+.menu2 li i.icon10_4{ background:url(../images/menu/menuIcon10-4.png) no-repeat;}	
+.menu2 i.menu2-circle {
+    width: 5px;
+    height: 5px;
+    background: #e3e3e3;
+    border-radius: 50%;
+    margin: 16px 15px 0 15px;}
+.menu2 li.cur i.menu2-circle {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #fff;
+}
+.menu1 span em{
+	width:16px;
+	height:16px;
+	background:url(../images/menu/arrow.png) no-repeat;
+	background-size: 80% 80%;
+	position:absolute;
+	top:12px;
+	right:22px;
+	opacity:0.8;
+	z-index:99;
+	}
+	
+.menu1 a:link,.menu1 a:visited{
+	color:#fff;
+	text-decoration:none;
+	}	
+.menu1 a:hover{
+	color:#fff;
+	text-decoration:none;
+	}
+.menu1 li.current1 a span{opacity: 1;}	
+.submenu.open{background:#2b2b38}
+.submenu.open span{opacity: 1;}	
+.side > ul li.open ul {display: block;}		
+
+/*----------------------------------------菜单样式-------------------------------------------*/	
+	
+		

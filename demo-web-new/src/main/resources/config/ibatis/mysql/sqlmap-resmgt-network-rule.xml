@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtNetWork-rule">
+<typeAlias alias="RmNwRulePo" type="com.git.cloud.resmgt.network.model.po.RmNwRulePo"/>
+<typeAlias alias="RmNwRuleListPo1" type="com.git.cloud.resmgt.network.model.po.RmNwRuleListPo"/>
+<!-- 规则表begin -->
+	<sql id="selectRmNwRuleList">
+		<![CDATA[
+		 select 
+		 d.RM_NW_RULE_ID as rmNwRuleId,
+		 d.HOST_TYPE_ID as hostTypeId,
+		 d.PLATFORM_ID as platFormId,
+		 d.VIRTUAL_TYPE_ID as virtualTypeId,
+		 d.RULE_NAME as ruleName,
+		 d.IS_ACTIVE as isActive,
+		 d.CREATE_USER as createUser, 
+		 d.CREATE_DATETIME as createDatetime,
+		 d.UPDATE_USER as updateUser,
+		 d.UPDATE_TIME as updateDatetime,
+		 d.HA_TYPE as haType,
+		 adt.DIC_NAME as haTypeName,
+		 h.HOST_TYPE_NAME as hsotTypeName,
+		 p.PLATFORM_NAME as platformName,
+		 v.VIRTUAL_TYPE_NAME as virtualTypeName,
+		 CONCAT(p.PLATFORM_CODE,v.VIRTUAL_TYPE_CODE,h.HOST_TYPE_CODE) as ucode
+		 from RM_NW_RULE d
+		 LEFT JOIN 
+		     RM_HOST_TYPE h ON d.HOST_TYPE_ID=h.HOST_TYPE_ID
+		 LEFT JOIN
+			 RM_PLATFORM p ON d.PLATFORM_ID=p.PLATFORM_ID
+		 LEFT JOIN
+			 RM_VIRTUAL_TYPE v ON d.VIRTUAL_TYPE_ID=v.VIRTUAL_TYPE_ID
+		 LEFT JOIN ADMIN_DIC adt ON d.HA_TYPE = adt.DIC_CODE	
+         AND adt.DIC_TYPE_CODE = 'HA_TYPE'
+		 where d.IS_ACTIVE='Y'  
+		 ]]>
+		  <dynamic prepend=" and ">
+			<isNotEmpty property="ruleName" prepend=" and ">
+				d.RULE_NAME LIKE '%$ruleName$%'
+			</isNotEmpty>
+			<isNotEmpty property="platFormId" prepend=" and ">
+				d.PLATFORM_ID = #platFormId#
+			</isNotEmpty>
+			<isNotEmpty property="virtualTypeId" prepend=" and ">
+				d.VIRTUAL_TYPE_ID = #virtualTypeId#
+			</isNotEmpty>
+			<isNotEmpty property="hostTypeId" prepend=" and ">
+				d.HOST_TYPE_ID = #hostTypeId#
+			</isNotEmpty>
+			<isNotEmpty property="haType" prepend=" and ">
+				d.HA_TYPE = #haType#
+			</isNotEmpty>
+			</dynamic>
+			ORDER BY $sidx$ $sord$ 
+			</sql>
+	<select id="findRmNwRuleTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRmNwRuleList"/>
+        ) as recordTable
+    </select>
+    <select id="findRmNwRulePage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRmNwRuleList"/> limit #startIndex# ,#pageSize#
+    </select>
+	<insert id="saveRmNwRule"  parameterClass="RmNwRulePo">  
+      insert into RM_NW_RULE(
+	      RM_NW_RULE_ID,HOST_TYPE_ID,PLATFORM_ID,VIRTUAL_TYPE_ID,RULE_NAME,HA_TYPE,IS_ACTIVE,CREATE_USER,CREATE_DATETIME
+      ) VALUES(
+	      #rmNwRuleId#,#hostTypeId#,#platFormId#,#virtualTypeId#,#ruleName#,#haType#,#isActive#,
+	      #createUser#,#createDateTime#
+      )
+	</insert> 
+	<select id="selectRmNwRuleById" parameterClass="java.lang.String" resultClass="RmNwRulePo">
+		 select 
+		 d.RM_NW_RULE_ID as rmNwRuleId,
+		 d.HOST_TYPE_ID as hostTypeId,
+		 d.PLATFORM_ID as platFormId,
+		 d.VIRTUAL_TYPE_ID as virtualTypeId,
+		 d.RULE_NAME as ruleName,
+		 d.IS_ACTIVE as isActive,
+		 d.CREATE_USER as createUser, 
+		 d.CREATE_DATETIME as createDateTime,
+		 d.UPDATE_USER as updateUser,
+		 d.UPDATE_TIME as updateDateTime,
+		 d.HA_TYPE as haType,
+		 adt.DIC_NAME as haTypeName,
+		 h.HOST_TYPE_NAME as hsotTypeName,
+		 p.PLATFORM_NAME as platformName,
+		 v.VIRTUAL_TYPE_NAME as virtualTypeName
+		 from RM_NW_RULE d
+		 LEFT JOIN 
+		     RM_HOST_TYPE h ON d.HOST_TYPE_ID=h.HOST_TYPE_ID
+		 LEFT JOIN
+			 RM_PLATFORM p ON d.PLATFORM_ID=p.PLATFORM_ID
+		 LEFT JOIN
+			 RM_VIRTUAL_TYPE v ON d.VIRTUAL_TYPE_ID=v.VIRTUAL_TYPE_ID
+		 LEFT JOIN ADMIN_DIC adt ON d.HA_TYPE = adt.DIC_CODE	
+         AND adt.DIC_TYPE_CODE = 'HA_TYPE'
+		 where d.IS_ACTIVE='Y' and d.RM_NW_RULE_ID=#rmNwRuleId#
+	</select>
+	<update id="updateRmNwRule"  parameterClass="RmNwRulePo">
+		 update RM_NW_RULE set  
+		 HOST_TYPE_ID=#hostTypeId#,
+		 PLATFORM_ID=#platFormId#,
+		 VIRTUAL_TYPE_ID=#virtualTypeId#,
+		 HA_TYPE=#haType#,
+		 RULE_NAME=#ruleName#,
+		 UPDATE_TIME=#updateDateTime#,
+		 UPDATE_USER=#updateUser#
+		 where RM_NW_RULE_ID=#rmNwRuleId#
+	</update>
+	<select id="selectRmNwRuleListByrmNwRuleId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 RM_NW_RULE_LIST_ID as rmNwRuleListId,
+		 RM_NW_RULE_ID as rmNwRuleId
+		 from RM_NW_RULE_LIST 
+		 where IS_ACTIVE='Y' and RM_NW_RULE_ID=#rmNwRuleId#
+	</select>
+	<delete id="deleteRmNwRule" parameterClass="java.lang.String">
+		update RM_NW_RULE set IS_ACTIVE = 'N' WHERE RM_NW_RULE_ID = #rmNwRuleId#
+	</delete>
+	<!-- 规则明细表 -->
+	<!-- 规则表begin -->
+	<sql id="selectRmNwRuleListList">
+		<![CDATA[
+		 select 
+		 d.RM_NW_RULE_LIST_ID as rmNwRuleListId,
+		 d.RM_NW_RULE_ID as rmNwRuleId,
+		 d.USE_CODE as useCode,
+		 d.ACT_NUM as actNum,
+		 d.OCC_NUM as occNum,
+		 d.OCC_SITE as occSite,
+		 d.RM_IP_TYPE_NAME as rmIpTypeName, 
+		 d.VMWARE_PG_PEFIX as vmwarePgPefix,
+		 d.IS_ACTIVE as isActive
+		 from RM_NW_RULE_LIST d
+		 where d.IS_ACTIVE='Y' 
+		 and d.RM_NW_RULE_ID=#rmNwRuleId#
+		 ]]>
+		  <dynamic prepend=" and ">
+			<isNotEmpty property="rmIpTypeName" prepend=" and ">
+				d.RM_IP_TYPE_NAME LIKE '%$rmIpTypeName$%'
+			</isNotEmpty>
+			<isNotEmpty property="useCode" prepend=" and ">
+				d.USE_CODE = #useCode#
+			</isNotEmpty>
+			</dynamic>
+			ORDER BY $sidx$ $sord$ 
+			</sql>
+	<select id="findRmNwRuleListTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRmNwRuleListList"/>
+        ) as recordTable
+    </select>
+    <select id="findRmNwRuleListPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRmNwRuleListList"/> limit #startIndex# ,#pageSize#
+    </select>
+    <insert id="saveRmNwRuleList"  parameterClass="RmNwRuleListPo1">  
+      insert into RM_NW_RULE_LIST(
+	      RM_NW_RULE_LIST_ID,RM_NW_RULE_ID,USE_CODE,ACT_NUM,OCC_NUM,OCC_SITE,RM_IP_TYPE_NAME,VMWARE_PG_PEFIX,IS_ACTIVE,USE_ID
+      ) VALUES(
+	      #rmNwRuleListId#,#rmNwRuleId#,#useCode#,#actNum#,#occNum#,#occSite#,
+	      #rmIpTypeName#,#vmwarePgPefix#,#isActive#,#useId#
+      )
+	</insert> 
+	<select id="selectRmNwRuleListById" parameterClass="java.lang.String" resultClass="RmNwRuleListPo1">
+		 select 
+		 d.USE_ID as useId,
+		 d.RM_NW_RULE_LIST_ID as rmNwRuleListId,
+		 d.RM_NW_RULE_ID as rmNwRuleId,
+		 d.USE_CODE as useCode,
+		 d.ACT_NUM as actNum,
+		 d.OCC_NUM as occNum,
+		 d.OCC_SITE as occSite,
+		 d.IS_ACTIVE as isActive, 
+		 d.RM_IP_TYPE_NAME as rmIpTypeName,
+		 d.VMWARE_PG_PEFIX as vmwarePgPefix
+		 from RM_NW_RULE_LIST d
+		 where d.IS_ACTIVE='Y' and d.RM_NW_RULE_LIST_ID=#rmNwRuleListId#
+	</select>
+	<update id="updateRmNwRuleList"  parameterClass="RmNwRuleListPo1">
+		 update RM_NW_RULE_LIST set  
+		 RM_NW_RULE_ID=#rmNwRuleId#,
+		 USE_CODE=#useCode#,
+		 ACT_NUM=#actNum#,
+		 OCC_NUM=#occNum#,
+		 OCC_SITE=#occSite#,
+		 RM_IP_TYPE_NAME=#rmIpTypeName#,
+		 VMWARE_PG_PEFIX=#vmwarePgPefix#,
+		 USE_ID=#useId#
+		 where RM_NW_RULE_LIST_ID=#rmNwRuleListId#
+	</update>
+	<delete id="deleteRmNwRuleList" parameterClass="java.lang.String">
+		update RM_NW_RULE_LIST set IS_ACTIVE = 'N' WHERE RM_NW_RULE_LIST_ID = #rmNwRuleListId#
+	</delete>
+	<select id="selectRmNwRuleListByUseCode" parameterClass="java.util.HashMap" resultClass="RmNwRuleListPo1">
+		 select 
+		 d.RM_NW_RULE_LIST_ID as rmNwRuleListId,
+		 d.RM_NW_RULE_ID as rmNwRuleId,
+		 d.USE_CODE as useCode,
+		 d.ACT_NUM as actNum,
+		 d.OCC_NUM as occNum,
+		 d.OCC_SITE as occSite,
+		 d.IS_ACTIVE as isActive, 
+		 d.RM_IP_TYPE_NAME as rmIpTypeName,
+		 d.VMWARE_PG_PEFIX as vmwarePgPefix
+		 from RM_NW_RULE_LIST d
+		 where d.IS_ACTIVE='Y' and d.USE_CODE=#useCode# and RM_NW_RULE_ID = #rmNwRuleId#
+	</select>
+	<select id="selectRmNwRuleByRuleName" parameterClass="java.util.HashMap" resultClass="RmNwRulePo">
+		 select 
+		 d.RM_NW_RULE_ID as rmNwRuleId,
+		  d.HOST_TYPE_ID as hostTypeId,
+		 d.PLATFORM_ID as platFormId,
+		 d.VIRTUAL_TYPE_ID as virtualTypeId,
+		 d.RULE_NAME as ruleName,
+		 d.HA_TYPE as haType
+		 from RM_NW_RULE d
+		 where d.IS_ACTIVE='Y' and d.PLATFORM_ID=#platFormId#
+		 and d.VIRTUAL_TYPE_ID=#virtualTypeId#
+		  and d.HOST_TYPE_ID=#hostTypeId#
+		  and d.HA_TYPE=#haType#
+	</select>
+</sqlMap>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="vmrc">
+  <typeAlias alias="vmrcPo" type="com.git.cloud.vmrc.model.po.VmrcPo" />
+  <select id="queryVmrcInfoByVmId" parameterClass="java.lang.String" resultClass="vmrcPo">
+    <![CDATA[
+      SELECT 
+            DEV.ID vmId,
+            DEV.DEVICE_NAME devName,
+            VM_H_IP.IP connectHost,
+            PWD.USER_NAME connectUsername,
+            PWD.`PASSWORD` connectPassword
+        FROM 
+            CM_DEVICE DEV
+            LEFT JOIN
+            CM_VM VM
+            ON 
+                DEV.ID = VM.ID
+            LEFT JOIN
+            rm_nw_openstack_ip_address VM_H_IP
+            ON  
+                VM.HOST_ID = VM_H_IP.INSTANCE_ID
+            LEFT JOIN
+            CM_HOST H
+            ON
+                VM.HOST_ID = H.ID
+            LEFT JOIN
+            CM_PASSWORD PWD
+            ON
+                VM.HOST_ID = PWD.RESOURCE_ID
+        WHERE
+            DEV.ID = #vmId#
+    ]]>
+  </select>
+</sqlMap>

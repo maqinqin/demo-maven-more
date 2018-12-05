@@ -1,0 +1,38 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-network-package" extends="icms-package" namespace="/resmgt-network">
+	</package>
+	<!-- 平台类型维护 -->
+	<package name="resmgt-network-rule" namespace="/resmgt-network/rule" extends="resmgt-network-package">
+		<action name="rmNwRuleView" class="rmNwRuleAction" method="rmNwRuleView">
+			<result name="success">/pages/resmgt/network/rmNwRule.jsp</result>
+		</action>
+		<action name="getRmNwRuleList" class="rmNwRuleAction" method="getRmNwRuleList">
+		</action>
+		<action name="saveRmNwRule" class="rmNwRuleAction" method="saveRmNwRule">
+		</action>
+		<action name="selectRmNwRuleById" class="rmNwRuleAction" method="selectRmNwRuleById">
+		</action>
+		<action name="updateRmNwRule" class="rmNwRuleAction" method="updateRmNwRule">
+		</action>
+		<action name="deleteRmNwRule" class="rmNwRuleAction" method="deleteRmNwRule">
+		</action>
+		<action name="getRmNwRuleListList" class="rmNwRuleAction" method="getRmNwRuleListList">
+		</action>
+		<action name="saveRmNwRuleList" class="rmNwRuleAction" method="saveRmNwRuleList">
+		</action>
+		<action name="selectRmNwRuleListById" class="rmNwRuleAction" method="selectRmNwRuleListById">
+		</action>
+		<action name="updateRmNwRuleList" class="rmNwRuleAction" method="updateRmNwRuleList">
+		</action>
+		<action name="deleteRmNwRuleList" class="rmNwRuleAction" method="deleteRmNwRuleList">
+		</action>
+		<action name="selectRmNwRuleListByUseCode" class="rmNwRuleAction" method="selectRmNwRuleListByUseCode">
+		</action>
+		<action name="selectRmNwRuleByRuleName" class="rmNwRuleAction" method="selectRmNwRuleByRuleName">
+		</action>
+	</package>
+</struts>

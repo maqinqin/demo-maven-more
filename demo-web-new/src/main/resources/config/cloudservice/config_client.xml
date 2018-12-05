@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	    http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/context
+		http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<value>classpath:config/cloudservice/cloud-link.properties</value>
+		</property>
+	</bean>
+
+	<bean id="resInvokerFactory"
+		class="com.git.support.invoker.common.impl.ResAdptInvokerFactory">
+		<property name="invokers">
+			<map><!-- <entry key="TEST"> <ref local="testInvokerFactory" /> </entry> -->
+				<entry key="AMQ">
+					<ref local="amqInvokerFactory" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+	<!-- <bean id="testInvokerFactory" class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean"> 
+		<property name="targetBeanName"> <idref local="testResAdptInvoker" /> </property> 
+		</bean> -->
+	<bean id="amqInvokerFactory"
+		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
+		<property name="targetBeanName">
+			<idref local="amqResAdptInvoker" />
+		</property>
+	</bean>
+	<!-- <bean id="testResAdptInvoker" class="com.ccb.iomp.cloud.link.invoker.test.impl.TestResAdptInvoker"> 
+		<property name="routeKeyFlds"> <list> <value>DATACENTER_QUEUE_IDEN</value> 
+		<value>RESOURCE_CLASS</value> </list> </property> </bean> -->
+	<bean id="amqResAdptInvoker" class="com.git.support.invoker.amq.impl.AmqResAdptInvoker">
+		<property name="routeKeyFlds">
+			<list>
+				<value>DATACENTER_QUEUE_IDEN</value>
+				<value>RESOURCE_CLASS</value>
+			</list>
+		</property>
+		<property name="destinations" ref="destinations" />
+		<property name="msgConverter" ref="msgConverter" />
+	</bean>
+
+	<bean id="destinations" class="java.util.HashMap">
+		<constructor-arg>
+			<map>
+				<entry key="BJ_VM">
+					<ref bean="destination_BJ_VM" />
+				</entry>
+				<entry key="BJ_KVM">
+					<ref bean="destination_BJ_KVM" />
+				</entry>
+				<entry key="GL_KVM">
+					<ref bean="destination_GL_KVM" />
+				</entry>
+				<entry key="BJ_SA">
+					<ref bean="destination_BJ_SA" />
+				</entry>
+				<entry key="BJ_OS">
+					<ref bean="destination_BJ_OS" />
+				</entry>
+				<entry key="BJ_HS">
+					<ref bean="destination_BJ_HS" />
+				</entry>
+				<entry key="BJ_PV">
+					<ref bean="destination_BJ_PV" />
+				</entry>
+				<entry key="BJ_SE">
+					<ref bean="destination_BJ_SE" />
+				</entry>
+				<entry key="BJ_SW">
+					<ref bean="destination_BJ_SW" />
+				</entry>
+				<entry key="GL_SA">
+					<ref bean="destination_GL_SA" />
+				</entry>
+				<entry key="BJ_NA">
+					<ref bean="destination_BJ_NA" />
+				</entry>
+				<entry key="BJ_PW">
+					<ref bean="destination_BJ_PW" />
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="msgConverter" class="com.git.support.invoker.amq.impl.ObjectMessageConverter" />
+	<!-- Bei Jing Start -->
+	<bean id="destination_BJ_VM" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_VM_Request" />
+		<property name="queueReply" ref="queue_BJ_VM_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_KVM" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_KVM_Request" />
+		<property name="queueReply" ref="queue_BJ_KVM_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_GL_KVM" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_GL_KVM_Request" />
+		<property name="queueReply" ref="queue_GL_KVM_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_SA" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_SA_Request" />
+		<property name="queueReply" ref="queue_BJ_SA_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_OS" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_OS_Request" />
+		<property name="queueReply" ref="queue_BJ_OS_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+	
+	<bean id="destination_BJ_HS" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_HS_Request" />
+		<property name="queueReply" ref="queue_BJ_HS_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+	
+	<bean id="destination_BJ_PV" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_PV_Request" />
+		<property name="queueReply" ref="queue_BJ_PV_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_SE" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_SE_Request" />
+		<property name="queueReply" ref="queue_BJ_SE_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_SW" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_SW_Request" />
+		<property name="queueReply" ref="queue_BJ_SW_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_GL_SA" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_GL_SA_Request" />
+		<property name="queueReply" ref="queue_GL_SA_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_NA" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_NA_Request" />
+		<property name="queueReply" ref="queue_BJ_NA_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="destination_BJ_PW" class="com.git.support.invoker.amq.impl.AmqDestination">
+		<property name="queueRequest" ref="queue_BJ_PW_Request" />
+		<property name="queueReply" ref="queue_BJ_PW_Reply" />
+		<property name="mesgExpiration" value="${msg.expiration}" />
+		<property name="connectionFactory" ref="connectionFactory_1" />
+	</bean>
+
+	<bean id="queue_BJ_VM_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.vm.request}" />
+	</bean>
+
+	<bean id="queue_BJ_VM_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.vm.reply}" />
+	</bean>
+
+	<bean id="queue_BJ_KVM_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.kvm.request}" />
+	</bean>
+
+	<bean id="queue_BJ_KVM_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.kvm.reply}" />
+	</bean>
+
+	<bean id="queue_GL_KVM_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.gl.kvm.request}" />
+	</bean>
+
+	<bean id="queue_GL_KVM_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.gl.kvm.reply}" />
+	</bean>
+
+	<bean id="queue_BJ_SA_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.sa.request}" />
+	</bean>
+
+	<bean id="queue_BJ_SA_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.sa.reply}" />
+	</bean>
+
+	<bean id="queue_BJ_OS_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.os.request}" />
+	</bean>
+
+	<bean id="queue_BJ_OS_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.os.reply}" />
+	</bean>
+	
+	<bean id="queue_BJ_HS_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.hs.request}" />
+	</bean>
+
+	<bean id="queue_BJ_HS_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.hs.reply}" />
+	</bean>
+	
+	<bean id="queue_BJ_PV_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.pv.request}" />
+	</bean>
+
+	<bean id="queue_BJ_PV_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.pv.reply}" />
+	</bean>
+
+	<bean id="queue_BJ_SE_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.se.request}" />
+	</bean>
+
+	<bean id="queue_BJ_SE_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.se.reply}" />
+	</bean>
+	<bean id="queue_BJ_SW_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.sw.request}" />
+	</bean>
+
+	<bean id="queue_BJ_SW_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.sw.reply}" />
+	</bean>
+	<bean id="queue_GL_SA_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.gl.sa.request}" />
+	</bean>
+
+	<bean id="queue_GL_SA_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.gl.sa.reply}" />
+	</bean>
+
+	<bean id="queue_BJ_NA_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.na.request}" />
+	</bean>
+
+	<bean id="queue_BJ_NA_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.na.reply}" />
+	</bean>
+
+	<bean id="queue_BJ_PW_Request" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.pw.request}" />
+	</bean>
+
+	<bean id="queue_BJ_PW_Reply" class="org.apache.activemq.command.ActiveMQQueue">
+		<constructor-arg index="0" value="${amq.queue.bj.pw.reply}" />
+	</bean>
+	<!-- Bei Jing End -->
+	<!-- Other datacenter -->
+	<!-- end -->
+
+	<bean id="connectionFactory_1" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL">
+			<value>${amq.url}</value>
+		</property>
+	</bean>
+
+	<!-- <bean id="connectionFactory_1" class="org.apache.activemq.pool.PooledConnectionFactory" 
+		destroy-method="stop"> <property name="connectionFactory"> <bean class="org.apache.activemq.ActiveMQConnectionFactory"> 
+		<property name="brokerURL"> <value>${amq.url}</value> </property> </bean> 
+		</property> <property name="maxConnections" value="${amq.pool.maxConnections}" 
+		/> <property name="maximumActiveSessionPerConnection" value="${amp.pool.maximumActiveSessionPerConnection}" 
+		/> </bean> -->
+</beans>		

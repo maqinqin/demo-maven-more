@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="appmgt">
+ <!--服务器角色模型-->
+ <typeAlias alias="DeployunitPo" type="com.git.cloud.appmgt.model.po.DeployUnitPo" />
+ <typeAlias alias="DeployUnitVo" type="com.git.cloud.appmgt.model.vo.DeployUnitVo" />
+ <!--应用系统模型-->
+ <typeAlias alias="appSysPO" type="com.git.cloud.appmgt.model.po.AppSysPO" />
+ <typeAlias alias="rmNwSecureTierPo" type="com.git.cloud.resmgt.network.model.po.RmNwSecureTierPo" />
+ <typeAlias alias="appStatPO" type="com.git.cloud.appmgt.model.po.AppStatPo" />
+ 
+ 
+ <select id="deployUnitCheckByServiceId" parameterClass="java.lang.String" resultClass="DeployUnitVo">
+		 SELECT DISTINCT
+			app.SERVICE_ID serviceId,
+			app.ENAME ename,
+			info.CNAME appCname
+		FROM
+			APP_DU app,
+			APP_INFO info,
+			CLOUD_SERVICE clo
+		WHERE
+			app.SERVICE_ID = clo.SERVICE_ID
+		AND info.APP_ID = app.APP_ID
+		AND app.IS_ACTIVE = 'Y'
+		AND clo.IS_ACTIVE = 'Y'
+		AND app.SERVICE_ID = #serviceId#
+ </select>
+ 
+ <select id="includeVm" parameterClass="java.lang.String" resultClass="DeployunitPo">
+		SELECT
+			DU_ID as duId
+		FROM
+			CM_VM
+		WHERE
+			DU_ID = #duId#
+</select>
+	
+ 
+ 	<!-- 查询服务器角色 -->
+ 	<select id="getDeployUnitById" parameterClass="java.util.Map" resultClass="DeployUnitVo">
+ 		SELECT a.DU_ID duId,
+			   a.DATACENTER_ID datacenterId,
+		       a.APP_ID appId,
+		       a.CNAME cname,
+		       a.FULL_CNAME fullCname,
+		       a.ENAME ename,
+		       a.FULL_ENAME fullEname,
+		       a.SERVICE_TYPE_CODE serviceTypeCode,
+		       a.`STATUS` status,
+		       a.SECURE_AREA_CODE secureAreaCode,
+		       a.SEVURE_TIER_CODE sevureTierCode,
+		       a.REMARK remark,
+		       a.IS_ACTIVE isActive,
+		       a.SERVICE_ID serviceId,
+		       b.FULL_CNAME appCname,
+		       c.DATACENTER_CNAME datacenterName,
+			   d.DIC_NAME serviceTypeName,
+               e.SECURE_AREA_NAME secureAreaName,
+		       f.SECURE_TIER_NAME sevureTierName,
+               g.DIC_NAME statusName ,
+               b.ename appEname
+		FROM APP_DU a LEFT JOIN APP_INFO b ON a.APP_ID=b.APP_ID
+		              LEFT JOIN RM_DATACENTER c on a.DATACENTER_ID=c.ID
+		              LEFT JOIN ADMIN_DIC d on a.SERVICE_TYPE_CODE=d.DIC_CODE AND d.DIC_TYPE_CODE=#serviceTypeCode#
+					  LEFT JOIN RM_NW_SECURE_AREA e on a.SECURE_AREA_CODE=e.SECURE_AREA_ID
+					  LEFT JOIN RM_NW_SECURE_TIER f on a.SEVURE_TIER_CODE=f.SECURE_TIER_ID
+		              LEFT JOIN ADMIN_DIC g on a.`STATUS`=g.DIC_CODE AND g.DIC_TYPE_CODE=#useStatus#
+		WHERE a.DU_ID=#duId#
+ 	</select>
+	
+<!--	更新服务器角色-->
+		<update id="updateDeployUnit"  parameterClass="DeployunitPo">  
+		UPDATE APP_DU set remark = #remark#  
+		<dynamic prepend="">
+			<isNotEmpty prepend="," property="sevureTierCode">
+				sevure_tier_code = #sevureTierCode# 
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="datacenterId">
+				datacenter_id = #datacenterId#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="appId">
+				app_id = #appId#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="cname">
+				cname = #cname#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="fullCname">
+				full_cname = #fullCname#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="ename">
+				ename = #ename#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="fullEname">
+				full_ename = #fullEname#
+			</isNotEmpty>
+			<!-- <isNotEmpty prepend="," property="serviceTypeCode">
+				service_type_code = #serviceTypeCode#
+			</isNotEmpty> -->
+			<isNotEmpty prepend="," property="status">
+				status = #status#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="secureAreaCode">
+				secure_area_code = #secureAreaCode#
+			</isNotEmpty>
+			
+			<!-- 
+			<isNotEmpty prepend="," property="sevureTierCode">
+				sevure_tier_code = #sevureTierCode#
+			</isNotEmpty>  
+			-->
+			
+			<isNotEmpty prepend="," property="updateDateTime">
+				update_datetime = #updateDateTime#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="updateUser">
+				update_user = #updateUser#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="isActive">
+				is_active = #isActive#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="rrinfoId">
+				RRINFO_ID = #rrinfoId#
+			</isNotEmpty>
+			<isEqual prepend="," property="updateServiceFlag" compareValue="true">
+				SERVICE_ID = #serviceId#
+			</isEqual>
+		</dynamic>
+		WHERE
+              du_id = #duId#
+	</update> 
+	
+	<update id="updateDeployUnitServiceId"  parameterClass="DeployunitPo">  
+		UPDATE APP_DU 
+			set SERVICE_ID = #serviceId#
+			WHERE
+              du_id = #duId#
+	</update> 
+	<!-- 根据安全区域选择安全层 -->
+	<select id="getSecureTierList" parameterClass="java.lang.String" resultClass="rmNwSecureTierPo">
+		SELECT SECURE_TIER_ID secureTierId,SECURE_TIER_NAME secureTierName FROM RM_NW_SECURE_TIER WHERE SECURE_AREA_ID=#secureAreaId# and IS_ACTIVE='Y'
+	</select>
+	
+	<!--查询应用系统，查询条件为ID-->
+	<select id="findAppSysById"  parameterClass="java.lang.String" resultClass="appSysPO">  
+      SELECT APP_ID appId,FATHER_ID fatherId,CNAME cname,FULL_CNAME fullCname,ENAME ename,FULL_ENAME fullEname,MANAGER manager,
+      		 SYS_TYPE_CODE sysTypeCode, SYS_LEVEL_CODE sysLevelCode, REMARK, CREATE_DateTIME createDateTime, CREATE_USER createUser,
+      		 UPDATE_DATETIME updateDateTime,UPDATE_USER updateUser,IS_ACTIVE isActive 
+        FROM APP_INFO 
+       WHERE IS_ACTIVE = 'Y' and APP_ID = #appId#
+	</select> 
+	<select id="findServiceIdByDuId" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT
+			du.SERVICE_ID AS serviceId
+		FROM
+			CM_VM AS cm
+		LEFT JOIN APP_DU AS du ON cm.DU_ID = du.DU_ID
+		AND du.IS_ACTIVE = 'Y'
+		WHERE
+			DU.DU_ID = #duID#
+	</select>
+	<!--查询应用系统,判断是否已经存在的查询-->
+	<select id="findAppSysByParam"  parameterClass="java.util.Map" resultClass="java.lang.String">   
+      SELECT count(1) 
+        FROM $tableName$
+      <dynamic prepend="WHERE">
+      <isNotEmpty prepend = "AND" property = "columnValue">
+        	$columnName$ = #columnValue#
+      </isNotEmpty>
+      <isNotEmpty prepend = "AND" property = "columnValue1">
+        	$columnName1$ = #columnValue1#
+      </isNotEmpty>
+      <isNotEmpty prepend = "AND" property = "columnValue2">
+        	$columnName2$ = #columnValue2#
+      </isNotEmpty>
+      </dynamic> 
+	</select> 
+	
+	<!-- 查询应用系统，查询条件为DU—ID，返回结果count。判断是否可以回收 -->
+	<select id="findAppSysByduid" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT COUNT(*)  as count 
+		FROM 
+			BM_SR b 
+			INNER JOIN 
+			BM_SR_RRINFO m 
+			ON 
+				b.SR_ID=m.SR_ID 
+		WHERE 
+			m.DU_ID=#columnValue# 
+			and 
+			b.sr_status_code !='REQUEST_CLOSED' AND b.sr_status_code !='REQUEST_DELETE'
+	</select>
+	
+	<!-- 新增应用操作历史记录 -->
+	<insert id="insertAppStat"  parameterClass="appStatPO">
+		INSERT INTO `APP_STAT`
+		(
+		  `STAT_ID` ,
+		  `APP_ID` ,
+		  `DU_ID` ,
+		  `DATACENTER_ID` ,
+		  `SERVICE_ID`,
+		  `SR_STATUS_CODE` ,
+		  `SR_TYPE_MARK` ,
+		  `DEVICE_ID` ,
+		  `CPU` ,
+		  `MEM` ,
+		  `DISK`,
+		  `CREATE_TIME` 
+		)
+		VALUES
+		(
+			#statID#,
+			#appID#,
+			#duID#,
+			#dataCenterID#,
+			#serviceID#,
+			#srStatusCode#,
+			#srTypeMark#,
+			#diviceID#,
+			#cpu#,
+			#mem#,
+			#disk#,
+			#createTime#
+		);
+	</insert>
+</sqlMap>

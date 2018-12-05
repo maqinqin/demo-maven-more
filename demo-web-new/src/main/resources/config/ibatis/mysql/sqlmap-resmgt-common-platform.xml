@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCmDevice-rmPlatform"> 
+<typeAlias alias="RmPlatformPo" type="com.git.cloud.resmgt.common.model.po.RmPlatformPo"/>
+<typeAlias alias="RmHostResPo" type="com.git.cloud.resmgt.common.model.po.RmHostResPo"/>
+<typeAlias alias="RmNwCclassPo" type="com.git.cloud.resmgt.network.model.po.RmNwCclassPo"/>
+<typeAlias alias="CloudServicePo" type="com.git.cloud.cloudservice.model.po.CloudServicePo"/>
+<typeAlias alias="RmVirtualTypePo" type="com.git.cloud.resmgt.common.model.po.RmVirtualTypePo"/>
+<!-- 平台类型begin-->
+	<sql id="selectRmPlatformList">
+		<![CDATA[
+		 select 
+		 d.PLATFORM_ID as platformId,
+		 d.PLATFORM_CODE as platformCode,
+		 d.PLATFORM_NAME as platformName,
+		 d.IS_ACTIVE as isActive,
+		 d.CREATE_USER as createUser, 
+		 d.CREATE_TIME as createDatetime,
+		 d.UPDATE_USER as updateUser,
+		 d.UPDATE_TIME as updateDatetime
+		 from RM_PLATFORM d
+		 where d.IS_ACTIVE='Y' 
+		 ]]>
+		  <dynamic prepend=" and ">
+			<isNotEmpty property="platformName" prepend=" and ">
+				d.PLATFORM_NAME LIKE '%$platformName$%'
+			</isNotEmpty>
+			<isNotEmpty property="platformCode" prepend=" and ">
+				d.PLATFORM_CODE = #platformCode#
+			</isNotEmpty>
+			</dynamic>
+			ORDER BY $sidx$ $sord$ 
+			</sql>
+	<select id="findRmPlatformTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRmPlatformList"/>
+        ) as recordTable
+    </select>
+    <select id="findRmPlatformPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRmPlatformList"/> limit #startIndex# ,#pageSize#
+    </select>
+	<insert id="insertRmPlatform"  parameterClass="RmPlatformPo">  
+      insert into RM_PLATFORM(
+	      PLATFORM_ID,PLATFORM_CODE,PLATFORM_NAME,CREATE_USER,CREATE_TIME,IS_ACTIVE
+      ) VALUES(
+	      #platformId#,#platformCode#,#platformName#,#createUser#,
+	      #createDateTime#,#isActive#
+      )
+	</insert> 
+	<update id="updateRmPlatform"  parameterClass="RmPlatformPo">
+		 update RM_PLATFORM set  
+		 PLATFORM_CODE=#platformCode#,
+		 PLATFORM_NAME=#platformName#,
+		 UPDATE_TIME=#updateDateTime#,
+		 UPDATE_USER=#updateUser#
+		 where PLATFORM_ID=#platformId#
+	</update>
+	<select id="selectRmPlatform" parameterClass="java.lang.String" resultClass="RmPlatformPo">
+		 select 
+		 PLATFORM_ID as platformId,
+		 PLATFORM_CODE as platformCode,
+		 PLATFORM_NAME as platformName,
+		 IS_ACTIVE as isActive,
+		 CREATE_USER as createUser, 
+		 CREATE_TIME as createDateTime,
+		 UPDATE_USER as updateUser,
+		 UPDATE_TIME as updateDateTime
+		 from RM_PLATFORM 
+		 where IS_ACTIVE='Y' and PLATFORM_ID=#platformId#
+	</select>
+	<select id="selectRmPlatformSel" resultClass="RmPlatformPo">
+		 select 
+		 PLATFORM_ID as platformId,
+		 PLATFORM_CODE as platformCode,
+		 PLATFORM_NAME as platformName,
+		 IS_ACTIVE as isActive
+		 from RM_PLATFORM 
+		 where IS_ACTIVE='Y'
+	</select>
+	<!-- 删除 -->
+	<delete id="deleteRmPlatform" parameterClass="java.lang.String">
+		update RM_PLATFORM set IS_ACTIVE = 'N' WHERE PLATFORM_ID = #platformId#
+	</delete>
+	<select id="selectRmHostResByPlatformId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 ID as id,
+		 PLATFORM_TYPE as platformType,
+		 SERVICE_TYPE as serviceType,
+		 SECURE_AREA_TYPE as secureAreaType,
+		 SECURE_LAYER as secureLayer
+		 from RM_HOST_RES_POOL 
+		 where  PLATFORM_TYPE=#platformType#
+	</select>
+	<select id="selectRmCdpByPlatformId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 ID as id
+		 from RM_CLUSTER 
+		 where IS_ACTIVE='Y' and PLATFORM_TYPE=#platformType#
+	</select>
+	<select id="selectRmCloudServiceByPlatformId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 SERVICE_ID as serviceId,
+		 SERVICE_NAME as serviceName,
+		 PLATFORM_TYPE as platformType
+		 from CLOUD_SERVICE 
+		 where IS_ACTIVE='Y' and PLATFORM_TYPE=#platformType#
+	</select>
+	<select id="selectRmVirtualTypeByPlatformId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 VIRTUAL_TYPE_ID as virtualTypeId,
+		 PLATFORM_ID as platformId
+		 from RM_VIRTUAL_TYPE 
+		 where IS_ACTIVE='Y' and PLATFORM_ID=#platformId#
+	</select>
+	<select id="selectRmPlatformForTrim" parameterClass="java.lang.String" resultClass="RmPlatformPo">
+		 select 
+		 PLATFORM_ID as platformId,
+		 PLATFORM_CODE as platformCode,
+		 PLATFORM_NAME as platformName,
+		 IS_ACTIVE as isActive,
+		 CREATE_USER as createUser, 
+		 CREATE_TIME as createDateTime,
+		 UPDATE_USER as updateUser,
+		 UPDATE_TIME as updateDateTime
+		 from RM_PLATFORM 
+		 where IS_ACTIVE='Y' and PLATFORM_CODE=#platformCode#
+	</select>
+	<select id="selectRmPlatformNameForTrim" parameterClass="java.lang.String" resultClass="RmPlatformPo">
+		 select 
+		 PLATFORM_ID as platformId,
+		 PLATFORM_CODE as platformCode,
+		 PLATFORM_NAME as platformName,
+		 IS_ACTIVE as isActive,
+		 CREATE_USER as createUser, 
+		 CREATE_TIME as createDateTime,
+		 UPDATE_USER as updateUser,
+		 UPDATE_TIME as updateDateTime
+		 from RM_PLATFORM 
+		 where IS_ACTIVE='Y' and PLATFORM_NAME=#platformName#
+	</select>
+	<!-- 平台类型end -->
+	<!-- 虚拟化类型begin -->
+	<!-- 查询平台类型列表 -->
+	<sql id="selectRmVirtualTypeList">
+		<![CDATA[
+		 select 
+		 d.VIRTUAL_TYPE_ID as virtualTypeId,
+		 d.VIRTUAL_TYPE_CODE as virtualTypeCode,
+		 d.VIRTUAL_TYPE_NAME as virtualTypeName,
+		 d.PLATFORM_ID as platformId,
+		 d.CREATE_USER as createUser, 
+		 d.CREATE_TIME as createDatetime,
+		 d.UPDATE_USER as updateUser,
+		 d.UPDATE_TIME as updateDatetime
+		 from RM_VIRTUAL_TYPE d
+		 where d.IS_ACTIVE='Y' 
+		 and d.PLATFORM_ID=#platformId#
+		 ]]>
+			ORDER BY $sidx$ $sord$
+			</sql>
+	<select id="findRmVirtualTypTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRmVirtualTypeList"/>
+        ) as recordTable
+    </select>
+    <select id="findRmVirtualTypPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRmVirtualTypeList"/> limit #startIndex# ,#pageSize#
+    </select>
+    <insert id="savaVirtualType"  parameterClass="RmVirtualTypePo">  
+      insert into RM_VIRTUAL_TYPE(
+	      VIRTUAL_TYPE_ID,VIRTUAL_TYPE_CODE,VIRTUAL_TYPE_NAME,PLATFORM_ID,CREATE_USER,CREATE_TIME,IS_ACTIVE
+      ) VALUES(
+	      #virtualTypeId#,#virtualTypeCode#,#virtualTypeName#,#platformId#,#createUser#,
+	      #createDateTime#,#isActive#
+      )
+      </insert>
+      <select id="selectRmVirtualTypeForTrim" parameterClass="java.lang.String" resultClass="RmVirtualTypePo">
+		 select 
+		 VIRTUAL_TYPE_ID as virtualTypeId,
+		 VIRTUAL_TYPE_CODE as virtualTypeCode,
+		 VIRTUAL_TYPE_NAME as virtualTypeName,
+		 PLATFORM_ID as platformId,
+		 IS_ACTIVE as isActive,
+		 CREATE_USER as createUser, 
+		 CREATE_TIME as createDateTime,
+		 UPDATE_USER as updateUser,
+		 UPDATE_TIME as updateDateTime
+		 from RM_VIRTUAL_TYPE 
+		 where IS_ACTIVE='Y' and VIRTUAL_TYPE_CODE=#virtualTypeCode#
+	</select>
+	<select id="selectRmVirtualType" parameterClass="java.lang.String" resultClass="RmVirtualTypePo">
+		 select 
+		 VIRTUAL_TYPE_ID as virtualTypeId,
+		 VIRTUAL_TYPE_CODE as virtualTypeCode,
+		 VIRTUAL_TYPE_NAME as virtualTypeName,
+		 PLATFORM_ID as platformId,
+		 IS_ACTIVE as isActive,
+		 CREATE_USER as createUser, 
+		 CREATE_TIME as createDateTime,
+		 UPDATE_USER as updateUser,
+		 UPDATE_TIME as updateDateTime
+		 from RM_VIRTUAL_TYPE 
+		 where IS_ACTIVE='Y' and VIRTUAL_TYPE_ID=#virtualTypeId#
+	</select>
+	<select id="selectRmVirtualTypeSel" parameterClass="java.util.Map" resultClass="RmVirtualTypePo">
+		 select 
+		 VIRTUAL_TYPE_ID as virtualTypeId,
+		 VIRTUAL_TYPE_CODE as virtualTypeCode,
+		 VIRTUAL_TYPE_NAME as virtualTypeName,
+		 PLATFORM_ID as platformId,
+		 IS_ACTIVE as isActive
+		 from RM_VIRTUAL_TYPE 
+		 where IS_ACTIVE='Y' and PLATFORM_ID = #platformId#
+	</select>
+	<update id="updateRmVirtualType"  parameterClass="RmVirtualTypePo">
+		 update RM_VIRTUAL_TYPE set  
+		 VIRTUAL_TYPE_CODE=#virtualTypeCode#,
+		 VIRTUAL_TYPE_NAME=#virtualTypeName#,
+		 PLATFORM_ID=#platformId#,
+		 UPDATE_TIME=#updateDateTime#,
+		 UPDATE_USER=#updateUser#
+		 where VIRTUAL_TYPE_ID=#virtualTypeId#
+	</update>
+	<select id="selectRmCdpByvirtualTypeId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 ID as id
+		 from RM_CLUSTER
+		 where IS_ACTIVE='Y' and VM_TYPE=#virtualTypeId#
+	</select>
+	<select id="selectRmCloudServiceByvirtualTypeId" parameterClass="java.lang.String" resultClass="java.util.List">
+		 select 
+		 SERVICE_ID as serviceId,
+		 SERVICE_NAME as serviceName,
+		 PLATFORM_TYPE as platformType
+		 from CLOUD_SERVICE 
+		 where IS_ACTIVE='Y' and VM_TYPE=#virtualTypeId#
+	</select>
+	<delete id="deleteVirtualType" parameterClass="java.lang.String">
+		update RM_VIRTUAL_TYPE set IS_ACTIVE = 'N' WHERE VIRTUAL_TYPE_ID = #virtualTypeId#
+	</delete>
+	<!-- 虚拟化类型end -->
+</sqlMap>

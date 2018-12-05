@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+
+<sqlMap namespace="checkParam">
+	<typeAlias alias="paramPo"
+		type="com.git.cloud.parame.model.po.ParameterPo" />
+	<typeAlias alias="parameterVo"
+		type="com.git.cloud.parame.model.vo.ParameterVo" />
+	<!-- 初始化参数 -->
+	<sql id="selectParamList">
+
+		SELECT
+		PARAM_ID as paramId,
+		PARAM_NAME as paramName,
+		PARAM_VALUE as paramValue,
+		REMARK as remark,
+		IS_ENCRYPTION as isEncryption
+		FROM
+		ADMIN_PARAM
+		WHERE
+		IS_ACTIVE = 'Y'
+
+		<dynamic prepend=" and ">
+			<isNotEmpty property="paramName" prepend=" and ">
+				PARAM_NAME like
+				concat('%', #paramName#, '%')
+			</isNotEmpty>
+
+		</dynamic>
+	</sql>
+	<select id="selectParamTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectParamList" />
+		) as recordTable
+	</select>
+	<select id="selectParamtPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectParamList" />
+		$_orderby$
+		limit #startIndex# ,#pageSize#
+
+	</select>
+	<!-- 修改时获得数据 -->
+	<select id="param.getParamById" parameterClass="java.util.Map"
+		resultClass="paramPo">
+		SELECT
+		PARAM_ID as paramId,
+		PARAM_NAME as paramName,
+		PARAM_VALUE as paramValue,
+		REMARK as remark,
+		IS_ENCRYPTION as isEncryption
+		FROM
+		ADMIN_PARAM
+		WHERE
+		IS_ACTIVE = 'Y'
+		AND PARAM_ID = #paramId#
+	</select>
+
+
+	<!-- 保存任务 -->
+	<insert id="param.insert" parameterClass="paramPo">
+		INSERT INTO
+		ADMIN_PARAM(
+		PARAM_ID,
+		PARAM_NAME,
+		PARAM_VALUE,
+		IS_ENCRYPTION,
+		IS_ACTIVE,
+		REMARK
+		)
+		VALUES
+		(
+		#paramId#,
+		#paramName#,
+		#paramValue#,
+		#isEncryption#,
+		#isActive#,
+		#remark#)
+	</insert>
+	<!-- 修改后更新任务 -->
+
+	<update id="param.update" parameterClass="paramPo">
+		UPDATE ADMIN_PARAM
+		<dynamic prepend="set">
+			<isNotEmpty prepend="," property="paramName">
+				PARAM_NAME = #paramName#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="paramValue">
+				PARAM_VALUE =
+				#paramValue#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="remark">
+				REMARK = #remark#
+			</isNotEmpty>
+			<isNotEmpty prepend="," property="isEncryption">
+				IS_ENCRYPTION =
+				#isEncryption#
+			</isNotEmpty>
+
+
+		</dynamic>
+		WHERE PARAM_ID=#paramId#
+	</update>
+	<!-- 删除后更新 -->
+	<update id="param.delete" parameterClass="paramPo">
+	 <![CDATA[
+	  UPDATE  ADMIN_PARAM 
+	  SET
+		IS_ACTIVE = #isActive#
+	  WHERE  PARAM_ID = #paramId#
+	 ]]>
+	</update>
+	<!-- 判断是否有同名的参数 -->
+	<select id="param.compare" parameterClass="java.lang.String"
+		resultClass="paramPo">
+	  <![CDATA[ SELECT 
+	   PARAM_NAME as paramName
+	   FROM ADMIN_PARAM 
+	   WHERE PARAM_NAME=#paramName#
+	   ]]>
+
+	</select>
+
+	<select id="getbpm" parameterClass="java.util.Map"
+		resultClass="paramPo">
+		SELECT
+		PARAM_ID AS paramId,
+		PARAM_NAME AS paramName,
+		PARAM_VALUE AS paramValue,
+		REMARK AS remark,
+		IS_ENCRYPTION AS isEncryption
+		FROM
+		ADMIN_PARAM
+		WHERE
+		IS_ACTIVE = 'Y'
+		AND PARAM_NAME = #bmpName#
+	</select>
+	
+	
+	<!-- 插入Logo图片 -->
+	<insert id="param.insertlogo" parameterClass="paramPo">
+        INSERT INTO
+        ADMIN_PARAM(
+	        PARAM_ID,
+	        PARAM_NAME,
+	        PARAM_VALUE,
+	        PARAM_LOGO,
+	        IS_ENCRYPTION,
+	        IS_ACTIVE      
+        )
+        VALUES
+        (
+	        #paramId#,
+	        #paramName#,
+	        #paramValue#,
+	        #paramLogo#,
+	        #isEncryption#,
+	        #isActive#
+	     )
+    </insert>
+	
+	<update id ="param.updatelogo" parameterClass="paramPo">
+	     UPDATE ADMIN_PARAM SET PARAM_LOGO = #paramLogo# WHERE  PARAM_NAME = #paramName#
+
+	</update>
+	
+	<!-- 查询Logo图片 -->
+	<select id="param.selectlogo" resultClass="paramPo">
+        SELECT
+            PARAM_NAME AS paramName,
+            PARAM_LOGO AS paramLogo
+        FROM
+            ADMIN_PARAM
+        WHERE
+            1 = 1
+        AND 
+            IS_ACTIVE = 'Y'
+        AND
+            PARAM_NAME = 'CloudTubeLogo'
+        OR
+            PARAM_NAME = 'TenantLogo'
+    </select>
+	
+</sqlMap>	

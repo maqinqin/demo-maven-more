@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="sys-user">
+	<typeAlias alias="sysUserPo" type="com.git.cloud.sys.model.po.SysUserPo" />
+	<typeAlias alias="sysUserVo" type="com.git.cloud.sys.model.vo.SysUserVo" />
+	<typeAlias alias="appInfoVo" type="com.git.cloud.sys.model.vo.AppInfoVo" />
+	<typeAlias alias="sysRolemManageVo" type="com.git.cloud.sys.model.vo.SysRolemManageVo" />
+	<typeAlias alias="sysMenuPo" type="com.git.cloud.sys.model.po.SysMenuPo" />
+	<typeAlias alias="cloudServicePo" type="com.git.cloud.cloudservice.model.po.CloudServicePo" />
+	<typeAlias alias="userLimit" type="com.git.cloud.sys.model.po.SysUserLimitPo" />
+	
+   <!--添加用户信息 -->
+	<insert id="insertUser" parameterClass="sysUserPo"> 
+		<![CDATA[ 
+			insert into SYS_USER (
+				user_id,org_id,first_name,last_name,login_name,login_password,email,phone,
+				ip_address,last_login,user_type,create_datetime,is_active,plat_user
+			) values (
+				#userId#,#orgId#,#firstName#,#lastName#,#loginName#,#loginPassword#,#email#,
+				#phone#,#ipAddress#,#lastLogin#,#userType#,#createDateTime#,#isActive#,#platUser#
+			)
+		]]>
+	</insert>
+
+	<!--更新用户信息 -->
+	<update id="updateUser" parameterClass="sysUserPo">
+		<![CDATA[ 
+			update SYS_USER set
+				org_id = #orgId#,
+				first_name = #firstName#,
+				last_name = #lastName#,
+				login_name = #loginName#,
+				login_password = #loginPassword#,
+				email = #email#,
+				phone = #phone#,
+				ip_address = #ipAddress#,
+				last_login = #lastLogin#,
+				user_type = #userType#,
+				update_datetime = #updateDateTime#,
+				is_active = #isActive#,
+				plat_user = #platUser#
+			where
+				  user_id = #userId#
+		]]>
+	</update>
+	
+	<!-- 删除用户信息 -->
+	<delete id="deleteUser" parameterClass="Map">
+		<![CDATA[ 
+			update SYS_USER set is_active = #isActive# where user_id = #userId#
+		]]>
+	</delete>
+	
+	<!--获得用户信息 Vo-->
+	<select id="getUserById" parameterClass="Map"
+		resultClass="sysUserVo">
+		<![CDATA[
+		  select 
+		    us.user_id as userId,
+				us.org_id as orgId,
+				org.org_name as orgName,
+				us.first_name as firstName,
+				us.last_name as lastName,
+				us.login_name as loginName,
+				us.login_password  as loginPassword,
+				us.email as email,
+				us.phone as phone,
+				us.ip_address as ipAddress,
+				us.last_login as lastLogin,
+				us.user_type as userType,
+				us.create_user as createUser,
+				us.create_datetime as createDateTime,
+				us.plat_user as platUser
+			from SYS_USER us 
+				left join SYS_ORGANIZATION org on us.org_id = org.org_id and org.is_active = 'Y'
+			where
+				us.user_id = #userId#
+				and us.is_active = 'Y'
+		]]>
+	</select>
+	
+	<!--获得用户信息 Po-->
+	<select id="getUserPoById" parameterClass="Map"
+		resultClass="sysUserPo">
+		<![CDATA[
+		  select 
+		    us.user_id as userId,
+				us.org_id as orgId,
+				us.first_name as firstName,
+				us.last_name as lastName,
+				us.login_name as loginName,
+				us.login_password  as loginPassword,
+				us.email as email,
+				us.phone as phone,
+				us.ip_address as ipAddress,
+				us.last_login as lastLogin,
+				us.user_type as userType,
+				us.create_user as createUser,
+				us.create_datetime as createDateTime,
+				us.plat_user as platUser
+			from SYS_USER us 
+			where
+				us.user_id = #userId#
+				and us.is_active = 'Y'
+		]]>
+	</select>
+	
+	<select id="findUserRoleResult" parameterClass="Map" resultClass="appInfoVo">
+		<![CDATA[
+			SELECT DISTINCT
+				appInfo.APP_ID AS appId,
+				appInfo.CNAME AS cname
+			FROM
+				APP_INFO appInfo,
+				SYS_ROLE_MANAGE roleManage
+			WHERE
+				appInfo.IS_ACTIVE = 'Y'
+			AND appInfo.FATHER_ID = '0'
+			AND(
+				roleManage.APP_INFO_ID = appInfo.APP_ID
+				OR roleManage.APP_INFO_ID = 'ALL'
+			)
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="userId" prepend=" and ">
+				<![CDATA[roleManage.USER_ID = #userId#]]>
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY
+				CONVERT(cname USING gbk)COLLATE gbk_chinese_ci ASC
+	</select>
+	
+	<!--根据机构ID获得所有用户 -->
+	<select id="getUserByOrgId" parameterClass="Map"
+		resultClass="sysUserVo">
+		<![CDATA[
+		  select 
+		    us.user_id as userId,
+				us.org_id as orgId,
+				org.org_name as orgName,
+				us.first_name as firstName,
+				us.last_name as lastName,
+				us.login_name as loginName,
+				us.login_password  as loginPassword,
+				us.email as email,
+				us.phone as phone,
+				us.ip_address as ipAddress,
+				us.last_login as lastLogin,
+				us.user_type as userType,
+				us.create_user as createUser,
+				us.create_datetime as createDateTime,
+				us.plat_user as platUser
+			from SYS_USER us 
+				left join SYS_ORGANIZATION org on us.org_id = org.org_id and org.is_active = 'Y'
+			where
+				us.org_id = #orgId#
+				and us.is_active = 'Y'
+		]]>
+	</select>
+	
+	<!-- 用户列表 -->
+	<sql id="selectUserList"> 
+		<![CDATA[
+		  select 
+		    us.user_id as userId,
+				us.org_id as orgId,
+				org.org_name as orgName,
+				us.first_name as firstName,
+				us.last_name as lastName,
+				us.login_name as loginName,
+				us.login_password  as loginPassword,
+				us.email as email,
+				us.phone as phone,
+				us.ip_address as ipAddress,
+				us.last_login as lastLogin,
+				us.user_type as userType,
+				dic.dic_name as userTypeName,
+				us.create_user as createUser,
+				us.create_datetime as createDateTime,
+				us.plat_user as platUser
+			from SYS_USER us 
+				left join SYS_ORGANIZATION org on us.org_id = org.org_id and org.is_active = 'Y'
+				left join ADMIN_DIC dic on us.user_type = dic.dic_code
+			where 
+			    us.is_active = 'Y'
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="loginName" prepend=" and ">
+				<![CDATA[us.login_name like '%$loginName$%']]>
+			</isNotEmpty>
+			<isNotEmpty property="userType" prepend=" and ">
+				<![CDATA[us.user_type = #userType#]]>
+			</isNotEmpty>
+		</dynamic>
+		order by convert(us.FIRST_NAME using gbk)  ASC
+		 <!-- order by org.org_name,us.first_name asc -->
+	</sql>
+	
+	<select id="selectUserListTotal" parameterClass="hashMap"
+		resultClass="Integer">
+			select count(1) from (
+			<include refid="selectUserList" />
+			) as recordTable
+	</select>
+	
+	<select id="initRadio" parameterClass="hashMap"
+		resultClass="sysRolemManageVo">
+		<![CDATA[
+			select 
+				ID AS id,
+				USER_ID AS userId,
+				APP_INFO_ID AS appInfoId,
+				CLOUD_SERVICE_ID AS cloudServiceId
+			from 
+				SYS_ROLE_MANAGE
+			where 
+				USER_ID = #userId#
+			]]>
+	</select>
+	
+	<select id="initAddSysRoleNoTree" parameterClass="Map"
+		resultClass="appInfoVo">
+		<![CDATA[
+		  SELECT DISTINCT
+		  	appInfo.APP_ID AS appId, appInfo.CNAME AS cname 
+		  FROM 
+			APP_INFO appInfo 
+		  WHERE 
+			appInfo.IS_ACTIVE = 'Y' AND appInfo.FATHER_ID = '0' 
+		  	AND appInfo.APP_ID NOT IN (SELECT DISTINCT appInfo.APP_ID AS appId 
+		  FROM 
+			APP_INFO appInfo 
+			,SYS_ROLE_MANAGE roleManage 
+		  WHERE 
+			appInfo.IS_ACTIVE = 'Y' AND appInfo.FATHER_ID = '0' AND roleManage.USER_ID  = #userId# 
+      AND (roleManage.APP_INFO_ID = appInfo.APP_ID OR roleManage.APP_INFO_ID='ALL')) 
+		]]>
+		  ORDER BY appInfo.CREATE_DATETIME DESC
+	</select>
+	
+	<select id="initAddSysRoleTree" parameterClass="Map"
+		resultClass="appInfoVo">
+		<![CDATA[
+		  SELECT DISTINCT
+		  	appInfo.APP_ID as appId, appInfo.CNAME as cname 
+		  FROM 
+			APP_INFO appInfo,SYS_ROLE_MANAGE roleManage 
+		  WHERE 
+			appInfo.IS_ACTIVE = 'Y' and appInfo.FATHER_ID = '0' 
+            AND(roleManage.APP_INFO_ID = appInfo.APP_ID OR roleManage.APP_INFO_ID = 'ALL')
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="userId" prepend=" and ">
+				<![CDATA[roleManage.USER_ID = #userId#]]>
+			</isNotEmpty>
+		</dynamic>
+		  ORDER BY CREATE_DATETIME DESC
+	</select>
+	
+	<!-- 保存系统授权 -->
+ 	<insert id="saveRole" parameterClass="sysRolemManageVo">
+		<![CDATA[ 
+			INSERT INTO SYS_ROLE_MANAGE (
+				ID,USER_ID,APP_INFO_ID
+			) values (
+				#id#,#userId#,#appInfoId#
+			)
+		]]>
+	</insert>
+	<!-- 删除系统授予权限 -->
+	<delete id="deleteRloeManage" parameterClass="Map">
+		<![CDATA[ 
+			delete from SYS_ROLE_MANAGE where APP_INFO_ID = #appInfoId# and USER_ID = #userId#
+		]]>
+	</delete>
+	
+	<!-- 
+		云服务关联用户 start
+	-->
+	<!-- 查询所有未关联的云服务 -->
+	<select id="initCloudServiceNoTree" parameterClass="Map" resultClass="cloudServicePo">
+		<![CDATA[
+			SELECT DISTINCT
+				ser.SERVICE_ID AS serviceId,
+				ser.SERVICE_NAME AS serviceName
+			FROM
+				CLOUD_SERVICE ser
+			WHERE
+				ser.IS_ACTIVE = 'Y'
+			AND ser.SERVICE_ID NOT IN(
+				SELECT
+					ser.SERVICE_ID AS serviceId
+				FROM
+					CLOUD_SERVICE ser,
+					SYS_ROLE_MANAGE roleManage
+				WHERE
+					ser.IS_ACTIVE = 'Y'
+				AND roleManage.USER_ID = #userId#
+				AND(
+					roleManage.CLOUD_SERVICE_ID = ser.SERVICE_ID
+					OR roleManage.CLOUD_SERVICE_ID = 'ALL'
+				)
+			)
+			ORDER BY
+				ser.SERVICE_NAME
+		]]>
+	</select>
+	<!-- 查询所有已关联的云服务 -->
+	<select id="initCloudServiceTree" parameterClass="Map" resultClass="cloudServicePo">
+		<![CDATA[
+			SELECT DISTINCT
+				ser.SERVICE_ID AS serviceId,
+				ser.SERVICE_NAME AS serviceName
+			FROM
+				CLOUD_SERVICE ser,
+				SYS_ROLE_MANAGE roleManage
+			WHERE
+				(
+					roleManage.CLOUD_SERVICE_ID = ser.SERVICE_ID
+					OR roleManage.CLOUD_SERVICE_ID = 'ALL'
+				)
+			AND ser.IS_ACTIVE = 'Y'
+		]]>
+		<dynamic prepend="and">
+			<isNotEmpty property="userId" prepend=" and ">
+				<![CDATA[roleManage.USER_ID = #userId#]]>
+			</isNotEmpty>
+		</dynamic>
+		  ORDER BY SERVICE_NAME
+	</select>
+	<!-- 保存云服务授权 -->
+ 	<insert id="saveCloudService" parameterClass="sysRolemManageVo">
+		<![CDATA[ 
+			INSERT INTO SYS_ROLE_MANAGE (
+				ID,USER_ID,CLOUD_SERVICE_ID
+			) values (
+				#id#,#userId#,#cloudServiceId#
+			)
+		]]>
+	</insert>
+	<!-- 删除云服务授予权限 -->
+	<delete id="deleteCloudService" parameterClass="Map">
+		<![CDATA[ 
+			delete from SYS_ROLE_MANAGE where CLOUD_SERVICE_ID = #cloudServiceId#
+		]]>
+		<dynamic prepend="and">
+			<isNotEmpty property="userId" prepend=" and ">
+				<![CDATA[USER_ID = #userId#]]>
+			</isNotEmpty>
+		</dynamic>
+	</delete>
+	
+	<!-- 
+		云服务关联用户 end
+	-->
+	
+	<select id="selectUserListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectUserList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	
+	<!--   查询角色列表 -->
+	<sql id="selectUserRoleList">
+		<![CDATA[
+		 select 
+			 rol.role_id as roleId,
+			 rol.role_name as roleName,
+			 rol.remark as remark,
+			 (select count(*) from SYS_USER_ROLE uro where uro.user_id = #userIdchoose# and uro.role_id = rol.role_id) as roleCount,
+			 rol.is_active as isActive 
+		 from 
+		 	SYS_ROLE rol
+		 where rol.is_active='Y' 
+		 ]]>
+			order by rol.create_datetime desc 
+	</sql>
+	
+	<select id="findUserRoleTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectUserRoleList"/>
+        ) as recordTable
+    </select>
+    
+    <select id="findUserRolePage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectUserRoleList"/> limit #startIndex# ,#pageSize#
+    </select>
+	
+    <!--保存授予角色 -->
+	<insert id="insertRoleList" parameterClass="java.util.List"> 
+		<![CDATA[ 
+			insert into SYS_USER_ROLE(
+				user_id,role_id
+			) values
+		]]>
+		 <iterate conjunction=",">
+			<![CDATA[
+				(#roleList[].userId#,#roleList[].roleId#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<!-- 删除授予角色 -->
+	<delete id="deleteRloe" parameterClass="Map">
+		<![CDATA[ 
+			delete from SYS_USER_ROLE where user_id = #userId# and role_id = #roleId#
+		]]>
+	</delete>
+	
+	<!-- 根据登录名获得授权资源 -->
+	<select id="selectResByLoginName" parameterClass="Map"
+		resultClass="sysMenuPo">
+		<![CDATA[
+		   select 
+			 res.id,
+			 res.menu_name as menuName,
+			 res.menu_code as menuCode,
+			 res.menu_url as menuUrl,
+			 res.parent_id as parentId,
+			 res.image_url as imageUrl,
+			 res.lable_color as lableColor
+			from 
+				SYS_MENU res
+			where exists (select  menu_id as id from  SYS_MENU_ROLE mero
+					where exists (select  role_id  from SYS_USER_ROLE usro
+								where usro.user_id = (select user_id from SYS_USER us
+													 where us.is_active = #isActive# 
+										]]>	
+												    <isNotEmpty property="userId" prepend=" and ">
+														<![CDATA[us.user_id = #userId#]]>
+													</isNotEmpty>
+													 <isNotEmpty property="loginName" prepend=" and ">
+														<![CDATA[us.login_name = #loginName#]]>
+													</isNotEmpty>
+                          <![CDATA[   
+													 ) and mero.role_id = usro.role_id
+						) and res.id = mero.menu_id
+			) and res.resource_type = #resourceType# and res.IS_ACTIVE = #isActive#
+  ]]>
+    <isNotEmpty property="parentId" prepend=" and ">
+     <![CDATA[res.parent_id = #parentId#]]>
+   </isNotEmpty> 
+    order by res.order_id
+	</select>
+	
+	<!-- 验证登录名是否存在 -->
+	<select id="selectLoginNameCount" parameterClass="Map"
+		resultClass="java.util.List">
+		<![CDATA[
+		   select 
+			    user_id as id
+			from 
+				SYS_USER
+			where 
+			   	binary login_name = #loginName#
+			    and IS_ACTIVE = #isActive# 
+		]]>	
+	</select>
+	
+	<select id="findRoleByUserId" parameterClass="hashMap" resultClass="com.git.cloud.sys.model.po.SysRolePo">
+		<![CDATA[
+		   SELECT
+				r.ROLE_ID roleId,
+				r.ROLE_NAME roleName
+			FROM
+				SYS_USER_ROLE ur,
+				SYS_ROLE r
+			WHERE
+				ur.ROLE_ID = r.ROLE_ID
+			AND r.IS_ACTIVE = 'Y'
+			AND user_id = #userId# 
+		]]>	
+	</select>
+	
+	<select id="findUserByLoginName" parameterClass="hashMap" resultClass="SysUserVo">
+		<![CDATA[
+		   select 
+		    us.user_id as userId,
+				us.org_id as orgId,
+				us.first_name as firstName,
+				us.last_name as lastName,
+				us.login_name as loginName,
+				us.login_password  as loginPassword,
+				us.email as email,
+				us.phone as phone,
+				us.ip_address as ipAddress,
+				us.last_login as lastLogin,
+				us.user_type as userType,	
+				us.create_user as createUser,
+				us.create_datetime as createDateTime
+			from SYS_USER us 
+				
+			where 
+			    us.is_active = 'Y' AND binary us.LOGIN_NAME=#login_name#
+		]]>	
+	</select>
+</sqlMap>

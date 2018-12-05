@@ -1,0 +1,9 @@
+{
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "EMC",
+		"OPERATION": 3006,
+		"RET_CODE":(String)"9999",
+        "RET_MESG":(String)"create  fail:error reason"
+	}
+}

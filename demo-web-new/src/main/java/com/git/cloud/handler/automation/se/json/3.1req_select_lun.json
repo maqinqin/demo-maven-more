@@ -1,0 +1,35 @@
+//请求选择lun信息
+{
+	"DATACENTER_ENAME":"NH/YQ",
+	"STORAGE_MODEL":VMAX,
+	"OS_TYPE":"VIOC",
+	"AVAILABLE_RATE_THRESHOLD":"25.0",
+	"SN":["000292603712", "000292603713"],
+	"STORAGE_MGR":{
+		"SMISISERVER_IP": "128.192.162.22",
+		"USER_NAME":"admin",
+		"USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+		"NAME_SPACE":"interop"
+	},
+	"DATA_TYPE":[
+		{
+			"name":"OracleSys",
+			"size":"30",
+			"count":"1"
+		},
+		{
+			"name":"Data",
+			"size":"100",
+			"count":"2"
+		},
+		{
+			"name":"Arch",
+			"size":"100",
+			"count":"2"
+		}
+	],
+	"LUN_SELECTED":{//已选择但未使用的Lun
+	    "000292603712":[041F,0412],
+	    "000292603713":[041F,0412], //镜像存储也需要传，信息需要一致
+	}
+}

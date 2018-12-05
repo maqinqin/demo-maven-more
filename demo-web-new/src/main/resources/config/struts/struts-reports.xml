@@ -1,0 +1,42 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+          
+ <struts>
+<!--  "http://10.100.3.76:8080/icms-web/reports/common/toPdf.action?timeLine="+$P{TIMELINE}+"&timeLineNext="+$P{TIMELINENEXT}+"&queryvmType="+$P{VMTYPE}+"" -->
+ 	<package name="reports-common" extends="icms-package" namespace="/reports/common">
+ 		<!-- 保存新建报表的详细  -->
+ 		<action name="save" class="com.git.cloud.reports.action.ReportAction" method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<!-- 自动生成新报表的查询页面 -->
+		<action name="showReport" class="com.git.cloud.reports.action.ReportAction" method="showReport">
+			<result name="success" >
+				<param name="location">/pages/reports/common/showReport.jsp</param>
+				<param name="createReportParam">${createReportParam}</param>
+			</result>
+		</action>
+		<action name="searchForHtml" class="com.git.cloud.reports.action.ReportAction" method="searchForHtml">
+		</action>
+ 		<action name="toPdf" class="com.git.cloud.reports.action.ReportAction" method="toPdf"></action>
+ 		
+ 		<!-- 报表详情 -->
+ 		<action name="getReportList" class="com.git.cloud.reports.action.ReportAction" method="getReportList"></action>
+ 		<!-- 删除报表 -->
+ 		<action name="deleteReportList" class="com.git.cloud.reports.action.ReportAction" method="deleteReportList">
+		</action>
+		<!-- 查询报表信息 -->
+ 		<action name="getReport" class="com.git.cloud.reports.action.ReportAction" method="getReport">
+		</action>
+		<!-- 根据报表名查询报表信息，查重 -->
+		<action name="getReportForName" class="com.git.cloud.reports.action.ReportAction" method="getReportForName">
+		</action>
+ 	</package>
+ 	
+ 	
+ </struts>

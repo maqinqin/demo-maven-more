@@ -1,0 +1,93 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>	
+	<!-- 网络资源池管理 -->
+	<package name="netWork-NwResPool-package" extends="icms-package" namespace="/network">
+		<!-- 显示仪表详情 -->
+		<action name="findNetworkAbstract" class="networkAbstractAction" method="findNetworkAbstract"></action>
+		<!-- 树 -->
+		<action name="buildNetworkResTree" class="networkResTreeAction" method="buildNetworkResTree"></action>
+		<action name="findSubTreeByNameAct" class="networkResTreeAction" method="findSubTreeByName"></action>
+		<!-- 
+		<action name="buildCclassNodeForTreeAsyncAct" class="networkResTreeAction" method="buildCclassNodeForTreeAsync"></action>
+		 -->
+		<!-- 网络资源池 -->
+		<action name="saveRmNwResPoolAct" class="rmRmNwResPoolAction" method="saveRmNwResPoolByVo"/>
+		<action name="findRmNwResPoolFullVoByIdAct" class="rmRmNwResPoolAction" method="findRmNwResPoolFullVoById"/>
+		<action name="delRmNwResPoolFullVoByIdAct" class="rmRmNwResPoolAction" method="delRmNwResPoolFullVoById"/>
+		<action name="updateRmNwResPoolAct" class="rmRmNwResPoolAction" method="updateRmNwResPoolByVo"/>
+		<action name="updateBeingRmNwResPoolAct" class="rmRmNwResPoolAction" method="updateBeingRmNwResPoolByVo"/>
+		<action name="delBeingRmNwResPoolFullVoByIdAct" class="rmRmNwResPoolAction" method="delBeingRmNwResPoolFullVoByIdAct"/>
+		<action name="findRmNwCclassFullVoListAct" class="rmRmNwResPoolAction" method="findRmNwCclassFullVoList"/>
+		<action name="findRmNwResPoolFullVoListAct" class="rmRmNwResPoolAction" method="findRmNwResPoolFullVoList"/>
+		<action name="selectRmNwPoolList" class="rmRmNwResPoolAction" method="selectRmNwPoolList"/>
+		<action name="selectIPList" class="rmRmNwResPoolAction" method="selectIPList"/>
+		<action name="getPhyNet" class="rmRmNwResPoolAction" method="getPhyNet"/>
+		<action name="getIPInfo" class="rmRmNwResPoolAction" method="getIPInfo"/>
+		<action name="updatePoolGateway" class="rmRmNwResPoolAction" method="updateGatewayPoolByVo"/>
+		<!-- B段 -->
+		<action name="saveRmNwBclassAct" class="rmNwBclassAction" method="saveRmNwBclassPo"/>
+		<action name="findRmNwBclassPoByIdAct" class="rmNwBclassAction" method="findRmNwBclassPoById"/>
+		<action name="updateRmNwBclassAct" class="rmNwBclassAction" method="updateRmNwBclassByPo"/>
+		<action name="findScopeCheckAct" class="rmNwBclassAction" method="findScopeCheck"/>
+		
+        <!-- C段 -->
+        <action name="whetherUpdateRmNwBclassPo" class="rmNwCclassAction" method="whetherUpdateRmNwBclassPo"></action>
+        <action name="saveRmNwCclassPo" class="rmNwCclassAction" method="saveRmNwCclassPo"/>
+        <action name="findCscopeCheck" class="rmNwCclassAction" method="findCscopeCheck"/>
+        <action name="findRmNwCclassPoByIdAct" class="rmNwCclassAction" method="findRmNwCclassPoById"/>
+        <action name="updateClassHoldOrValidAct" class="rmNwCclassAction" method="updateClassHoldOrValid"/>
+	    <action name="updateRmNwCclassChangeAct" class="rmNwCclassAction" method="updateRmNwCclassChange"/>
+	    <action name="findInitConvergeListAct" class="rmNwCclassAction" method="findInitConvergeList"/>
+	    
+	    <action name="findInitSecureAreaListAct" class="rmNwCclassAction" method="findInitSecureAreaList"/>
+	    <action name="findInitSecureTierListAct" class="rmNwCclassAction" method="findInitSecureTierList"/>
+	    <action name="findInitPlatFormListAct" class="rmNwCclassAction" method="findInitPlatFormList"/>
+	    <action name="findInitVirtualTypeListAct" class="rmNwCclassAction" method="findInitVirtualTypeList"/>
+	    <action name="findInitHostTypeListAct" class="rmNwCclassAction" method="findInitHostTypeList"/>
+	    <action name="findInitUseListAct" class="rmNwCclassAction" method="findInitUseList"/>
+	    <action name="findChangeSecureTierListAct" class="rmNwCclassAction" method="findChangeSecureTierList"/>
+	    <action name="findChangeVirtualTypeByPFAct" class="rmNwCclassAction" method="findChangeVirtualTypeByPF"/>
+	    <action name="findChangeUseByAllAct" class="rmNwCclassAction" method="findChangeUseByAll"/>
+	    
+	    <action name="queryRmNwIpAddress" class="rmNwCclassAction" method="queryRmNwIpAddress"/>
+	    <action name="updateRmNwIpForOccupy" class="rmNwCclassAction" method="updateRmNwIpForOccupy"/>
+	    <action name="updateRmNwIpForSeqOccupy" class="rmNwCclassAction" method="updateRmNwIpForSeqOccupy"></action>
+	    
+	    <action name="cancalRouter" class="rmNwCclassAction" method="cancalRouter"/>
+	    <action name="addRouter" class="rmNwCclassAction" method="addRouter"/>
+	    
+		<!-- 外部网络管理 -->
+		<action name="getExternalNetworkList" class="externalNetworkAction" method="getExternalNetworkList"></action>
+		<action name="updateExternalNetwork" class="externalNetworkAction" method="updateExternalNetwork"></action>
+		<action name="saveExternalNetwork" class="externalNetworkAction" method="saveExternalNetwork"></action>
+		<action name="selectExternalNetwork" class="externalNetworkAction" method="selectExternalNetwork"></action>
+		<action name="deleteExternalNetwork" class="externalNetworkAction" method="deleteExternalNetwork"></action>
+ 	 	<action name="deleteExternalNetworkCheck" class="externalNetworkAction" method="deleteExternalNetworkCheck"></action>
+		<action name="getPhyNet" class="externalNetworkAction" method="getPhyNet"/>
+		<!-- 子网管理 --> 
+		<action name="getExternalSubnetList" class="externalNetworkAction" method="getExternalSubnetList"></action>
+		<action name="updateExternalSubnet" class="externalNetworkAction" method="updateExternalSubnet"></action>
+		<action name="saveExternalSubnet" class="externalNetworkAction" method="saveExternalSubnet"></action>
+		<action name="selectExternalSubnet" class="externalNetworkAction" method="selectExternalSubnet"></action>		 
+		<action name="deleteExternalSubnet" class="externalNetworkAction" method="deleteExternalSubnet"></action>
+		<action name="hasSubnet" class="externalNetworkAction" method="hasSubnet"></action>		 
+	 	<!-- 虚拟路由器管理 -->
+		<action name="getVirtualRouterList" class="virtualRouterAction" method="getVirtualRouterList"></action>
+		<action name="updateVirtualRouter" class="virtualRouterAction" method="updateVirtualRouter"></action>
+		<action name="saveVirtualRouter" class="virtualRouterAction" method="saveVirtualRouter"></action>
+		<action name="selectVirtualRouter" class="virtualRouterAction" method="selectVirtualRouter"></action>
+		<action name="deleteVirtualRouter" class="virtualRouterAction" method="deleteVirtualRouter"></action>
+ 	 	<action name="deleteVirtualRouterCheck" class="virtualRouterAction" method="deleteVirtualRouterCheck"></action>
+ 	 	<action name="getAllExternalNetworkName" class="virtualRouterAction" method="getAllExternalNetworkName"></action>
+ 	 	<action name="getENVpcName" class="virtualRouterAction" method="getENVpcName"></action>
+ 	 	<action name="limitVpcName" class="virtualRouterAction" method="limitVpcName"></action>
+ 	 	<action name="onDVgetVpcIdAndName" class="virtualRouterAction" method="onDVgetVpcIdAndName"></action>
+ 	 	<action name="onVpcgetVrIdAndName" class="virtualRouterAction" method="onVpcgetVrIdAndName"></action>
+ 	 	<action name="snap" class="virtualRouterAction" method="snap"></action>
+		<!-- 获取openstack虚拟机的ip地址-->
+		<action name="selectIpAddressByDeviceId" class="virtualNetworkAction" method="selectIpAddressByDeviceId"></action>
+ 	</package>
+</struts>

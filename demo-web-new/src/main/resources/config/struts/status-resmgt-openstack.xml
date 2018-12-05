@@ -1,0 +1,177 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-openstackShow-package" extends="icms-package" namespace="/resmgt-openstackShow">
+	</package>
+	<!-- 初始化页面框架 -->
+	<package name="resmgt-openstackShow-frame" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackShow/frame">
+		<action name="openstackComputeResMag" class="openstackResShowAction" method="openstackComputeResMag">
+			<result name="success">/pages/resmgt/openstack/openstackResShow.jsp</result>
+		</action>
+	</package>
+	<!-- 构造树 -->
+	<package name="resmgt-openstackCompute-tree" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/tree">
+		<action name="buildComputeResTree" class="openstackResShowAction" method="buildComputeResTree"></action>
+	</package>
+	<!-- 卷相关 -->
+	<package name="resmgt-openstackCompute-volume"  namespace="/resmgt-openstackCompute/volume">
+		<action name="getVolumeList" class="openstackResShowAction" method="getVolumeList"></action>
+		<action name="getVolumeDetail" class="openstackResShowAction" method="getVolumeDetail"></action>
+		<action name="getVolumeSnapList" class="openstackResShowAction" method="getVolumeSnapList"></action>
+		<action name="deleteVolumeSnap" class="openstackResShowAction" method="deleteVolumeSnap"></action>
+		<action name="snapCreateVolume" class="openstackResShowAction" method="snapCreateVolume"></action>
+		<action name="deleteVolume" class="openstackResShowAction" method="deleteVolume"></action>
+		<action name="createVolumeSnap" class="openstackResShowAction" method="createVolumeSnap"></action>
+		<action name="putVolume" class="openstackResShowAction" method="putVolume"></action>
+	</package>
+	
+	<!-- wmy start -->
+	<!-- 安全组配置 -->
+	<package name="resmgt-openstackCompute-securityGroups" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/securityGroups">
+		<action name="securityGroupsListView" class="securityGroupsAction" method="securityGroupsListView">
+			<result name="success">/pages/resmgt/openstack/securityGroupsList.jsp</result>
+		</action>
+		<action name="getSecurityGroupsList" class="securityGroupsAction" method="getSecurityGroupsList"></action>
+		<action name="saveSecurityGroups" class="securityGroupsAction" method="saveSecurityGroups"></action>
+		<action name="updateSecurityGroups" class="securityGroupsAction" method="updateSecurityGroups"></action>
+		<action name="deleteSecurityGroups" class="securityGroupsAction" method="deleteSecurityGroups"></action>
+		<action name="getSecurityGroupsVoById" class="securityGroupsAction" method="getSecurityGroupsVoById"></action>
+		<action name="validateSecurityGroupsName" class="securityGroupsAction" method="validateSecurityGroupsName"></action>
+		<action name="initvnRefNoTree" class="securityGroupsAction" method="initvnRefNoTree"></action>
+		<action name="initvnRefTree" class="securityGroupsAction" method="initvnRefTree"></action>
+		<action name="saveVmref" class="securityGroupsAction" method="saveVmref"></action>
+		<action name="getSecurityVmrefById" class="securityGroupsAction" method="getSecurityVmrefById"></action>
+		<action name="getSecurityGroupsListByMap" class="securityGroupsAction" method="getSecurityGroupsListByMap"></action>
+	</package>
+	<!-- 安全组规则配置 -->
+	<package name="resmgt-openstackCompute-securityGroupsRules" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/securityGroupsRules">
+		<action name="getSecurityGroupsRulesList" class="securityGroupsRulesAction" method="getSecurityGroupsRulesList"></action>
+		<action name="saveSecurityGroupsRules" class="securityGroupsRulesAction" method="saveSecurityGroupsRules"></action>
+		<action name="deleteSecurityGroupsRules" class="securityGroupsRulesAction" method="deleteSecurityGroupsRules"></action>
+		<action name="getSeGrRulesById" class="securityGroupsRulesAction" method="getSeGrRulesById"></action>
+	</package>
+	<!-- 防火墙策略配置 -->
+	<package name="resmgt-openstackCompute-virtualFirewallPolicy" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/virtualFirewallPolicy">
+		<action name="getRmNwVfwPolicyView" class="rmNwVfwPolicyAction" method="getRmNwVfwPolicyView">
+			<result name="success">/pages/resmgt/openstack/virtualFirewallPolicy.jsp</result>
+		</action>
+		<action name="getRmNwVfwPolicyList" class="rmNwVfwPolicyAction" method="getRmNwVfwPolicyList"></action>
+		<action name="saveRmNwVfwPolicy" class="rmNwVfwPolicyAction" method="saveRmNwVfwPolicy"></action>
+		<action name="updateRmNwVfwPolicy" class="rmNwVfwPolicyAction" method="updateRmNwVfwPolicy"></action>
+		<action name="deleteRmNwVfwPolicy" class="rmNwVfwPolicyAction" method="deleteRmNwVfwPolicy"></action>
+		<action name="getRmNwVfwPolicyById" class="rmNwVfwPolicyAction" method="getRmNwVfwPolicyById"></action>
+		<action name="validateRmNwVfwPolicyName" class="rmNwVfwPolicyAction" method="validateRmNwVfwPolicyName"></action>
+		<action name="getVfwpRulesByPolicyId" class="rmNwVfwPolicyAction" method="getVfwpRulesByPolicyId"></action>
+		<action name="getRmNwVfwPolicyByMap" class="rmNwVfwPolicyAction" method="getRmNwVfwPolicyByMap"></action>
+		<action name="getVfwUsedPolicyById" class="rmNwVfwPolicyAction" method="getVfwUsedPolicyById"></action>
+	</package>
+	<!-- 防火墙策略规则配置 -->
+	<package name="resmgt-openstackCompute-virtualFirewallPolicyRule" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/virtualFirewallPolicyRule">
+		<action name="getRmNwVfwPolicyRuleList" class="rmNwVfwPolicyRuleAction" method="getRmNwVfwPolicyRuleList"></action>
+		<action name="saveRmNwVfwPolicyRule" class="rmNwVfwPolicyRuleAction" method="saveRmNwVfwPolicyRule"></action>
+		<action name="updateRmNwVfwPolicyRule" class="rmNwVfwPolicyRuleAction" method="updateRmNwVfwPolicyRule"></action>
+		<action name="deleteRmNwVfwPolicyRule" class="rmNwVfwPolicyRuleAction" method="deleteRmNwVfwPolicyRule"></action>
+		<action name="getRmNwVfwPolicyRuleById" class="rmNwVfwPolicyRuleAction" method="getRmNwVfwPolicyRuleById"></action>
+		<action name="validateRmNwVfwPolicyRuleName" class="rmNwVfwPolicyRuleAction" method="validateRmNwVfwPolicyRuleName"></action>
+	</package>
+	<!-- wmt end -->
+
+	<!-- 浮动ip begin-->
+	<package name="resmgt-openstackCompute-floatingIp" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/floatingIp">
+		<action name="findFloatingIpList" class="floatingIpAction" method="findFloatingIpList">
+			
+		</action>
+		<action name="searchIp" class="floatingIpAction" method="searchIp"></action>
+		<action name="findVmMsInfo" class="floatingIpAction" method="findVmMsInfo"></action>
+		<action name="saveFloatingIp" class="floatingIpAction" method="saveFloatingIp"></action>
+		<action name="unBandFloatingIp" class="floatingIpAction" method="unBandFloatingIp"></action>
+		<action name="bandFloatingIp" class="floatingIpAction" method="bandFloatingIp"></action>
+		<action name="deleteFloatingIp" class="floatingIpAction" method="deleteFloatingIp"></action>
+		<action name="findNoFloatingIpVmList" class="floatingIpAction" method="findNoFloatingIpVmList"></action>
+	</package>
+	<!-- 浮动ip end-->
+	<!-- 后端存储 begin-->
+	<package name="resmgt-openstackCompute-backStorage" extends="resmgt-openstackShow-package" namespace="/resmgt-openstackCompute/backStorage">
+		<action name="getBackStorage" class="backStorageAction" method="getBackStorage"></action>
+	</package>
+	<!-- 后端存储 end-->
+
+	<!-- cjb start -->
+	<package name="vlb-pool-package"  extends="icms-package" namespace="/vlb-pool">
+	</package>
+	<package name="vlb-pool-show"  extends="vlb-pool-package" namespace="/vlb-pool/show-res">
+		<!-- 负载均衡 -->
+		<action name="showVlbPoolList" class="vlbPoolAction" method="showVlbPoolList"></action>
+		<action name="load" class="vlbPoolAction" method="load"></action>
+		<action name="queryProtocal" class="vlbPoolAction" method="queryProtocal"></action>
+		<action name="queryVmServer" class="vlbPoolAction" method="queryVmServer"></action>
+		<action name="queryVpc" class="vlbPoolAction" method="queryVpc"></action>
+		<action name="querySubnet" class="vlbPoolAction" method="querySubnet"></action>
+		<action name="getSubnetDevice" class="vlbPoolAction" method="getSubnetDevice"></action>
+		<action name="save" class="vlbPoolAction" method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="delete" class="vlbPoolAction" method="delete"></action>
+		<!-- vip -->
+		<action name="SearchVip" class="vlbPoolAction" method="SearchVip"></action>
+		<action name="querySubnetNameByPoolId" class="vlbPoolAction" method="querySubnetNameByPoolId"></action>
+		<action name="saveVip" class="vlbPoolAction" method="saveVip">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="deleteVip" class="vlbPoolAction" method="deleteVip"/>
+		<!-- Member -->
+		<action name="showMemberList" class="vlbPoolAction" method="showMemberList">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					pagination.*
+				</param>
+			</result>
+		</action>
+		<action name="SearchMem" class="vlbPoolAction" method="SearchMem"></action>
+		<action name="saveMember" class="vlbPoolAction" method="saveMember">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="deleteMember" class="vlbPoolAction" method="deleteMember"></action>
+		<!-- 健康检查 -->
+		<action name="showHealthMonitorList" class="vlbPoolAction" method="showHealthMonitorList"></action>
+		<action name="SearchHealth" class="vlbPoolAction" method="SearchHealth"></action>
+		<action name="saveHealth" class="vlbPoolAction" method="saveHealth">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="deleteHealth" class="vlbPoolAction" method="deleteHealth"></action>
+	</package>
+	<package name="vlb-show"  extends="icms-package" namespace="/vlb/show-res">
+		<action name="showVlbList" class="vlbAction" method="showVlbList"></action>
+		<action name="getIPs" class="vlbAction" method="getIPs"></action>		
+		<action name="saveVlb" class="vlbAction" method="saveVlb"></action>	
+		<action name="delete" class="vlbAction" method="delete"></action>	
+		<action name="deleteListener" class="vlbAction" method="deleteListener"></action>
+		<action name="getVLBListener" class="vlbAction" method="getVLBListener"></action>	
+		<action name="getVLBListeners" class="vlbAction" method="getVLBListeners"></action>
+		<action name="saveVLBListener" class="vlbAction" method="saveVLBListener"></action>	
+	</package>
+	<!-- cjb end -->
+</struts>

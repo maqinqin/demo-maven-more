@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="model">
+	<typeAlias alias="modelModel" type="com.git.cloud.cloudservice.model.po.ModelModel" />
+	<typeAlias alias="scrModel" type="com.git.cloud.cloudservice.model.po.ScriptModel" />
+
+ 	<resultMap id="modelModelResult" class="modelModel">
+		<result property="id" column="ID" />
+		<result property="name" column="NAME" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="remark" column="REMARK" />
+		<result property="packageModel.id" column="PACKAGE_MODEL_FK" />
+		<result property="isActive" column="IS_ACTIVE" />
+		<result property="createUser" column="CREATE_USER" />
+		<result property="createDateTime" column="CREATE_DATETIME" />
+		<result property="updateUser" column="UPDATE_USER" />
+		<result property="updateDateTime" column="UPDATE_DATETIME" />
+	</resultMap>
+
+	<select id="model.selectAll" resultClass="modelModel">
+		SELECT * FROM CLOUD_SCRIPT_MODEL where IS_ACTIVE = "Y"
+		order by ID
+	</select>
+	<select id="model.load" resultMap="modelModelResult" parameterClass="java.lang.String">
+		SELECT * FROM CLOUD_SCRIPT_MODEL where  IS_ACTIVE='Y' and id=#id#
+	</select>
+	<update id="model.update" parameterClass="com.git.cloud.cloudservice.model.po.ModelModel">
+		update CLOUD_SCRIPT_MODEL 
+		set name = #name#,FILE_PATH = #filePath#,REMARK = #remark#, PACKAGE_MODEL_FK = #packageModel.id#,UPDATE_USER = #updateUser#,UPDATE_DATETIME = #updateDateTime#
+		where id=#id#
+	</update>
+	<insert id="model.insert" parameterClass="com.git.cloud.cloudservice.model.po.ModelModel">
+		insert into CLOUD_SCRIPT_MODEL (ID, NAME, FILE_PATH, REMARK,PACKAGE_MODEL_FK,CREATE_USER,CREATE_DATETIME,IS_ACTIVE)
+		values (#id#, #name#, #filePath#, #remark#, #packageModel.id#, #createUser#, #createDateTime#,#isActive#)
+	</insert>
+	
+	<update id="model.delete0" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT_MODEL set IS_ACTIVE="N" where id = #id#
+	</update>
+	<update id="model.delete01" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT_PARAM set IS_ACTIVE="N" WHERE ID IN(SELECT X.ID FROM (SELECT A.ID,C.ID PID FROM CLOUD_SCRIPT_PARAM A JOIN CLOUD_SCRIPT B ON A.SCRIPT_MODEL_FK = B.ID JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID)X WHERE PID = #id#)
+	    
+	</update>
+	<update id="model.delete02" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT set IS_ACTIVE="N" WHERE ID IN(SELECT X.ID FROM (SELECT B.ID,C.ID PID FROM CLOUD_SCRIPT B JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID)X  WHERE PID = #id#)
+	</update>
+	
+	<delete id="model.delete" parameterClass="java.lang.String">
+		delete from CLOUD_SCRIPT_MODEL where id = #id#
+	</delete>
+
+	<delete id="model.delete1" parameterClass="java.lang.String">
+	    DELETE FROM CLOUD_SCRIPT_PARAM WHERE ID IN(SELECT X.ID FROM (SELECT A.ID,C.ID PID FROM CLOUD_SCRIPT_PARAM A JOIN CLOUD_SCRIPT_PARAM B ON A.SCRIPT_MODEL_FK = B.ID JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID)X WHERE PID = #id#)
+	</delete>
+	<delete id="model.delete2" parameterClass="java.lang.String">
+	    DELETE FROM CLOUD_SCRIPT WHERE ID IN(SELECT X.ID FROM (SELECT B.ID,C.ID PID FROM CLOUD_SCRIPT_PARAM B JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID)X  WHERE PID = #id#)
+	</delete>
+ 
+    <select id="model.id" parameterClass="java.lang.String"  resultClass="scrModel">
+	  <![CDATA[ 
+	   SELECT  * FROM CLOUD_SCRIPT  WHERE IS_ACTIVE='Y'  AND MODEL_MODEL_FK=#ID#
+	   ]]>
+    </select> 
+</sqlMap>

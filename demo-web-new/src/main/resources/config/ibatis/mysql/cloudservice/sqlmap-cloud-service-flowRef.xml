@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="CloudServiceFlowRef">
+	<resultMap id="BaseResultMap"
+		class="com.git.cloud.cloudservice.model.po.CloudServiceFlowRefPo">
+		<result column="SERVICE_FLOW_ID" property="serviceFlowId" />
+		<result column="FLOW_ID" property="flowId" />
+		<result column="SERVICE_ID" property="serviceId" />
+		<result column="OPER_MODEL_TYPE" property="operModelType" />
+		<result column="IS_ACTIVE" property="isActive" />
+	</resultMap>
+	
+	<resultMap id="cloudServiceFlowRefVo"
+		class="com.git.cloud.cloudservice.model.po.CloudServiceFlowRefVo">
+		<result column="SERVICE_FLOW_ID" property="serviceFlowId" />
+		<result column="FLOW_ID" property="flowId" />
+		<result column="FLOW_NAME" property="flowName" />
+		<result column="SERVICE_ID" property="serviceId" />
+		<result column="OPER_MODEL_TYPE" property="operModelType" />
+		<result column="OPER_MODEL_TYPE_NAME" property="operModelTypeName" />
+		<result column="IS_ACTIVE" property="isActive" />
+	</resultMap>
+
+	<select id="CloudServiceFlowRef.load" resultMap="BaseResultMap">
+		SELECT * FROM CLOUD_SERVICE_FLOW_REF where SERVICE_FLOW_ID =#serviceSetId# and IS_ACTIVE='Y'
+	</select>
+	
+	<select id="CloudServiceFlowRef.file" resultMap="BaseResultMap">
+		SELECT * FROM CLOUD_SERVICE_FLOW_REF where SERVICE_ID =#serviceId# and IS_ACTIVE='Y'
+	</select>
+	
+	<select id="BpmTemplateFile" parameterClass="java.lang.String"
+		resultClass="com.git.cloud.cloudservice.model.po.CloudFileTemplate">
+		SELECT tem.TEMPLATE_ID AS templateId,
+			tem.TEMPLATE_NAME AS templateName,
+			tem.TYPE_ID AS typeId,
+			tem.JSON_DATA AS jsonData
+		FROM BPM_TEMPLATE tem
+			LEFT JOIN BPM_MODEL model ON model.TEMPLATE_ID = tem.TEMPLATE_ID
+		where model.MODEL_ID = #modleId# 	
+	</select>
+	<select id="BpmTemplateFile.select" parameterClass="java.lang.String"
+		resultClass="com.git.cloud.cloudservice.model.po.CloudFileTemplate">
+		SELECT tem.TEMPLATE_ID AS templateId,
+			tem.TEMPLATE_NAME AS templateName,
+			tem.TYPE_ID AS typeId,
+			tem.JSON_DATA AS jsonData
+		FROM BPM_TEMPLATE tem
+		WHERE TEM.TEMPLATE_ID = #templateId#
+	</select>
+	
+	<select id="BpmTemplateFlowId.select" parameterClass="java.lang.String" resultClass="java.lang.Integer">
+		SELECT COUNT(*) FROM BPM_MODEL WHERE MODEL_ID = #flowId#
+	</select>
+	<select id="BpmModelByCreate" resultClass="java.lang.String">
+		select model_id from bpm_model Order By CREATE_DATE Desc;
+	</select>
+
+	<select id="CloudServiceFlowRef.search" parameterClass="java.util.Map"
+		resultMap="cloudServiceFlowRefVo">
+		SELECT ref.SERVICE_FLOW_ID,ref.FLOW_ID,ref.SERVICE_ID,ref.OPER_MODEL_TYPE,ref.IS_ACTIVE,model.MODEL_NAME FLOW_NAME,sr.SR_TYPE_NAME OPER_MODEL_TYPE_NAME  FROM CLOUD_SERVICE_FLOW_REF ref ,BPM_MODEL model ,BM_SR_TYPE sr where ref.IS_ACTIVE='Y' and model.IS_ACTIVE='Y' and ref.FLOW_ID=model.MODEL_ID and sr.IS_ACTIVE='Y' and sr.SR_TYPE_MARK=ref.OPER_MODEL_TYPE
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="serviceId">
+				SERVICE_ID =
+				#serviceId#
+			</isNotEmpty>
+		</dynamic>
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="CloudServiceFlowRef.count" parameterClass="java.util.Map"
+		resultClass="java.lang.Integer">
+		SELECT count(*)  FROM CLOUD_SERVICE_FLOW_REF ref ,BPM_MODEL model ,BM_SR_TYPE sr where ref.IS_ACTIVE='Y' and model.IS_ACTIVE='Y' and ref.FLOW_ID=model.MODEL_ID and sr.IS_ACTIVE='Y' and sr.SR_TYPE_MARK=ref.OPER_MODEL_TYPE
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="SERVICE_ID">
+				SERVICE_ID =
+				#serviceId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<insert id="CloudServiceFlowRef.insert"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceFlowRefPo">
+		insert into CLOUD_SERVICE_FLOW_REF ( SERVICE_FLOW_ID,FLOW_ID,SERVICE_ID,OPER_MODEL_TYPE,IS_ACTIVE)values(
+		#serviceFlowId#,
+		#flowId#,
+		#serviceId#,
+		#operModelType#,
+		#isActive#)
+	</insert>
+	<insert id="CloudTemplate.insert"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudFileTemplate">
+		insert into BPM_TEMPLATE (TEMPLATE_ID,TEMPLATE_NAME,TYPE_ID,CREATE_DATE,JSON_DATA)values(
+		#templateId#,
+		#templateName#,
+		#typeId#,
+		#createDate#,
+		#jsonData#)
+	</insert>
+	<update id="CloudServiceFlowRef.update"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceFlowRefPo">
+		update
+		CLOUD_SERVICE_FLOW_REF set
+		FLOW_ID= #flowId#,
+		SERVICE_ID= #serviceId#,
+		OPER_MODEL_TYPE= #operModelType#, 
+		IS_ACTIVE =
+		#isActive#
+		where
+		SERVICE_FLOW_ID= #serviceFlowId#
+	</update>
+	<!-- <delete id="CloudServiceFlowRef.delete" parameterClass="java.lang.String">
+		delete
+		from
+		CLOUD_SERVICE_FLOW_REF where SERVICE_FLOW_ID = #serviceFlowId#
+	</delete> -->
+	
+	<update id="CloudServiceFlowRef.delete" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE CLOUD_SERVICE_FLOW_REF SET IS_ACTIVE='N'  WHERE SERVICE_FLOW_ID = #serviceFlowId#
+		]]>
+	</update>
+	
+	<select id="findCloudServiceFlowRefsByparam" parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceFlowRefPo" resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM  CLOUD_SERVICE_FLOW_REF WHERE OPER_MODEL_TYPE= #operModelType# AND IS_ACTIVE ='Y' AND SERVICE_ID= #serviceId#
+		<isNotEmpty prepend="and" property="serviceFlowId">
+			SERVICE_FLOW_ID != #serviceFlowId#
+		</isNotEmpty>
+	</select>
+</sqlMap>

@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="teacher">
+
+	<!--  <sqlMap namespace="Teacher">  -->
+
+	<typeAlias alias="Teacher" type="com.git.cloud.common.model.bo.demo.Teacher" />
+
+	<select id="select" parameterClass="java.lang.String" resultClass="Teacher">
+		 select id,name,address,year from TEACHER where id=#id#
+	</select>
+
+	<select id="selectAll" resultClass="Teacher">
+		 select id,name,address,year from TEACHER
+	</select>
+
+	<select id="selectByIns" parameterClass="Teacher" resultClass="Teacher">
+		 select id,name,address,year from TEACHER where name=#name#
+	</select>
+
+	<insert id="insert" parameterClass="Teacher">
+		insert into TEACHER
+		values(#id#,#name#,#address#,#year#)
+	</insert>
+
+	<delete id="delete" parameterClass="java.lang.String">
+		delete from TEACHER where id=#id#
+	</delete>
+
+	<update id="update" parameterClass="Teacher">
+		update TEACHER set
+		name=#name#,address=#address#,year=#year#
+		where id=#id#
+	</update>
+
+	<procedure id="insertByProc" parameterClass="Teacher">
+		{call pro_insert(#id#,#name#,#address#,#year#)}
+	</procedure>
+
+	<procedure id="findAllByProc" resultClass="Teacher">
+		{call pro_findAll()}
+	</procedure>
+
+	<procedure id="findAllByIDProc" parameterClass="Teacher" resultClass="Teacher">
+		{call pro_findAllByIDProc(#id#)}
+	</procedure>
+</sqlMap>

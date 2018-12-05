@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="virtualRouter">
+    
+    <select id="selectVirtualRouterPrimaryKey" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.network.model.po.VirtualRouterPo">
+        <![CDATA[
+        SELECT
+		    id virtualRouterId,
+		    EXTERNAL_NETWORK_ID externalNetworkId,
+		    IAAS_UUID iaasUuid,
+		    PROJECT_ID projectId
+		FROM
+		    rm_nw_openstack_virtual_router
+		WHERE
+		    IS_ACTIVE = 'Y'
+		AND id = #virtualRouterId#
+    ]]>
+    </select>
+</sqlMap>

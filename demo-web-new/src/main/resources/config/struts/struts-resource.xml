@@ -1,0 +1,26 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+<struts>
+	<package name="resource-package" extends="icms-package" namespace="/resource"></package>
+	
+	<package name="reousrce-query" extends="resource-package" namespace="/resource/queryResource">
+		<action name="machineIndex" class="resourceAction" method="index">
+			<result name="success">/pages/resource/displayMachineResource.jsp</result>
+		</action>
+		<action name="vmIndex" class="resourceAction" method="index">
+			<result name="success">/pages/resource/displayVmResource.jsp</result>
+		</action>
+		<action name="queryMachineResource" class="resourceAction" method="queryMachineResource"></action>		
+		<action name="queryVmResource" class="resourceAction" method="queryVmResource"></action>
+		
+		<action name="queryPool" class="resourceAction" method="queryPool"></action>
+		<action name="queryCDP" class="resourceAction" method="queryCDP"></action>
+		<action name="queryCluster" class="resourceAction" method="queryCluster"></action>
+		
+		<action name="queryDeployUnit" class="resourceAction" method="queryDeployUnit"></action>
+		
+		<action name="queryMachineInfo" class="resourceAction" method="queryMachineInfo"></action>
+		<action name="queryVmInfo" class="resourceAction" method="queryVmInfo"></action>
+	</package>
+</struts>          

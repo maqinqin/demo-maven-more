@@ -1,0 +1,48 @@
+{
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "BROCADE",
+		"OPERATION": 3023
+	},
+	"BODY" :{
+		"SWITCH_TYPE":"BROCADE",
+		"SERVICE_IP": "128.192.162.9",
+		"SERVICE_PORT": "5989",
+		"USER_NAME":"admin",
+		"USER_PASSWD":"4KPPnJRAvXm6g2KFvEB%2B9S6BJQw%2FKl5R",
+		"NAME_SPACE":"root/brocade1",
+		"VFINFOS":[
+			{
+				"VFNAME":"VF_NAME1",
+				"ZONEINFOS":[
+					{
+						"NAME":"TEST_LYJ00",
+						"MEMBERS":["c0:50:76:06:8f:31:00:3a","50:00:09:74:08:3A:01:18"],
+						"ACTIVE_ZONESET":"adsfasdf"
+					},
+					{
+						"NAME":"TEST_LYJ01",
+						"MEMBERS":["c0:50:76:06:8f:31:00:38","50:00:09:74:08:3A:01:58"],
+						"ACTIVE_ZONESET":"adsfasdf"
+					}
+				]
+			},
+			{
+				"VFNAME":"VF_NAME2",
+				"ZONEINFOS":[
+					{
+						"NAME":"TEST_LYJ02",
+						"MEMBERS":["c0:50:76:06:8f:31:00:3a","50:00:09:74:08:3A:01:18"],
+						"ACTIVE_ZONESET":"adsfasdf2"
+					},
+					{
+						"NAME":"TEST_LYJ03",
+						"MEMBERS":["c0:50:76:06:8f:31:00:38","50:00:09:74:08:3A:01:58"],
+						"ACTIVE_ZONESET":"adsfasdf2"
+					}
+				]
+			}
+		]
+		
+	}
+}

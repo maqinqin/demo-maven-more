@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtNetWorkUse">
+<typeAlias alias="RmNwUseVo" type="com.git.cloud.resmgt.network.model.vo.RmNwUseVo" />
+<typeAlias alias="RmNwUsePo" type="com.git.cloud.resmgt.network.model.po.RmNwUsePo" />
+<typeAlias alias="RmNwUseRelVo" type="com.git.cloud.resmgt.network.model.vo.RmNwUseRelVo" />
+<typeAlias alias="RmNwUseRelPo" type="com.git.cloud.resmgt.network.model.po.RmNwUseRelPo" />
+<typeAlias alias="RmHostTypePo" type="com.git.cloud.resmgt.common.model.po.RmHostTypePo" />
+
+	<sql id="findRmNwUsePos">
+			SELECT u.USE_ID as useId, u.USE_NAME as useName, u.USE_CODE as useCode, u.IS_ACTIVE as isActive
+			FROM RM_USE u
+			WHERE u.IS_ACTIVE = 'Y'
+			<isNotEmpty prepend="AND" property="useId">
+				 u.USE_ID=#useId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="useName">
+				 u.USE_NAME like concat('%', #useName#, '%')
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="useCode">
+				 u.USE_CODE like concat('%', #useCode#, '%')
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="isActive">
+				 u.IS_ACTIVE=#isActive#
+			</isNotEmpty>
+		ORDER BY $sidx$ $sord$
+	</sql>
+	
+	<sql id="findRmNwUseRelPos">
+			SELECT u.USE_REL_ID as useRelId, u.USE_REL_CODE as useRelCode, u.USE_ID as useId, (select p.PLATFORM_NAME from RM_PLATFORM p where p.PLATFORM_ID = u.PLATFORM_ID) as platformName, (select v.VIRTUAL_TYPE_NAME FROM RM_VIRTUAL_TYPE v WHERE v.VIRTUAL_TYPE_ID = u.VIRTUAL_TYPE_ID) as virtualTypeName, (select h.HOST_TYPE_NAME from RM_HOST_TYPE h where h.HOST_TYPE_ID = u.HOST_TYPE_ID) as hostTypeName, u.IS_ACTIVE as isActive
+			FROM RM_USE_REL u
+			WHERE u.IS_ACTIVE = 'Y'
+			<isNotEmpty prepend="AND" property="useId">
+				 u.USE_ID=#useId#
+			</isNotEmpty>
+			<isNotEmpty prepend="AND" property="isActive">
+				 u.IS_ACTIVE=#isActive#
+			</isNotEmpty>
+		ORDER BY $sidx$ $sord$
+	</sql>
+	
+	<select id="findRmNwUseList" parameterClass="java.util.Map"  resultClass="RmNwUseVo">
+		<include refid="findRmNwUsePos"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="findRmNwUsePoCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="findRmNwUsePos"/>
+        ) as recordTable
+	</select>
+	
+	<select id="queryUseNameList" resultClass="java.util.HashMap">
+		SELECT u.USE_CODE code u.USE_NAME name, u.USE_ID id  FROM RM_USE u WHERE u.IS_ACTIVE ='Y'
+	</select>
+	
+	<select id="findRmNwUsePosByUse" parameterClass="RmNwUsePo" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(1) FROM RM_USE WHERE IS_ACTIVE ='Y'
+		]]>
+		<isNotEmpty prepend="AND" property="useCode">
+				 USE_CODE = #useCode#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="useName">
+				 USE_NAME = #useName#
+		</isNotEmpty>
+		<isNotEmpty prepend="AND" property="useId">
+				 USE_ID != #useId#
+		</isNotEmpty>
+	</select>
+	
+	<select id="findRmNwUseRelPosByUseRel" parameterClass="RmNwUseRelPo" resultClass="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(1) FROM RM_USE_REL WHERE IS_ACTIVE ='Y' and BINARY USE_REL_CODE = #useRelCode#
+		]]>
+		<isNotEmpty prepend="AND" property="useRelId">
+				 USE_REL_ID != #useRelId#
+		</isNotEmpty>
+	</select>
+	
+	<insert id="saveRmNwUsePoAct" parameterClass="RmNwUsePo">
+		<![CDATA[
+			INSERT INTO RM_USE(USE_ID ,USE_NAME ,USE_CODE,IS_ACTIVE) VALUES(#useId#,#useName#,#useCode# ,#isActive#)
+		]]>
+	</insert>
+	
+	<insert id="saveRmNwUseRelPoAct" parameterClass="RmNwUseRelPo">
+		<![CDATA[
+			INSERT INTO RM_USE_REL(USE_REL_ID, USE_REL_CODE, USE_ID, PLATFORM_ID, VIRTUAL_TYPE_ID, HOST_TYPE_ID, IS_ACTIVE) 
+			VALUES(#useRelId#,#useRelCode#,#useId#,#platformId#,#virtualTypeId#,#hostTypeId#,#isActive#)
+		]]>
+	</insert>
+	
+	<update id="updateRmNwUsePoAct" parameterClass="RmNwUsePo">
+		<![CDATA[
+			UPDATE RM_USE SET USE_NAME = #useName#, USE_CODE = #useCode# WHERE USE_ID = #useId#
+		]]>
+	</update>
+	
+	<update id="updateRmNwUseRelPoAct" parameterClass="RmNwUseRelPo">
+		<![CDATA[
+			UPDATE RM_USE_REL SET USE_REL_CODE = #useRelCode#, PLATFORM_ID = #platformId#, VIRTUAL_TYPE_ID = #virtualTypeId#, HOST_TYPE_ID = #hostTypeId#  WHERE USE_REL_ID = #useRelId#
+		]]>
+	</update>
+	
+	<select id="findRmNwUsePoById" parameterClass="java.lang.String" resultClass="RmNwUsePo">
+		<![CDATA[
+			SELECT USE_ID as useId, USE_NAME as useName, USE_CODE as useCode, IS_ACTIVE as isActive FROM RM_USE WHERE IS_ACTIVE='Y' and USE_ID = #useId#
+		]]>
+	</select>
+	
+	<select id="findRmNwUseRelPoById" parameterClass="java.lang.String" resultClass="RmNwUseRelPo">
+		<![CDATA[
+			SELECT USE_REL_ID as useRelId, USE_REL_CODE as useRelCode, USE_ID as useId, PLATFORM_ID as platformId, VIRTUAL_TYPE_ID as virtualTypeId, HOST_TYPE_ID as hostTypeId, IS_ACTIVE as isActive FROM RM_USE_REL WHERE IS_ACTIVE='Y' and USE_REL_ID = #useRelId#
+		]]>
+	</select>
+	
+	<select id="findRmNwUseRelsByUseId" parameterClass="java.lang.String" resultClass="RmNwUseRelPo">
+		<![CDATA[
+			SELECT USE_REL_ID as useRelId, USE_REL_CODE as useRelCode, USE_ID as useId, PLATFORM_ID as platformId, VIRTUAL_TYPE_ID as virtualTypeId, HOST_TYPE_ID as hostTypeId, IS_ACTIVE as isActive FROM RM_USE_REL WHERE IS_ACTIVE='Y' and USE_ID = #useId#
+		]]>
+	</select>
+	
+	<update id="deleteRmNwUsePoById" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE RM_USE SET IS_ACTIVE = 'N' WHERE USE_ID = #useId#
+		]]>
+	</update>
+	
+	<update id="deleteRmNwUseRelPoById" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE RM_USE_REL SET IS_ACTIVE = 'N' WHERE USE_REL_ID = #useRelId#
+		]]>
+	</update>
+	
+	<select id="findOccupiedUseNamePoById" parameterClass="java.lang.String" resultClass="String">
+		<![CDATA[
+			SELECT USE_NAME AS useName from RM_USE WHERE USE_ID = #useId#
+		]]>
+	</select>
+	
+	<select id="findRmNwUseRelList" parameterClass="java.util.Map"  resultClass="RmNwUseRelVo">
+		<include refid="findRmNwUseRelPos"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="findRmNwUseRelPoCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="findRmNwUseRelPos"/>
+        ) as recordTable
+	</select>
+	
+	<select id="selectRmHostTypeSel" resultClass="RmHostTypePo">
+		 select 
+		 HOST_TYPE_ID as hostTypeId,
+		 HOST_TYPE_CODE as hostTypeCode,
+		 HOST_TYPE_NAME as hostTypeName,
+		 IS_ACTIVE as isActive
+		 from RM_HOST_TYPE 
+		 where IS_ACTIVE='Y'
+	</select>
+	
+</sqlMap>

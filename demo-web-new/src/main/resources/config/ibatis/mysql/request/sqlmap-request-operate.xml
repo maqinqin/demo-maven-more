@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="request-operate">
+	<typeAlias alias="srVo" type="com.git.cloud.request.model.vo.BmSrVo" />
+	<typeAlias alias="bmSrRrinfoVo" type="com.git.cloud.request.model.vo.BmSrRrinfoVo" />
+	<typeAlias alias="bmSrAttrVo" type="com.git.cloud.request.model.vo.BmSrAttrValVo" />
+	<typeAlias alias="bmApproveVo" type="com.git.cloud.request.model.vo.BmApproveVo" />
+	<typeAlias alias="bmSrRrVmRefPo" type="com.git.cloud.request.model.po.BmSrRrVmRefPo" />
+	<typeAlias alias="bmSrTypePo" type="com.git.cloud.request.model.po.BmSrTypePo" />
+	<typeAlias alias="bmToDoPo" type="com.git.cloud.request.model.po.BmToDoPo" />
+	<typeAlias alias="bmSrRrinfoPo" type="com.git.cloud.request.model.po.BmSrRrinfoPo" />
+	
+	<!--添加云服务[供给]申请 -->
+	<insert id="insertBmSr" parameterClass="srVo"> 
+		<![CDATA[ 
+			insert into BM_SR (
+				sr_id,sr_code,app_id,datacenter_id,sr_type_mark,sr_status_code,sr_start_time,
+				sr_end_time,urgency_code,summary,remark,creator_id,create_time,approve_mark,tenant_id
+			) values (
+				#srId#,#srCode#,#appId#,#datacenterId#,#srTypeMark#,#srStatusCode#,#srStartTime#,
+				#srEndTime#,#urgencyCode#,#summary#,#remark#,#creatorId#,#createTime#,#approveMark#,#tenantId#
+			)
+		]]>
+	</insert>
+
+	<!--更新云服务[供给]申请 -->
+	<update id="updateBmSr" parameterClass="srVo">
+		<![CDATA[ 
+			update BM_SR set
+				sr_code = #srCode#,
+				app_id = #appId#,
+				datacenter_id = #datacenterId#,
+				sr_type_mark = #srTypeMark#,
+				sr_status_code = #srStatusCode#,
+				sr_start_time = #srStartTime#,
+				sr_end_time = #srEndTime#,
+				urgency_code = #urgencyCode#,
+				summary = #summary#,
+				remark = #remark#,
+				close_time = #closeTime#,
+				approve_mark = #approveMark#
+			where
+				  sr_id = #srId#
+		]]>
+	</update>
+	
+	<!-- 更新服务申请状态 -->
+	<update id="updatetBmSrStatus" parameterClass="srVo">
+		<![CDATA[ 
+			update BM_SR set sr_status_code = #srStatusCode#, close_time = #closeTime# where sr_id = #srId#
+		]]>
+	</update>
+	
+	<!-- 更新服务申请状态 -->
+	<update id="updateAssignResult" parameterClass="srVo">
+		<![CDATA[ 
+			update BM_SR set assign_result = #assignResult# where sr_id = #srId#
+		]]>
+	</update>
+
+	<!--添加[供给]资源信息 -->
+	<insert id="insertBmSrRrinfo" parameterClass="bmSrRrinfoVo">
+		<![CDATA[ 
+			insert into BM_SR_RRINFO (
+				rrinfo_id,sr_id,service_id,du_id,flow_id,data_center_id,cpu,mem,sys_disk,data_disk_code,archive_disk_code,vm_num,create_datetime,order_id,RM_HOST_RES_POOL_ID,FLAVOR_ID,PARAMETERS_JSON
+			) values (
+				#rrinfoId#,#srId#,#serviceId#,#duId#,#flowId#,#dataCenterId#,#cpu#,#mem#,#sysDisk#,#dataDiskCode#,#archiveDiskCode#,#vmNum#,#createTime#,#orderId#,#rmHostResPoolId#,#flavorId#,#parametersJson#
+			)
+		]]>
+	</insert>
+
+	<!-- 删除[供给]资源信息 -->
+	<delete id="deleteBmSrRrinfo" parameterClass="Map">
+		<![CDATA[ 
+			delete from BM_SR_RRINFO  
+		]]>
+		<dynamic prepend=" where ">
+			<isNotEmpty property="rrinfoId" prepend=" and ">
+				<![CDATA[ rrinfo_id = #rrinfoId#]]>
+			</isNotEmpty>
+			<isNotEmpty property="srId" prepend=" and ">
+				<![CDATA[sr_id = #srId#]]>
+			</isNotEmpty>
+		</dynamic>
+	</delete>
+
+	<!--添加[供给]资源参数 -->
+	<insert id="insertBmSrAttr" parameterClass="java.util.List"> 
+		<![CDATA[ 
+			insert into BM_SR_ATTR_VAL (
+				sr_attr_val_id,rrinfo_id,attr_id,attr_value
+			) values
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#attrList[].srAttrValId#,#attrList[].rrinfoId#,#attrList[].attrId#,#attrList[].attrValue#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<!-- 删除[供给]资源参数 -->
+	<delete id="deleteBmSrAttr" parameterClass="java.lang.String">
+		<![CDATA[ 
+			delete from BM_SR_ATTR_VAL where rrinfo_id = #rrinfoid#
+		]]>
+	</delete>
+
+	<!--添加[扩容]资源参数 -->
+	<insert id="insertBmSrVmRef" parameterClass="java.util.List"> 
+		<![CDATA[ 
+			insert into BM_SR_RR_VM_REF(
+				sr_rr_vm_ref_id,sr_id,rrinfo_id,device_id,cpu_old,mem_old,disk_old,VOLUME_TYPE
+			) values
+		]]>
+		 <iterate conjunction=",">
+			<![CDATA[
+				(#rrVmRefList[].refId#,#rrVmRefList[].srId#,#rrVmRefList[].rrinfoId#,#rrVmRefList[].deviceId#,#rrVmRefList[].cpuOld#,#rrVmRefList[].memOld#,#rrVmRefList[].diskOld#,#rrVmRefList[].volumeType#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<update id="updateBmSrRrVmRef" parameterClass="bmSrRrVmRefPo">
+		<![CDATA[ 
+			update BM_SR_RR_VM_REF set is_enough = #isEnough#, move_host_id = #moveHostId# where sr_rr_vm_ref_id = #refId#
+		]]>
+	</update>
+
+		<!--根据服务申请Id删除资源设备信息 -->
+	<delete id="deleteBmSrRrVmRefBySrId" parameterClass="java.lang.String">
+		<![CDATA[ 
+			delete from BM_SR_RR_VM_REF where sr_id = #srId#
+		]]>
+	</delete>
+	
+	<!--根据资源申请Id删除资源设备信息 -->
+	<delete id="deleteBmSrRrVmRefByRrinfoId" parameterClass="java.lang.String">
+		<![CDATA[ 
+			delete from BM_SR_RR_VM_REF where rrinfo_id = #rrinfoId#
+		]]>
+	</delete>
+	<!--添加服务请求类型-->
+	<insert id="insertBmSrType" parameterClass="bmSrTypePo">
+		<![CDATA[ 
+			insert into BM_SR_TYPE (
+				sr_type_id,sr_type_name,sr_type_mark,parent_id,sr_type_code,is_active,remark
+			) values (
+				#srTypeId#,#srTypeName#,#srTypeMark#,#parentId#,#srTypeCode#,#isActive#,#remark#
+			)
+		]]>
+	</insert>
+	
+	<!--更新服务请求类型-->
+	<update id="updateBmSrType" parameterClass="bmSrTypePo">
+		<![CDATA[ 
+			update 
+			   BM_SR_TYPE 
+			set 
+			   sr_type_name = #srTypeName#,
+			   sr_type_mark = #srTypeMark#,
+			   parent_id = #parentId#,
+			   sr_type_code = #srTypeCode#,
+			   remark = #remark#
+			where 
+			   sr_type_id = #srTypeId#
+		]]>
+	</update>
+	
+	<!--删除服务请求类型-->
+	<delete id="deleteBmSrType" parameterClass="Map">
+		<![CDATA[ 
+			update BM_SR_TYPE set is_active = #isActive# where sr_type_id = #srTypeId#
+		]]>
+	</delete>
+
+	<insert id="addApprove" parameterClass="bmApproveVo">
+		insert into BM_APPROVE(
+		   APPROVE_ID, SR_ID, TODO_ID, APPROVE_RESULT, APPROVE_REMARK, APPROVER_ID, APPORVE_TIME, APPROVE_MARK
+		)  
+		values (
+		   #approveId#, #srId#, #todoId#, #approveResult#, #approveRemark#, #approverId#, #approveTime#, #approveMark#
+		)
+	</insert>
+	
+	<insert id="insertBmToDo" parameterClass="bmToDoPo">
+		<![CDATA[ 
+			insert into BM_TO_DO(
+			   TODO_ID, SR_ID, CURRENT_STEP, CURRENT_GROUP_ID, CURRENT_USER_ID, TODO_STATUS, PAGE_URL, TASK_ID, NODE_ID, INSTANCE_ID,
+			   CREATE_TIME, OPERATE_TIME, DEAL_TIME, CREATE_USER, CREATE_DATETIME, UPDATE_USER, UPDATE_DATETIME
+			)  
+			values (
+			   #todoId#, #srId#, #currentStep#, #currentGroupId#, #currentUserId#, #todoStatus#, #pageUrl#, #taskId#, #nodeId#, #instanceId#,
+			   #createTime#, #operateTime#, #dealTime#, #createUser#, #createDateTime#, #updateUser#, #updateDateTime#
+			)
+		]]>
+	</insert>
+	
+	<update id="updateBmToDoStatus" parameterClass="bmToDoPo">
+		<![CDATA[ 
+			update BM_TO_DO set todo_status = #todoStatus#, deal_time = #dealTime# where todo_id = #todoId#
+		]]>
+	</update>
+	
+	<update id="updateBmToDoStatusBySrId" parameterClass="bmToDoPo">
+		<![CDATA[ 
+			update BM_TO_DO set todo_status = '2', deal_time = #dealTime# where sr_id = #srId# and todo_status <> '2'
+		]]>
+	</update>
+</sqlMap>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCompute">	
+	<!-- 同步计算机资源池  Vcenter资源管理 -->
+	<sql id="selectSynchronizeList">
+		<![CDATA[
+			SELECT
+				b.DATACENTER_ID AS datacenterId,
+				a.DATACENTER_CNAME AS datacenterName,
+				b.ID AS vmSmId,
+				b.SERVER_NAME AS serverName,
+				b.DOMAIN_NAME AS domainName,
+				b.MANAGE_IP AS manageIp,
+			    p.PLATFORM_NAME platformName,
+				p.PLATFORM_CODE platformCode
+			FROM
+				RM_DATACENTER a
+			LEFT JOIN RM_VM_MANAGE_SERVER b ON a.ID = b.DATACENTER_ID
+			LEFT JOIN RM_PLATFORM p ON p.PLATFORM_ID = b.PLATFORM_TYPE
+			WHERE
+				b.IS_ACTIVE = 'Y'
+			AND b.PLATFORM_TYPE IN ('1')
+			AND a.IS_ACTIVE='Y'
+			AND p.IS_ACTIVE='Y'
+		 ]]>
+		  <dynamic prepend=" and ">
+			<isNotEmpty property="manageIp" prepend=" and ">
+				b.MANAGE_IP LIKE '%$manageIp$%'
+			</isNotEmpty>
+			<isNotEmpty property="serverName" prepend=" and ">
+				b.SERVER_NAME LIKE '%$serverName$%'
+			</isNotEmpty>
+			</dynamic>
+		</sql>
+	<select id="findsynchronizeTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectSynchronizeList"/>
+        ) as recordTable
+    </select>
+    <select id="findsynchronizePage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectSynchronizeList"/> limit #startIndex# ,#pageSize#
+    </select>
+    
+    <!-- 获取Vcenter user pass  -->
+    <select id="findsynchronizeAccount"  parameterClass="String" resultClass="com.git.cloud.resmgt.synchronization.model.po.VcenterPasswordPo" remapResults="true">
+       	select  a.User_name as userName ,a.password ,b.MANAGE_IP as ip from cm_password a inner  JOIN rm_vm_manage_server b on   a.RESOURCE_ID = #RESOUCE_ID# and b.id = #RESOUCE_ID#
+    </select>
+	
+</sqlMap>

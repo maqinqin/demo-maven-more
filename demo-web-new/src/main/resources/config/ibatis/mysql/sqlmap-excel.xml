@@ -1,0 +1,266 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCompute">
+	<typeAlias alias="ExcelInfoPo" type="com.git.cloud.excel.model.po.ExcelInfoPo" />
+	<typeAlias alias="RmDatacenterPo" type="com.git.cloud.resmgt.common.model.po.RmDatacenterPo" />
+	<typeAlias alias="HostVo" type="com.git.cloud.excel.model.vo.HostVo" />
+	<typeAlias alias="VmVo" type="com.git.cloud.excel.model.vo.VmVo" />
+	<typeAlias alias="DataStoreVo" type="com.git.cloud.excel.model.vo.DataStoreVo" />
+	<typeAlias alias="RmClusterPo" type="com.git.cloud.resmgt.compute.model.po.RmClusterPo" />
+	<typeAlias alias="RmNwIpAddressPo" type="com.git.cloud.resmgt.network.model.po.RmNwIpAddressPo" />
+	<typeAlias alias="CmDevicePo" type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="CmVmPo" type="com.git.cloud.resmgt.common.model.po.CmVmPo" />
+	<typeAlias alias="CmHostBo" type="com.git.cloud.resmgt.common.model.bo.CmHostBo" />
+	
+	
+	<insert id="insertExcelInfo" parameterClass="ExcelInfoPo">
+		<![CDATA[
+		INSERT INTO 
+		EXCEL_INFO
+			(ID ,FILE_NAME ,FILE_PATH,FILE_TYPE,CREATE_TIME,UPDATE_TIME,IS_INPUT) 
+		VALUES
+			(#id#,#fileName#,#filePath# ,#fileType#,#createDateTime#,#updateDateTime#,#isInput#)
+		]]>
+	</insert>
+	
+	<update id="updateExcelInfo" parameterClass="ExcelInfoPo">
+		<![CDATA[
+			UPDATE 
+				EXCEL_INFO 
+			SET 
+				FILE_NAME=#fileName#,
+				FILE_PATH=#filePath#,
+				IS_INPUT=#isInput#,
+				CREATE_TIME=#createDateTime#,
+				UPDATE_TIME=#updateDateTime#
+			WHERE FILE_TYPE = #fileType#
+		]]>
+	</update>
+	
+	
+	<select id="selectExcelInfoByType" resultClass="ExcelInfoPo" parameterClass="java.util.Map">
+	 	<![CDATA[
+		SELECT
+     		  FILE_NAME AS fileName,
+		      FILE_PATH AS filePath,
+		      FILE_TYPE AS fileType,
+		      IS_INPUT AS isInput,
+		      CREATE_TIME AS createDateTime,
+		      UPDATE_TIME AS updateDateTime
+		FROM 
+			  EXCEL_INFO
+        WHERE 
+        	  EXCEL_INFO.FILE_TYPE = #fileType#
+        ]]>
+	</select>
+	
+	<select id="selectExcelInfoAll" resultClass="ExcelInfoPo" >
+	 	<![CDATA[
+		SELECT
+			  ID AS id,
+     		  FILE_NAME AS fileName,
+		      FILE_PATH AS filePath,
+		      FILE_TYPE AS fileType,
+		      IS_INPUT AS isInput,
+		      CREATE_TIME AS createDateTime,
+		      UPDATE_TIME AS updateDateTime
+		FROM 
+			  EXCEL_INFO
+       
+        ]]>
+	</select>
+	
+	<select id="selectDataCenterByCode" resultClass="RmDatacenterPo" parameterClass="java.lang.String" >
+	 	<![CDATA[
+		SELECT
+			  ID AS id,
+     		  DATACENTER_CODE AS datacenterCode,
+		      DATACENTER_CNAME AS datacenterCname,
+		      ENAME AS ename,
+		      ADDRESS AS address,
+		      STATUS AS status,
+		      IS_ACTIVE AS isActive,
+		      REMARK AS remark,
+		      QUEUE_IDEN AS queueIden
+	
+		FROM 
+			  RM_DATACENTER
+       	WHERE 
+			  IS_ACTIVE = 'Y'
+		AND 
+			  DATACENTER_CODE = #dataCenterCode#
+        ]]>
+	</select>
+	
+	<select id="selectClusterByEname" resultClass="RmClusterPo" parameterClass="java.lang.String" >
+	 	<![CDATA[
+		SELECT
+			  ID AS id,
+     		  CDP_ID AS cdpId,
+		      CLUSTER_NAME AS clusterName,
+		      ENAME AS ename,
+		      STORAGE_ID AS storage_id,
+		      STATUS AS status,
+		      IS_ACTIVE AS isActive,
+		      REMARK AS remark,
+		      RES_POOL_ID AS resPoolId
+		
+		FROM 
+			  RM_CLUSTER
+		WHERE 
+			  IS_ACTIVE = 'Y'
+		AND 
+			  ENAME = #clusterCode#
+       
+        ]]>
+	</select>
+	
+	<insert id="insertCmDevicePo" parameterClass="CmDevicePo"> 
+		<![CDATA[ 
+			insert into CM_DEVICE(
+				id,
+				device_name,
+				is_active,
+				SN,
+				CREATE_USER,
+				CREATE_DATETIME,
+				DEVICE_STATUS,
+				RES_POOL_ID,
+				DEVICE_MODEL_ID,
+				SEAT_ID
+			) values(
+				#id#,
+				#deviceName#,
+				'Y',
+				#sn#,
+				'系统管理员',
+				#createDateTime#,
+				'ONLINE',
+				#resPoolId#,
+				#deviceModelId#,
+				#seatId#)
+		]]>
+	</insert>
+	
+	<insert id="insertCmHostPo" parameterClass="HostVo"> 
+		<![CDATA[ 
+			insert into CM_HOST(
+				ID,
+				CPU,
+				MEM,
+				IS_BARE,
+				IS_INVC,
+				CLUSTER_ID,
+				DEFAULT_DATASTORE_ID,
+				DEFAULT_DATASTORE_TYPE
+			) VALUES(
+				#id#,
+				#hostCpu#,
+				#hostMem#,
+				'N',
+				'Y',
+				#clusterId#,
+				#defaultDatastoreId#,
+				#defaultDatastoreType#)
+		]]>
+	</insert>
+	
+	<insert id="insertCmDataStorePo" parameterClass="DataStoreVo"> 
+		<![CDATA[ 
+			insert into CM_DATASTORE(
+				ID,
+				NAME,
+				PATH,
+				IS_ACTIVE
+			) values(
+				#id#,
+				#dsName#,
+				#path#,
+				'Y');
+		]]>
+	</insert>
+	<insert id="insertLocalDisk" parameterClass="DataStoreVo"> 
+		<![CDATA[ 
+			insert into CM_LOCAL_DISK(
+				ID,
+				DEVICE_ID,
+				NAME,
+				SIZE,
+				IS_ACTIVE,
+				CREATE_USER
+			) values(
+				#id#,
+				#deviceId#,
+				#dsName#,
+				'0',
+				'Y',
+				'系统管理员');
+		]]>
+	</insert>
+
+	<insert id="insertCmVmPo" parameterClass="CmVmPo"> 
+		<![CDATA[ 
+			insert into CM_VM(
+				ID,
+				HOST_ID,
+				CPU,
+				MEM,
+				DU_ID
+			) values(
+				#id#,
+				#hostId#,
+				#cpu#,
+				#mem#,
+				#duId#)
+		]]>
+	</insert>
+
+	<update id="updateIpAddress" parameterClass="RmNwIpAddressPo">
+		<![CDATA[ 
+			UPDATE 
+				rm_nw_openstack_ip_address 
+			SET 
+				INSTANCE_ID=#deviceId#,
+				NW_RULE_LIST_ID=#nwRuleListId#,
+				ALLOCED_STATUS_CODE=#allocedStatusCode#
+			WHERE IP=#ip#
+		]]>
+	</update>
+	
+	<update id="updateExcelInfoByName" parameterClass="ExcelInfoPo">
+		<![CDATA[ 
+			UPDATE 
+				EXCEL_INFO 
+			SET 
+				IS_INPUT=#isInput#
+			WHERE FILE_NAME=#fileName#
+		]]>
+	</update>
+
+	<select id="selectExcelInfoByName" resultClass="ExcelInfoPo" parameterClass="java.lang.String">
+	 	<![CDATA[
+		SELECT
+     		  FILE_NAME AS fileName,
+		      FILE_PATH AS filePath,
+		      FILE_TYPE AS fileType,
+		      IS_INPUT AS isInput,
+		      CREATE_TIME AS createDateTime,
+		      UPDATE_TIME AS updateDateTime
+		FROM 
+			  EXCEL_INFO
+        WHERE 
+        	  EXCEL_INFO.FILE_NAME = #fileName#
+        ]]>
+	</select>
+	<select id="selecthostIdByName" resultClass="HostVo" parameterClass="java.lang.String">
+	 	<![CDATA[
+		SELECT
+			ID AS id
+		FROM
+			CM_DEVICE
+		WHERE
+			DEVICE_NAME = #name#
+        ]]>
+	</select>
+</sqlMap>

@@ -1,0 +1,18 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+<struts>
+	<package name="resmgt-common-server" extends="resmgt-common-package" namespace="/resmgt-common/server">
+		<action name="index" class="rmGeneralServerAction" method="index">
+			<result name="success">/pages/resmgt/common/rmGeneralServer.jsp</result>
+		</action>
+		<action name="queryRmGeneralServer" class="rmGeneralServerAction" method="queryRmGeneralServer"></action>
+		<action name="queryServerType" class="rmGeneralServerAction" method="rmGeneralServerAction"></action>
+		<action name="queryDataCenter" class="rmGeneralServerAction" method="queryDataCenter"></action>
+		<action name="saveRmGeneralServer" class="rmGeneralServerAction" method="saveRmGeneralServer"></action>
+		<action name="deleteRmGeneralServer" class="rmGeneralServerAction" method="deleteRmGeneralServer"></action>
+		<action name="queryRmGeneralServerById" class="rmGeneralServerAction" method="queryRmGeneralServerById"></action>
+		<action name="updateRmGeneralServer" class="rmGeneralServerAction" method="updateRmGeneralServer"></action>
+		<action name="checkServerName" class="rmGeneralServerAction" method="checkServerName"></action>
+	</package>
+</struts>          

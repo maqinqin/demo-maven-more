@@ -1,0 +1,11 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="resmgt-compute" extends="resmgt-compute-package" namespace="/compute">
+		<action name="getComputeAbstract" class="com.git.cloud.resmgt.compute.action.ComputeAbstractAction" method="getComputeAbstract"></action>
+		<!-- 物理机分页 -->
+		<action name="getRmComputeHostListAction" class="com.git.cloud.resmgt.compute.action.RmComputeHostListAction" method="getRmComputeHostList"></action>
+	</package>
+</struts>

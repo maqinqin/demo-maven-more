@@ -1,0 +1,13 @@
+<!DOCTYPE struts PUBLIC
+        "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+        "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+<struts>
+    <package name="index-package" extends="icms-package" namespace="/index">
+    </package>
+    <package name="index-main" extends="vmrc-package" namespace="/index/pages">
+        <action name="topAct" class="indexAction" method="top">
+            <result name="success">/pages/top.jsp</result>
+        </action>
+    </package>
+
+</struts>

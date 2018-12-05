@@ -1,0 +1,1439 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN" "http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="request-query">
+	<typeAlias alias="srVo" type="com.git.cloud.request.model.vo.BmSrVo" />
+	<typeAlias alias="srPo" type="com.git.cloud.request.model.po.BmSrPo" />
+	<typeAlias alias="bmSrRrinfoVo" type="com.git.cloud.request.model.vo.BmSrRrinfoVo" />
+	<typeAlias alias="bmSrRrinfoPo" type="com.git.cloud.request.model.po.BmSrRrinfoPo" />
+	<typeAlias alias="bmSrRrVmRefPo" type="com.git.cloud.request.model.po.BmSrRrVmRefPo" />
+	<typeAlias alias="srAttrVo" type="com.git.cloud.request.model.vo.BmSrAttrValVo" />
+	<typeAlias alias="csAttrSelPo" type="com.git.cloud.cloudservice.model.po.CloudServiceAttrSelPo" />
+	<typeAlias alias="csFlowRefPo" type="com.git.cloud.cloudservice.model.po.CloudServiceFlowRefPo" />
+	<typeAlias alias="bmSrTypePo" type="com.git.cloud.request.model.po.BmSrTypePo" />
+	<typeAlias alias="bmToDoPo" type="com.git.cloud.request.model.po.BmToDoPo" />
+	<typeAlias alias="bmToDoVo" type="com.git.cloud.request.model.vo.BmToDoVo" />
+	<typeAlias alias="bmSrTypeWfRefPo" type="com.git.cloud.request.model.po.BmSrTypeWfRefPo" />
+    <typeAlias alias="appStatVo" type="com.git.cloud.appmgt.model.vo.AppStatVo"/>
+    <typeAlias alias="srAttrVo" type="com.git.cloud.request.model.vo.BmSrAttrValVo"/>
+	<resultMap id="srAttrVoMap"
+			class="com.git.cloud.request.model.vo.BmSrAttrValVo">
+			<result column="SR_ATTR_VAL_ID" property="srAttrValId" />
+			<result column="RRINFO_ID" property="rrinfoId" />
+			<result column="ATTR_ID" property="attrId" />
+			<result column="ATTR_VALUE" property="attrValue" />
+			<result column="ATTR_TYPE" property="attrType" />
+			<result column="ATTR_NAME" property="attrName" />
+			<result column="ATTR_CNAME" property="attrCname" />
+			<result column="ATTR_CLASS" property="attrClass" />
+			<result column="DEF_VAL" property="defVal" />
+			<result column="IS_REQUIRE" property="isRequire" />
+			<result column="REMARK" property="remark" />
+			<result property="attrSelList" select="CloudServiceAttrPo.getAttrSelList"  
+            column="ATTR_ID" />
+	</resultMap>
+	<resultMap id="srNotVisibleAttrVoMap"
+			class="com.git.cloud.request.model.vo.BmSrAttrValVo">
+			<result column="ATTR_VALUE" property="attrValue" />
+			<result column="ATTR_NAME" property="attrName" />
+	</resultMap>
+	<typeAlias alias="InstanceInfoVo" type="com.git.cloud.rest.model.InstanceInfoVo" />
+	
+	<sql id="findCloudReqeust">
+		<![CDATA[
+		select s.sr_id as srId,
+			   s.sr_code as srCode,
+			   a.cname as appName,
+			   d.datacenter_cname as datacenterName,
+			   s.sr_type_mark as srTypeMark,
+			   st.sr_type_name as srTypeName,
+			   dic.dic_name as srStatus,
+			   s.sr_status_code as srStatusCode,
+			   concat(u.FIRST_NAME,u.LAST_NAME) as creator,
+			   s.create_time as createTime,
+			   s.close_time as closeTime,
+			   s.summary
+		  from BM_SR s left join APP_INFO a on s.APP_ID = a.APP_ID
+		               left join RM_DATACENTER d on s.DATACENTER_ID = d.ID
+		               left join BM_SR_TYPE st on s.SR_TYPE_MARK = st.SR_TYPE_MARK
+		               left join ADMIN_DIC dic on s.SR_STATUS_CODE = dic.DIC_CODE
+		               left join SYS_USER u on s.CREATOR_ID = u.USER_ID
+		  where s.sr_status_code <> '0'
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="srCode" prepend=" and ">
+				s.sr_code like concat('%', #srCode#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="appId" prepend=" and ">
+				s.app_id = #appId#
+			</isNotEmpty>
+			<isNotEmpty property="datacenterId" prepend=" and ">
+				s.datacenter_id = #datacenterId#
+			</isNotEmpty>
+			<isNotEmpty property="srStatusCode" prepend=" and ">
+				s.sr_status_code = #srStatusCode#
+			</isNotEmpty>
+			<isNotEmpty property="srTypeMark" prepend=" and ">
+				s.sr_type_mark = #srTypeMark#
+			</isNotEmpty>
+			<isNotEmpty property="userId" prepend=" and ">
+				s.creator_id = #userId#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="findCloudReqeustTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="findCloudReqeust" />
+		) as recordTable
+	</select>
+	<select id="findCloudReqeustPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="findCloudReqeust" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+	
+
+	<select id="findAppStatBySrId" parameterClass="java.lang.String" resultClass="appStatVo">
+	<![CDATA[
+			SELECT DISTINCT
+			bm.APP_ID AS appID,
+			bm.DATACENTER_ID AS dataCenterID,
+			bm.SR_STATUS_CODE AS srStatusCode,
+			bm.SR_TYPE_MARK AS srTypeMark,
+			v.CPU AS cpu,
+			v.MEM AS mem,
+			ref.CPU_OLD cpuOld,
+			ref.MEM_OLD memOld,
+			ref.DISK_OLD diskOld,
+			sr.PARAMETERS_JSON param,
+			IFNULL(sr.SERVICE_ID,0) AS serviceID,
+			sr.DU_ID AS duID,
+			IFNULL(sr.SYS_DISK,0) AS disk,
+			ref.DEVICE_ID AS diviceID,
+			ref.RRINFO_ID AS rrinfoId,
+			bm.CREATOR_ID AS creatorId,
+			bm.TENANT_ID AS tenantId	
+			FROM
+				BM_SR bm
+			LEFT JOIN BM_SR_RRINFO sr ON bm.SR_ID = sr.SR_ID
+			LEFT JOIN BM_SR_RR_VM_REF ref ON sr.RRINFO_ID = ref.RRINFO_ID
+			LEFT JOIN CM_VM v ON ref.DEVICE_ID = v.ID
+			WHERE
+				bm.SR_ID = #srId#
+		 ]]> 
+	</select>
+	<sql id="getCloudRequestWaitDeal">
+		<![CDATA[
+		select s.sr_id as srId,
+			   s.sr_code as srCode,
+			   IFNULL(a.cname,"")  as appName,
+			   d.datacenter_cname as datacenterName,
+			   s.sr_type_mark as srTypeMark,
+			   st.sr_type_name as srTypeName,
+			   dic.dic_name as srStatus,
+			   s.sr_status_code as srStatusCode,
+			   concat(u.FIRST_NAME,u.LAST_NAME) as creator,
+			   s.create_time as requestTime,
+			   t.create_time as createTime,
+			   t.todo_id as todoId,
+			   t.page_url as pageUrl,
+			   t.current_step as currentStep
+		  from BM_SR s left join APP_INFO a on s.APP_ID = a.APP_ID
+		               left join RM_DATACENTER d on s.DATACENTER_ID = d.ID
+		               left join BM_SR_TYPE st on s.SR_TYPE_MARK = st.SR_TYPE_MARK
+		               left join ADMIN_DIC dic on s.SR_STATUS_CODE = dic.DIC_CODE
+		               left join SYS_USER u on s.CREATOR_ID = u.USER_ID,
+					 BM_TO_DO t
+		 where s.sr_id = t.sr_id
+		   and t.TODO_STATUS <> '2'
+		   AND s.SR_TYPE_MARK NOT IN ('FW','FWR')
+		   and (t.CURRENT_USER_ID = #userId# or ((t.CURRENT_USER_ID is null or t.CURRENT_USER_ID = '') and t.CURRENT_GROUP_ID in ($roleIds$)))
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="srCode" prepend=" and ">
+				s.sr_code like concat('%', #srCode#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="appId" prepend=" and ">
+				s.app_id = #appId#
+			</isNotEmpty>
+			<isNotEmpty property="datacenterId" prepend=" and ">
+				s.datacenter_id = #datacenterId#
+			</isNotEmpty>
+			<isNotEmpty property="srStatusCode" prepend=" and ">
+				s.sr_status_code = #srStatusCode#
+			</isNotEmpty>
+			<isNotEmpty property="srTypeMark" prepend=" and ">
+				s.sr_type_mark = #srTypeMark#
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="getCloudRequestWaitDealTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="getCloudRequestWaitDeal" />
+		) as recordTable
+	</select>
+	<select id="getCloudRequestWaitDealPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="getCloudRequestWaitDeal" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+
+	<select id="selectBmSrList" parameterClass="java.util.Map"
+		resultClass="srVo">
+		select s.sr_id as srId,
+		s.sr_code as srCode,
+		s.app_id as appName,
+		s.datacenter_id as datacenterName,
+		s.sr_type_mark as srType,
+		s.sr_status_code as srStatus,
+		s.creator_id as creator,
+		s.create_time as createTime,
+		s.summary
+		from BM_SR s
+	</select>
+	<!-- 审批列表 -->
+	<sql id="selectBmSrRrinfoList">
+		<![CDATA[
+		SELECT 
+			t.PARAMETERS_JSON parametersJson
+	    FROM BM_SR_RRINFO t 
+	    WHERE  1=1
+		]]>
+		<dynamic prepend=" AND ">
+			<isNotEmpty property="srId" prepend="and">
+		      <![CDATA[t.SR_ID=#srId#]]>
+			</isNotEmpty>
+		</dynamic>
+		<![CDATA[
+			ORDER BY t.CREATE_DATETIME
+		]]>
+	</sql>
+	<select id="selectBmSrRrinfoListTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoList" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="findBmSrNewestRecord" parameterClass="java.util.Map"
+		resultClass="srPo">
+		SELECT
+			s.SR_ID AS srId,
+			s.SR_CODE AS srCode,
+			s.APP_ID AS appId,
+			s.DATACENTER_ID AS datacenterId,
+			s.sr_type_mark AS srTypeMark,
+			s.SR_STATUS_CODE AS srStatusCode,
+			s.SR_START_TIME AS srStartTime,
+			s.SR_END_TIME AS srEndTime,
+			s.URGENCY_CODE AS urgencyCode,
+			s.SUMMARY AS summary,
+			s.REMARK AS remark,
+			s.CREATOR_ID AS creatorId,
+			s.CREATE_TIME AS createTime,
+			s.CLOSE_TIME AS closeTime,
+			s.APPROVE_MARK AS approveMark
+		FROM
+			BM_SR s
+		WHERE
+			length(s.SR_CODE) > 12
+		ORDER BY
+			RIGHT (s.SR_CODE, 12) DESC
+		LIMIT 1
+	</select>
+
+	<!-- 查询服务请求by 代办id -->
+	<select id="selectBmSrByToDoId" parameterClass="java.lang.String"
+		resultClass="srVo">
+		 select  
+				s.SR_ID as srId,
+				s.SR_CODE as srCode,
+				ai.FULL_CNAME as appName,
+				dc.DATACENTER_CNAME as datacenterName,
+				s.sr_type_mark as srTypeMark,
+				s.SR_STATUS_CODE as srStatusCode,
+				s.SR_START_TIME as srStartTime,
+				s.SR_END_TIME as srEndTime,
+				s.URGENCY_CODE as urgencyCode,
+				s.SUMMARY as summary,
+				s.REMARK as remark,
+				s.CREATOR_ID as creatorId,
+				s.CREATE_TIME as createTime,
+				s.CLOSE_TIME as closeTime,
+				s.APPROVE_MARK as approveMark,
+				s.ASSIGN_RESULT as assignResult,
+				(case when bmInfo.SYS_DISK > 0 then concat("CPU=",bmInfo.CPU," MEM=",bmInfo.MEM,"M"," SYS DISK=",bmInfo.SYS_DISK,"G") else concat("CPU=",bmInfo.CPU," MEM=",bmInfo.MEM,"M") end ) as confParameter
+		 from 
+				<!-- BM_SR s,BM_TO_DO d,APP_INFO ai,RM_DATACENTER dc,BM_SR_RRINFO bmInfo
+		 where  1=1 
+				and s.SR_ID=d.SR_ID 
+				and s.APP_ID = ai.APP_ID
+				and s.DATACENTER_ID = dc.ID 
+				and bmInfo.SR_ID = s.SR_ID -->
+				BM_SR s 
+		LEFT JOIN BM_SR_RRINFO bmInfo ON bmInfo.SR_ID = s.SR_ID 
+		LEFT JOIN BM_TO_DO d ON s.SR_ID=d.SR_ID 
+		LEFT JOIN APP_INFO ai ON s.APP_ID = ai.APP_ID
+		LEFT JOIN RM_DATACENTER dc ON s.DATACENTER_ID = dc.ID 
+		where  1=1
+		<isNotEmpty property="value" prepend="and">
+			d.TODO_ID = #value#
+		</isNotEmpty>
+	</select>
+	
+	<!-- 查询服务请求 代办id 如删除服务器角色 -->
+	<select id="selectBmSrForDelToDoId" parameterClass="java.lang.String"
+		resultClass="srVo">
+		select s.SR_ID as srId,
+			s.SR_CODE as srCode,
+			ai.FULL_CNAME as appName,
+			dc.DATACENTER_CNAME as datacenterName,
+			s.sr_type_mark as srTypeMark,
+			s.SR_STATUS_CODE as srStatusCode,
+			s.SR_START_TIME as srStartTime,
+			s.SR_END_TIME as srEndTime,
+			s.URGENCY_CODE as urgencyCode,
+			s.SUMMARY as summary,
+			s.REMARK as remark,
+			s.CREATOR_ID as creatorId,
+			s.CREATE_TIME as createTime,
+			s.CLOSE_TIME as closeTime,
+			s.APPROVE_MARK as approveMark,
+			s.ASSIGN_RESULT as assignResult
+		from BM_SR s,BM_TO_DO d,APP_INFO ai,RM_DATACENTER dc
+		where 1=1 
+			and s.SR_ID=d.SR_ID 
+			and s.APP_ID = ai.APP_ID
+			and s.DATACENTER_ID = dc.ID 
+		<isNotEmpty property="value" prepend="and">
+			d.TODO_ID = #value#
+		</isNotEmpty>
+	</select>
+
+	<!-- 审批确认 -->
+	<!-- 实施确认、实施完成（供给） -->
+	<sql id="selectBmSrRrinfoByParam">
+		SELECT s.SR_CODE srCode,du.CNAME duName,vd.id vmdeviceId, vd.device_name vmdeviceName, hd.device_name
+		deviceName,cl.CLUSTER_NAME clusterName,rp.POOL_NAME resPoolName,sr.RRINFO_ID rrinfoId,du.DU_ID duId 
+		FROM BM_SR s,BM_SR_RRINFO sr,APP_DU du,
+			BM_SR_RR_VM_REF ref, CM_DEVICE hd,CM_DEVICE vd, CM_VM v, CM_HOST h,
+			RM_CLUSTER cl, RM_RES_POOL rp
+		WHERE s.SR_ID = sr.SR_ID
+		AND sr.DU_ID = du.DU_ID
+		AND s.SR_ID = ref.SR_ID
+		AND ref.DEVICE_ID = vd.ID
+		AND vd.ID = v.ID
+		AND v.HOST_ID = h.ID
+		AND hd.ID = h.ID
+		AND h.CLUSTER_ID = cl.ID
+		AND cl.RES_POOL_ID = rp.ID
+		<isNotEmpty property="srId" prepend="and">
+			sr.SR_ID = #srId#
+		</isNotEmpty>
+	</sql>
+	
+	<select id="selectBmSrRrinfoByParamTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoByParam" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoByParamPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoByParam" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 实施确认、实施完成（回收） -->
+	<sql id="selectBmSrRrinfoRecycleByParam">
+		SELECT
+		du.DU_ID duId,
+		vd.ID deviceId,
+		du.CNAME duName,
+		vd.DEVICE_NAME deviceName
+		FROM
+		BM_SR_RRINFO sr,
+		APP_DU du,
+		BM_SR_RR_VM_REF vref,
+		CM_DEVICE vd,
+		CM_VM v
+		WHERE sr.DU_ID = du.DU_ID
+		AND sr.SR_ID = vref.SR_ID
+		AND vref.DEVICE_ID = vd.ID
+		AND v.ID = vd.ID
+
+		<isNotEmpty property="srId" prepend="and">
+			sr.SR_ID = #srId#
+		</isNotEmpty>
+	</sql>
+	<select id="selectBmSrRrinfoRecycleByParamTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoRecycleByParam" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoRecycleByParamPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoRecycleByParam" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 实施确认、实施完成（扩容） -->
+	<sql id="selectBmSrRrinfoExtendByParam">
+		SELECT
+			sr.RRINFO_ID rrinfoId,
+			vd.DEVICE_NAME vmName,
+			vref.CPU_OLD cpuOld,
+			vref.MEM_OLD memOld,
+			v.DISK diskOld,
+			v.platform_type_code platformTypeCode,
+			sr.PARAMETERS_JSON parametersJson,
+			IFNULL(
+				(
+					SELECT
+						sum(re.DISK_SIZE)
+					FROM
+						RM_DEVICE_VOLUMES_REF re
+					WHERE
+						re.DEVICE_ID = vref.DEVICE_ID
+					AND re.MOUNT_STATUS = 'mount'
+				),
+				0
+			)AS externalDiskSum
+		FROM
+			BM_SR_RRINFO sr
+		LEFT JOIN APP_DU du ON sr.DU_ID = du.DU_ID
+		LEFT JOIN BM_SR_RR_VM_REF vref ON sr.RRINFO_ID = vref.RRINFO_ID
+		LEFT JOIN CM_DEVICE vd ON vref.DEVICE_ID = vd.ID
+		LEFT JOIN CM_VM v ON v.ID = vd.ID
+		WHERE
+			1 = 1
+		<isNotEmpty property="srId" prepend="and">
+			sr.SR_ID = #srId#
+		</isNotEmpty>
+		ORDER BY sr.ORDER_ID,CONVERT(vmName USING gbk) ASC 
+	</sql>
+	<select id="selectBmSrRrinfoExtendByParamTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoExtendByParam" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoExtendByParamPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoExtendByParam" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	
+	<!-- 扩容申请验证关单和关单之后，调用该方法 -->
+	<sql id="selectBmSrRrinfoExtendHisByParam">
+		SELECT
+			sr.RRINFO_ID rrinfoId,
+			vd.DEVICE_NAME vmName,
+			du.CNAME duName,
+			du.ENAME duEname,
+			vref.CPU_OLD cpuOld,
+			vref.MEM_OLD memOld,
+			vref.DISK_OLD diskOld,
+			sr.CPU cpuNew,
+			sr.MEM memNew,
+			IFNULL(sr.SYS_DISK, 0)mountDisk,
+			v.platform_type_code platformTypeCode
+		FROM
+			BM_SR_RRINFO sr
+		LEFT JOIN APP_DU du ON sr.DU_ID = du.DU_ID
+		LEFT JOIN BM_SR_RR_VM_REF vref ON sr.RRINFO_ID = vref.RRINFO_ID
+		LEFT JOIN CM_DEVICE vd ON vref.DEVICE_ID = vd.ID
+		LEFT JOIN CM_VM v ON v.ID = vd.ID
+		WHERE 1 = 1
+		<isNotEmpty property="srId" prepend="and">
+			sr.SR_ID = #srId#
+		</isNotEmpty>
+		ORDER BY sr.ORDER_ID,CONVERT(vmName USING gbk) ASC 
+	</sql>
+	<select id="selectBmSrRrinfoExtendHisByParamTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoExtendHisByParam" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoExtendHisByParamPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoExtendHisByParam" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 服务交付信息 -->
+	<sql id="selectBmSrRrinfoAffirmList">
+		<![CDATA[
+		SELECT
+			sr.RRINFO_ID rrinfoId,
+			sr.PARAMETERS_JSON parametersJson,
+			sr.CREATE_DATETIME createTime,
+			vd.DEVICE_NAME vmdeviceName,
+			vd.ID vmdeviceId,
+			pd.USER_NAME vmuserName,
+			pd. PASSWORD vmpwd
+		FROM
+			BM_SR_RRINFO sr
+		LEFT JOIN APP_DU du ON sr.DU_ID = du.DU_ID
+		LEFT JOIN BM_SR_RR_VM_REF ref ON sr.RRINFO_ID = ref.RRINFO_ID
+		LEFT JOIN CM_DEVICE vd ON ref.DEVICE_ID = vd.ID
+		LEFT JOIN CM_VM v ON vd.ID = v.ID
+		LEFT JOIN CM_PASSWORD pd ON v.ID = pd.RESOURCE_ID
+		WHERE
+			1 = 1
+		]]>
+		<isNotEmpty property="srId" prepend="and">
+		      <![CDATA[sr.SR_ID=#srId#]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY sr.CREATE_DATETIME
+		]]>
+	</sql>
+	<select id="selectBmSrRrinfoAffirmTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoAffirmList" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoAffirmPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoAffirmList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 资源分配信息列表（供给） -->
+<sql id="selectBmSrRrinfoResoureList">
+		<![CDATA[
+		SELECT
+			rr.RRINFO_ID rrinfoId,
+			h.ID hostId,
+			rr.CREATE_DATETIME createTime,
+			v.ID vmId,
+			vd.DEVICE_NAME vmName,
+			vd.LPAR_NAME_PREFIX lparNamePrefix,
+			v.CPU cpu,
+			v.MEM mem,
+			hd.DEVICE_NAME deviceName,
+			rp.POOL_NAME resPoolName,
+			cl.CLUSTER_NAME clusterName,
+			rr.PARAMETERS_JSON parametersJson,
+			h.DEFAULT_DATASTORE_TYPE datastoreType,
+			(
+				SELECT
+					ld.`NAME`
+				FROM
+					CM_LOCAL_DISK ld
+				WHERE
+					ld.DEVICE_ID = hd.ID
+				AND h.DEFAULT_DATASTORE_TYPE = 'LOCAL_DISK'
+			)AS localDatastoreName,
+			(
+				SELECT
+					cds.DATASTORE_NAME
+				FROM
+					CM_HOST_DATASTORE_REF chdr,
+					CM_DATASTORE cds
+				WHERE
+					chdr.HOST_ID = v.HOST_ID
+				AND chdr.DATASTORE_ID = cds.DATASTORE_ID
+				AND h.DEFAULT_DATASTORE_TYPE = 'NAS_DATASTORE'
+				AND chdr.DATASTORE_ID = v.DATASTORE_ID
+			)AS datastoreName,
+			rpl.PLATFORM_CODE platFormCode,
+			rvt.VOLUME_TYPE volumeType,
+			rht.HOST_TYPE_CODE hostTypeCode
+		FROM
+			BM_SR_RRINFO rr
+		LEFT JOIN BM_SR_RR_VM_REF ref ON rr.RRINFO_ID = ref.RRINFO_ID
+		LEFT JOIN CM_DEVICE vd ON ref.DEVICE_ID = vd.ID
+		LEFT JOIN CM_VM v ON vd.ID = v.ID
+		LEFT JOIN CM_DEVICE hd ON v.HOST_ID = hd.ID
+		LEFT JOIN CM_HOST h ON hd.ID = h.ID
+		LEFT JOIN RM_CLUSTER cl ON h.CLUSTER_ID = cl.ID
+		LEFT JOIN RM_RES_POOL rp ON cl.RES_POOL_ID = rp.ID
+		LEFT JOIN RM_HOST_RES_POOL hrp ON hrp.ID = rp.ID
+		LEFT JOIN RM_PLATFORM rpl ON rpl.PLATFORM_CODE = hrp.PLATFORM_TYPE
+		LEFT JOIN RM_VOLUME_TYPE rvt ON rvt.ID = ref.VOLUME_TYPE
+		LEFT JOIN RM_HOST_TYPE rht ON rht.HOST_TYPE_ID = hrp.HOST_TYPE_ID
+		WHERE 1 = 1
+		]]>
+		<isNotEmpty property="srId" prepend="and">
+		      <![CDATA[rr.SR_ID=#srId#]]>
+		</isNotEmpty>
+		<![CDATA[
+			ORDER BY vd.DEVICE_NAME
+		]]>
+	</sql>
+	<select id="selectBmSrRrinfoResoureTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoResoureList" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoResourePage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoResoureList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 服务自动化，添加卷列表 -->
+	<sql id="selectBmSrRrinfoResoureAutoList">
+		<![CDATA[
+		SELECT
+		attr.ATTR_NAME attNanme,
+		t.ATTR_VALUE attValue,
+		j.`NAME` nameValue
+		FROM
+			BM_SR_ATTR_VAL t
+		LEFT JOIN CLOUD_SERVICE_ATTR attr ON attr.ATTR_ID = t.ATTR_ID
+		LEFT JOIN CLOUD_PROJECT j ON j.ID = t.ATTR_VALUE
+		WHERE
+			t.RRINFO_ID IN(
+				SELECT
+					r.RRINFO_ID
+				FROM
+					BM_SR_RRINFO r
+				WHERE
+					r.SR_ID = #srId#
+			)
+		]]>
+	</sql>
+		<select id="selectBmSrRrinfoResoureAutoTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectBmSrRrinfoResoureAutoList" />
+		) as recordTable
+	</select>
+	<select id="selectBmSrRrinfoResoureAutoPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectBmSrRrinfoResoureAutoList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 资源分配信息列表（扩容） -->
+		<sql id="selectExpandVirtualDeviceList">
+		<![CDATA[
+		SELECT
+			rr.RRINFO_ID rrinfoId,
+		    rr.PARAMETERS_JSON parametersJson,
+			d.ID deviceId,
+			d.DEVICE_NAME deviceName,
+			rr.ARCHIVE_DISK_CODE archiveDisk,
+			od.ID oldHostId,
+			od.DEVICE_NAME oldHostName,
+			ref.IS_ENOUGH isEnough,
+			ref.MOVE_HOST_ID newHostId,
+			vm.CPU cpuOld,
+			vm.MEM memOld,
+			vm.DISK diskOld,
+			vm.platform_type_code platformTypeCode,
+			IFNULL(
+					(
+						SELECT
+							sum(re.DISK_SIZE)
+						FROM
+							RM_DEVICE_VOLUMES_REF re
+						WHERE
+							re.DEVICE_ID = ref.DEVICE_ID
+						AND re.MOUNT_STATUS = 'mount'
+					),
+					0
+				)AS externalDiskSum
+		FROM
+			BM_SR_RRINFO rr
+		LEFT JOIN BM_SR_RR_VM_REF ref ON rr.RRINFO_ID = ref.RRINFO_ID
+		LEFT JOIN CM_DEVICE d ON ref.DEVICE_ID = d.ID
+		LEFT JOIN CM_VM vm ON d.ID = vm.ID
+		LEFT JOIN CM_DEVICE od ON vm.HOST_ID = od.ID
+		WHERE 1=1
+		]]>
+		<isNotEmpty property="srId" prepend="and">
+		      <![CDATA[rr.SR_ID=#srId#]]>
+		</isNotEmpty>
+		ORDER BY rr.ORDER_ID,CONVERT(deviceName USING gbk) ASC 
+	</sql>
+	<select id="selectExpandVirtualDeviceTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectExpandVirtualDeviceList" />
+		) as recordTable
+	</select>
+	<select id="selectExpandVirtualDevicePage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectExpandVirtualDeviceList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 子流程列表 -->
+	<select id="selectWorkflowLinkList" parameterClass="hashMap"
+		resultClass="hashMap">
+		<![CDATA[
+		    SELECT
+				sr.RRINFO_ID rrinfoId,
+				sr.PARAMETERS_JSON parametersJson,
+				ad.CNAME duName,
+				ad.ENAME duEname,
+				bi.INSTANCE_ID instanceId,
+				bi.INSTANCE_NAME instanceName,
+				bi.INSTANCE_STATE_ID instanceStateId,
+				sr.FLOW_ID flowId,
+				bi.WF_MODEL_ID wfModelId
+			FROM
+				BM_SR_RRINFO sr
+			LEFT JOIN BPM_INSTANCE bi ON sr.SR_ID = bi.SERVICE_REQ_ID
+			AND sr.RRINFO_ID = bi.SERVICE_RES_REQ_ID
+			LEFT JOIN APP_DU ad ON sr.DU_ID = ad.DU_ID
+			where 1=1
+		]]>
+		<isNotEmpty property="srId" prepend="and">
+		      <![CDATA[sr.SR_ID=#srId#]]>
+		</isNotEmpty>
+	</select>
+
+	<!--获得服务[供给]申请主数据 -->
+	<select id="findBmSrVoById" parameterClass="java.lang.String"
+		resultClass="srVo">
+		<![CDATA[
+		   select 
+				sr.sr_id as srId,
+				sr.sr_code as srCode,
+				sr.app_id as appId,
+				ap.full_cname as appName,
+				ap.ename as appEName,
+				sr.datacenter_id as datacenterId,
+				dc.datacenter_cname as datacenterName,
+				sr.sr_type_mark as srTypeMark,
+				sr.sr_start_time as srStartTime,
+				sr.sr_end_time as srEndTime,
+				sr.sr_status_code as srStatusCode,
+				sr.summary as summary,
+				sr.remark as remark,
+				sr.creator_id as creatorId,
+				sr.create_time as createTime,
+				sr.approve_mark as approveMark,
+  				CASE WHEN bmInfo.SYS_DISK > 0 THEN concat("CPU=",bmInfo.CPU," MEM=",bmInfo.MEM,"M"," EXYTA DISK=",bmInfo.SYS_DISK,"G") ELSE concat("CPU=",bmInfo.CPU," MEM=",bmInfo.MEM,"M") END  as confParameter
+			from BM_SR sr 
+				left join APP_INFO ap on sr.app_id = ap.app_id
+				left join RM_DATACENTER dc on sr.datacenter_id = dc.id
+				left join BM_SR_RRINFO bmInfo on sr.SR_ID = bmInfo.SR_ID
+			where
+				sr.sr_id = #srId#
+		]]>
+	</select>
+	
+	<!--获得服务[回收]申请主数据 -->
+	<select id="findRrByIdBmSr" parameterClass="java.lang.String"
+		resultClass="srVo">
+		<![CDATA[
+		  select 
+				sr.sr_id as srId,
+				sr.sr_code as srCode,
+				sr.app_id as appId,
+				ap.full_cname as appName,
+				ap.ename as appEName,
+				sr.datacenter_id as datacenterId,
+				dc.datacenter_cname as datacenterName,
+				sr.sr_type_mark as srTypeMark,
+				sr.sr_start_time as srStartTime,
+				sr.sr_end_time as srEndTime,
+				sr.sr_status_code as srStatusCode,
+				sr.summary as summary,
+				sr.remark as remark,
+				sr.creator_id as creatorId,
+				sr.create_time as createTime,
+				sr.approve_mark as approveMark,
+				sr.tenant_id as tenantId
+			from BM_SR sr 
+				left join APP_INFO ap on sr.app_id = ap.app_id
+				left join RM_DATACENTER dc on sr.datacenter_id = dc.id
+			where
+				sr.sr_id = #srId#
+		]]>
+	</select>
+	
+	<select id="findBmSrVoBySrCode" parameterClass="java.lang.String"
+		resultClass="srVo">
+		<![CDATA[
+		   select 
+				sr.sr_id as srId,
+				sr.sr_code as srCode,
+				sr.app_id as appId,
+				ap.full_cname as appName,
+				sr.datacenter_id as datacenterId,
+				dc.datacenter_cname as datacenterName,
+				sr.sr_type_mark as srTypeMark,
+				sr.sr_start_time as srStartTime,
+				sr.sr_end_time as srEndTime,
+				sr.sr_status_code as srStatusCode,
+				sr.summary as summary,
+				sr.remark as remark,
+				sr.creator_id as creatorId
+			from BM_SR sr 
+				left join APP_INFO ap on sr.app_id = ap.app_id
+				left join RM_DATACENTER dc on sr.datacenter_id = dc.id
+			where
+				sr.sr_code = #srCode#
+		]]>
+	</select>
+
+	<!--获得资源申请信息数据 -->
+	<select id="getBmSrRrinfo" parameterClass="java.lang.String"
+		resultClass="bmSrRrinfoVo">
+		<![CDATA[
+		 SELECT DISTINCT
+			inf.rrinfo_id AS rrinfoId,
+			inf.sr_id AS srId,
+			inf.vm_num AS vmNum,
+			inf.cpu AS cpu,
+			inf.mem AS mem,
+			IFNULL(inf.sys_disk,0) AS sysDisk,
+			inf.PARAMETERS_JSON parametersJson,
+			ser.service_id AS serviceId,
+			ser.service_name AS serviceName,
+			ser.platform_type AS platformType,
+			pdu.du_id AS duId,
+			pdu.cname AS duName,
+			pdu.ename AS duEname,
+			pdu.service_type_code AS duType,
+			r.CPU_OLD cpuOld,
+			r.MEM_OLD memOld,
+			r.DISK_OLD diskOld,
+			pl.PLATFORM_CODE platformTypeCode
+		FROM
+			BM_SR_RRINFO inf
+		LEFT JOIN CLOUD_SERVICE ser ON inf.service_id = ser.service_id
+		LEFT JOIN APP_DU pdu ON inf.du_id = pdu.du_id
+		LEFT JOIN BM_SR_RR_VM_REF r ON r.SR_ID = inf.SR_ID
+		LEFT JOIN RM_PLATFORM pl ON pl.PLATFORM_ID = ser.platform_type
+		WHERE
+			inf.sr_id = #srId#
+		ORDER BY
+			inf.CREATE_DATETIME
+		]]>
+	</select>
+	
+	<!--根据Id获取资源申请信息 -->
+	<select id="findBmSrRrinfoById" parameterClass="java.lang.String" resultClass="bmSrRrinfoPo">
+		<![CDATA[
+		   select 
+				rr.rrinfo_id as rrinfoId,
+				rr.sr_id as srId,
+				rr.service_id as serviceId,
+				rr.du_id as duId,
+				rr.cpu as cpu,
+				rr.mem as mem,
+				rr.data_center_id as dataCenterId,
+				rr.sys_disk as sysDisk,
+				rr.PARAMETERS_JSON parametersJson,
+				rr.vm_num as vmNum
+		   from 
+				BM_SR_RRINFO rr
+		   where
+				rr.rrinfo_id = #rrinfoId#
+		]]>
+	</select>
+	
+	<!--获得未分配虚机的资源申请信息数据 -->
+	<select id="findNoAssignRrinfoListBySrId" parameterClass="java.lang.String" resultClass="bmSrRrinfoPo">
+		<![CDATA[
+			SELECT
+				rr.rrinfo_id AS rrinfoId,
+				rr.sr_id AS srId,
+				rr.service_id AS serviceId,
+				rr.du_id AS duId,
+				rr.cpu AS cpu,
+				rr.mem AS mem,
+				rr.sys_disk AS sysDisk,
+				rr.vm_num AS vmNum,
+				rr.PARAMETERS_JSON parametersJson,
+				rr.DATA_CENTER_ID as dataCenterId,
+				rr.RM_HOST_RES_POOL_ID rmHostResPoolId,
+				sr.CREATOR_ID AS userId
+			FROM
+				BM_SR_RRINFO rr
+				LEFT JOIN BM_SR sr ON rr.SR_ID = sr.SR_ID
+			WHERE
+				rr.sr_id = #srId#
+			AND rr.RRINFO_ID NOT IN (
+				SELECT
+					RRINFO_ID
+				FROM
+					BM_SR_RR_VM_REF vr
+				WHERE
+					vr.sr_id = rr.SR_ID
+			)
+			
+			order by rr.CREATE_DATETIME
+		]]>
+	</select>
+	
+	<!--根据资源请求Id获取资源申请下的机器关系 -->
+	<select id="findBmSrRrVmRefListByRrinfoId" parameterClass="hashMap" resultClass="bmSrRrVmRefPo">
+		<![CDATA[
+		  SELECT
+			ref.sr_rr_vm_ref_id AS refId,
+			ref.sr_id AS srId,
+			ref.rrinfo_id AS rrinfoId,
+			ref.device_id AS deviceId,
+			ref.is_enough AS isEnough,
+			ref.move_host_id AS moveHostId,
+			ref.cpu_old cpuOld,
+			ref.mem_old memOld
+		FROM
+			BM_SR_RR_VM_REF ref,
+			CM_DEVICE d
+		WHERE
+			ref.DEVICE_ID = d.ID
+		AND ref.rrinfo_id = #rrinfoId#
+		ORDER BY
+			d.DEVICE_NAME
+		]]>
+	</select>
+	
+	<select id="findBmSrRrVmRefListBySrId" parameterClass="hashMap" resultClass="bmSrRrVmRefPo">
+		<![CDATA[
+		   SELECT
+				ref.sr_rr_vm_ref_id AS refId,
+				ref.sr_id AS srId,
+				ref.rrinfo_id AS rrinfoId,
+				ref.device_id AS deviceId,
+				ref.is_enough AS isEnough,
+				ref.move_host_id AS moveHostId
+			FROM
+				BM_SR_RR_VM_REF ref, CM_DEVICE d
+			WHERE ref.DEVICE_ID = d.ID AND ref.sr_id = #srId#
+			ORDER BY d.DEVICE_NAME
+		]]>
+	</select>
+	<!--通过设备ID，查询卷类型  -->
+	<select id="findBmSrRrVmVolumeTypeByDeviceId" parameterClass="hashMap" resultClass="bmSrRrVmRefPo">
+		<![CDATA[
+			SELECT
+				ref.sr_rr_vm_ref_id AS refId,
+				ref.sr_id AS srId,
+				ref.rrinfo_id AS rrinfoId,
+				ref.device_id AS deviceId,
+				ref.is_enough AS isEnough,
+				ref.move_host_id AS moveHostId,
+				rvt.VOLUME_TYPE volumeType
+			FROM
+				BM_SR_RR_VM_REF ref,
+				CM_DEVICE d,
+				RM_VOLUME_TYPE rvt
+			WHERE
+				ref.DEVICE_ID = d.ID
+			AND ref.VOLUME_TYPE = rvt.ID
+			AND ref.DEVICE_ID = #deviceId#
+		]]>
+	</select>
+	
+	<select id="findBmSrRrVmRefByRrinfoIdAndVmId" parameterClass="hashMap" resultClass="bmSrRrVmRefPo">
+		<![CDATA[
+		   select 
+				ref.sr_rr_vm_ref_id as refId,
+				ref.sr_id as srId,
+				ref.rrinfo_id as rrinfoId,
+				ref.device_id as deviceId,
+				ref.is_enough as isEnough,
+				ref.move_host_id as moveHostId
+		   from 
+				BM_SR_RR_VM_REF ref
+		   where
+				ref.rrinfo_id = #rrinfoId#
+			and ref.device_id = #deviceId#
+		]]>
+	</select>
+
+	<!--获得[供给]资源参数数据 -->
+	<select id="request-query.getBmSrAttr" parameterClass="java.lang.String"
+		resultMap="srAttrVoMap">
+		<![CDATA[
+		   select 
+				trv.SR_ATTR_VAL_ID,
+				trv.RRINFO_ID,
+				trv.ATTR_ID,
+				trv.ATTR_VALUE,
+				cea.ATTR_TYPE,
+				cea.ATTR_NAME,
+				cea.ATTR_CNAME,
+				cea.DEF_VAL,
+				cea.IS_REQUIRE,
+				cea.REMARK,
+				cea.ATTR_CLASS 
+			from 
+				BM_SR_ATTR_VAL trv 
+				left join CLOUD_SERVICE_ATTR cea on trv.attr_id = cea.attr_id AND cea.IS_ACTIVE='Y' 
+			where
+				trv.rrinfo_id = #rrinfoId#
+			order by cea.ATTR_CNAME
+		]]>
+	</select>
+	<select id="request-query.getBmSrNotVisibleAttr" parameterClass="java.lang.String"
+		resultMap="srNotVisibleAttrVoMap">
+		<![CDATA[
+			select a.ATTR_NAME, a.DEF_VAL as ATTR_VALUE from CLOUD_SERVICE_ATTR a, BM_SR_RRINFO r 
+			where a.SERVICE_ID=r.SERVICE_ID and a.IS_VISIBLE='N' 
+				and r.RRINFO_ID= #rrinfoId#;
+		]]>
+	</select>
+
+	<select id="request-query.findBmSrAttrAutoListByDeviceId" parameterClass="hashMap" resultMap="srAttrVoMap">
+		<![CDATA[
+ 			select 
+				trv.SR_ATTR_VAL_ID,
+				trv.RRINFO_ID,
+				trv.ATTR_ID,
+				trv.ATTR_VALUE,
+				cea.ATTR_TYPE,
+				cea.ATTR_NAME,
+				cea.ATTR_CNAME,
+				cea.DEF_VAL,
+				cea.IS_REQUIRE,
+				cea.REMARK,
+				cea.ATTR_CLASS 
+			from 
+				BM_SR_DEVICE_ATTR_VAL trv 
+				left join CLOUD_SERVICE_ATTR cea on trv.attr_id = cea.attr_id
+			where 1=1
+			and	trv.rrinfo_id = #rrinfoId#
+			and trv.device_id = #deviceId#
+			order by cea.ATTR_CNAME
+		]]>
+	</select>
+	<!--获得[供给]参数属性数据 -->
+	<select id="getBmSrAttrSel" parameterClass="java.lang.String"
+		resultClass="csAttrSelPo">
+		<![CDATA[
+		   select 
+				trs.attr_sel_id as attrSelId,
+				trs.attr_id as attrId,
+				trs.attr_key as attrKey,
+				trs.attr_value as attrValue
+			from 
+				CLOUD_SERVICE_ATTR_SEL trs
+			where
+				trs.attr_id=#attr_id#
+		]]>
+	</select>
+
+
+
+	<!--获得服务请求流程模版ID -->
+	<select id="getCloudServiceFlowId" parameterClass="Map"
+		resultClass="csFlowRefPo">
+		<![CDATA[
+		   select 
+				flow_id as flowId
+			from 
+				CLOUD_SERVICE_FLOW_REF
+			where
+				service_id = #serviceId# 
+				and oper_model_type = #srTypeMark#
+				and is_active = #isActive#
+		]]>
+	</select>
+
+	<!-- 扩容列表 -->
+	<sql id="selectVEBmSrRrinfoList">
+		<![CDATA[
+			SELECT DISTINCT
+				ad.DU_ID AS duId,
+				ad.CNAME AS duName,
+				ad.ENAME AS duEname,
+				ad.SERVICE_TYPE_CODE AS duType
+			FROM
+				APP_DU ad
+			LEFT JOIN CLOUD_SERVICE cs ON cs.SERVICE_ID = ad.SERVICE_ID
+			LEFT JOIN CM_VM cv ON ad.DU_ID = cv.DU_ID
+			LEFT JOIN CM_DEVICE cd ON cv.ID = cd.ID
+			WHERE
+				cd.IS_ACTIVE = 'Y'
+			AND cd.DEVICE_STATUS = 'ONLINE'
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="appId" prepend=" and ">
+				ad.APP_ID = #appId#
+			</isNotEmpty>
+			<isNotEmpty property="datacenterId" prepend=" and ">
+				ad.DATACENTER_ID = #datacenterId#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY CONVERT(duName USING gbk) ASC
+	</sql>
+	<select id="selectVEBmSrRrinfoListTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectVEBmSrRrinfoList" />
+		) as recordTable
+	</select>
+	<select id="selectVEBmSrRrinfoListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectVEBmSrRrinfoList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	
+	<!-- 扩容选择虚拟机列表 -->
+	<sql id="selectVmSrDeviceinfoList">
+		<![CDATA[
+			SELECT DISTINCT
+				cv.ID deviceId,
+				cd.DEVICE_NAME AS deviceName,
+				ad.DU_ID AS duId,
+				ad.CNAME AS duName,
+				ad.ENAME AS duEname,
+				ad.SERVICE_TYPE_CODE AS duType,
+				cs.SERVICE_ID AS serviceId,
+				cs.SERVICE_NAME AS serviceName,
+				cs.PLATFORM_TYPE AS platformType,
+				cv.platform_type_code AS platformTypeCode,
+				cv.CPU cpu,
+				cv.MEM mem,
+				cv.DISK disk,
+				rdvr.DISK_SIZE as externalDiskSum
+			FROM
+				APP_DU ad
+			LEFT JOIN CLOUD_SERVICE cs ON cs.SERVICE_ID = ad.SERVICE_ID
+			LEFT JOIN CM_VM cv ON ad.DU_ID = cv.DU_ID
+			LEFT JOIN CM_DEVICE cd ON cv.ID = cd.ID
+			LEFT JOIN rm_device_volumes_ref rdvr ON rdvr.DEVICE_ID = cv.ID
+			WHERE
+				cd.IS_ACTIVE = 'Y'
+			AND cd.DEVICE_STATUS = 'ONLINE'
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="duId" prepend=" and ">
+				cv.DU_ID = #duId#
+			</isNotEmpty>
+		</dynamic>
+		ORDER BY CONVERT(duName USING gbk) ASC
+	</sql>
+	<select id="selectVmSrDeviceinfoListTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="selectVmSrDeviceinfoList" />
+		) as recordTable
+	</select>
+	<select id="selectVmSrDeviceinfoListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="selectVmSrDeviceinfoList" />
+		limit #startIndex# ,#pageSize#
+	</select>
+
+	
+	<!--查询所有服务请求-->
+	<select id="getBmSrTypeTreeList"  parameterClass="Map" resultClass="bmSrTypePo">  
+       select 
+          sr_type_id as srTypeId,
+	      sr_type_name as srTypeName, 
+	      sr_type_mark as srTypeMark,
+	      parent_id as parentId,
+	      sr_type_code as srTypeCode,
+	      remark
+       from 
+         BM_SR_TYPE 
+       where 
+         is_active = #isActive# 
+         and parent_id = #srTypeId#
+       order by 
+         sr_type_name
+	</select> 
+	
+	<!--模糊查询所有服务请求-->
+	<select id="getBmSrTypeByName"  parameterClass="Map" resultClass="bmSrTypePo">  
+       select 
+          sr_type_id as srTypeId,
+	      sr_type_name as srTypeName, 
+	      sr_type_mark as srTypeMark,
+	      parent_id as parentId,
+	      sr_type_code as srTypeCode,
+	      remark
+       from 
+         BM_SR_TYPE 
+       where 
+         is_active = #isActive# 
+         and sr_type_name like concat('%', #srTypeName#, '%')
+       order by 
+         sr_type_name
+	</select>
+	
+	<!--查询父节点信息-->
+	<select id="getBmSrTypeByParentId"  parameterClass="Map" resultClass="bmSrTypePo">  
+       select 
+          sr_type_id as srTypeId,
+	      sr_type_name as srTypeName, 
+	      sr_type_mark as srTypeMark,
+	      parent_id as parentId,
+	      sr_type_code as srTypeCode,
+	      remark
+       from 
+         BM_SR_TYPE 
+       where 
+         is_active = #isActive#
+         and sr_type_id = #parentId#
+       order by 
+         sr_type_name
+	</select>
+	
+	<!--查询过滤后子节点-->
+	<select id="getBmSrTypeTreeByParentId"  parameterClass="Map" resultClass="bmSrTypePo">  
+       select 
+          sr_type_id as srTypeId,
+	      sr_type_name as srTypeName, 
+	      sr_type_mark as srTypeMark,
+	      parent_id as parentId,
+	      sr_type_code as srTypeCode,
+	      remark
+       from 
+         BM_SR_TYPE 
+       where 
+         is_active = #isActive# 
+         and parent_id = #parentId#
+         and sr_type_id in ($allIds$)
+       order by 
+         sr_type_name
+	</select> 	
+	
+	<select id="findBmToDoById" parameterClass="java.lang.String" resultClass="bmToDoPo">
+		select todo_id as todoId,
+		       sr_id as srId,
+		       current_step as currentStep,
+		       current_group_id as currentGroupId,
+		       current_user_id as currentUserId,
+		       todo_status as todoStatus,
+		       page_url as pageUrl,
+		       task_id as taskId,
+		       node_id as nodeId,
+		       instance_id as instanceId,
+		       operate_time as operateTime,
+		       deal_time as dealTime
+		  from BM_TO_DO
+		 where todo_id = #todoId#
+	</select>
+	
+	<select id="findBmSrTypeWfRefBySrTypeMark" parameterClass="hashMap" resultClass="bmSrTypeWfRefPo">
+		select ref_id as refId,
+		       sr_type_mark as srTypeMark,
+		       template_id as templateId
+		  from BM_SR_TYPE_WF_REF
+		 where sr_type_mark = #srTypeMark#
+	</select>
+
+	<select id="findNewestCompleteRequest" parameterClass="hashMap" resultClass="srVo">
+		<include refid="findCloudReqeust" />
+		   and s.SR_STATUS_CODE = #srStatusClose#
+		 order by s.CLOSE_TIME desc limit 0,#num#
+	</select>
+	
+	<select id="findNewestCreateRequest" parameterClass="hashMap" resultClass="srVo">
+		<include refid="findCloudReqeust" />
+		 order by s.CREATE_TIME desc limit 0,#num#
+	</select>
+	
+	<select id="findNewestWaitDealRequest" parameterClass="hashMap" resultClass="hashMap">
+		<include refid="getCloudRequestWaitDeal" />
+		 order by t.CREATE_TIME desc limit 0,#num#
+	</select>
+	
+	<select id="findAppSysVirtualServer" parameterClass="hashMap" resultClass="com.git.cloud.appmgt.model.vo.AppSysKpiVo">
+		<![CDATA[
+			SELECT
+				a.APP_ID appId, a.CNAME appCName, a.ENAME appEName, b.nums deviceNums
+			FROM
+				APP_INFO a
+			LEFT JOIN (
+				SELECT
+					ai.APP_ID, count(*) nums
+				FROM
+					APP_INFO ai, APP_DU ad, CM_VM cv, CM_DEVICE cd
+				WHERE
+					ai.APP_ID = ad.APP_ID
+				AND ad.DU_ID = cv.DU_ID
+				AND cv.ID = cd.ID
+				AND ai.IS_ACTIVE = 'Y'
+				AND ad.IS_ACTIVE = 'Y'
+				AND cd.IS_ACTIVE = 'Y'
+				AND cd.DEVICE_STATUS = #deviceStatus#
+				GROUP BY ai.APP_ID
+			) b ON a.APP_ID = b.APP_ID
+			WHERE a.IS_ACTIVE = 'Y'
+			ORDER BY b.nums DESC
+		]]>
+	</select>
+	
+	<select id="findAppSysCompleteRequest" parameterClass="hashMap" resultClass="com.git.cloud.appmgt.model.vo.AppSysKpiVo">
+		<![CDATA[
+			SELECT
+				a.APP_ID appId, a.CNAME appCName, a.ENAME appEName, b.nums requestNums
+			FROM
+				APP_INFO a
+			LEFT JOIN (
+				SELECT
+					ai.APP_ID, count(*) nums
+				FROM
+					APP_INFO ai, BM_SR s
+				WHERE
+					ai.APP_ID = s.APP_ID
+				AND ai.IS_ACTIVE = 'Y'
+				AND s.SR_STATUS_CODE = #srStatusClose#
+				AND s.CLOSE_TIME > #closeStartTime#
+				AND s.CLOSE_TIME < #closeEndTime#
+				GROUP BY ai.APP_ID
+			) b ON a.APP_ID = b.APP_ID
+			WHERE a.IS_ACTIVE = 'Y'
+			ORDER BY b.nums DESC
+		]]>
+	</select>
+	<select id="findDeviceIdsBySrId" parameterClass="java.lang.String" resultClass="java.lang.String">
+		<![CDATA[
+		SELECT
+			srVmRef.DEVICE_ID
+		FROM
+			BM_SR_RR_VM_REF srVmRef
+			LEFT JOIN BM_SR bm ON bm.SR_ID = srVmRef.SR_ID
+		WHERE
+			bm.SR_ID = #srId# AND bm.SR_TYPE_MARK <> 'VR'
+		]]>
+	</select>
+	<select id="updataDeviceRunningState" parameterClass="java.lang.String" resultClass="java.lang.String">
+		UPDATE
+			CM_DEVICE
+		SET 
+			RUNNING_STATE = 'poweron'
+		WHERE
+			ID = #devId#
+	</select>
+
+	<select id="findApproveResult" parameterClass="hashMap" resultClass="com.git.cloud.request.model.vo.BmApproveVo">
+		<![CDATA[
+			SELECT
+				t.CURRENT_STEP currentStep,
+				a.APPROVE_RESULT approveResult,
+				a.APPROVE_REMARK approveRemark
+			FROM
+				BM_SR s,
+				BM_APPROVE a,
+				BM_TO_DO t
+			WHERE
+				s.SR_ID = a.SR_ID
+			AND	a.TODO_ID = t.TODO_ID
+			AND a.APPROVE_MARK = s.APPROVE_MARK
+			AND s.SR_ID = #srId#
+		]]>
+	</select>
+	<select id="getHasAttrRrinfoIdBySrId" parameterClass="hashMap" resultClass="bmSrRrinfoPo">
+		<![CDATA[
+			select DISTINCT rr.RRINFO_ID rrinfoId from BM_SR_RRINFO rr, BM_SR_ATTR_VAL sa where rr.RRINFO_ID = sa.RRINFO_ID and rr.SR_ID = #srId#
+		]]>
+	</select>
+	
+	<select id="findBmSrStatusMap" parameterClass="hashMap" resultClass="com.git.cloud.request.model.po.BmSrStatusMapPo">
+		<![CDATA[
+			SELECT sm.ID,
+			       sm.NODE_NAME nodeName,
+			       sm.SR_STATUS_CODE srStatusCode,
+			       sm.SR_TYPE_MARK srTypeMark
+			  FROM BM_SR_STATUS_MAP sm, BM_SR s
+			 WHERE sm.SR_TYPE_MARK = s.SR_TYPE_MARK
+			   AND s.SR_ID = #srId#
+			   AND sm.NODE_NAME = #nodeName#
+		]]>
+	</select>
+	<select id="findHostIpById" parameterClass="java.lang.String" resultClass="java.lang.String">
+			SELECT
+			    r.IP
+			FROM
+			    rm_nw_openstack_ip_address r,
+			    CM_DEVICE a
+			WHERE
+			    r.INSTANCE_ID = a.ID
+			AND a.ID = #id# AND a.IS_ACTIVE='Y'
+	</select>
+	
+	<select id="haveFloatingIp" parameterClass="hashMap" resultClass="srAttrVo">
+			SELECT
+				a.ATTR_VALUE as attrValue
+			FROM
+				BM_SR_ATTR_VAL a,
+				CLOUD_SERVICE_ATTR b
+			WHERE
+				a.RRINFO_ID = #rrinfoId#
+			AND a.ATTR_ID = b.ATTR_ID
+			AND b.SERVICE_ID = #serviceId#
+			AND b.ATTR_NAME = 'HAS_FLOATING_IP'
+	</select>
+	
+	<!--根据流程节点，查询流程相关信息 -->
+	<select id="getInstanceInfoById" parameterClass="java.lang.String"
+		resultClass="InstanceInfoVo">
+		SELECT
+			inst.INSTANCE_ID instanceId,
+			inst.INSTANCE_NAME instanceName,
+			inst.SERVICE_REQ_ID srId,
+			inst.SERVICE_RES_REQ_ID rrinfoId,
+			sr.CREATOR_ID userId,
+			sr.TENANT_ID tenantId,
+			us.LOGIN_NAME userName,
+			te.`name` tenantName
+		FROM
+			BPM_INSTANCE inst
+		LEFT JOIN BM_SR sr ON sr.SR_ID = inst.SERVICE_REQ_ID
+		LEFT JOIN SYS_USER us ON us.USER_ID = sr.CREATOR_ID
+		LEFT JOIN CLOUD_TENANT te ON te.id = sr.TENANT_ID
+		WHERE
+			inst.INSTANCE_ID = #instanceId#
+			AND (inst.TYPE_ID = '4' || inst.TYPE_ID = '3')
+			AND us.IS_ACTIVE = 'Y'
+	</select>
+	
+	
+	<!-- 获取定价审批信息 -->
+	<sql id="queryBmSrRrinfoPriceApproval">
+		<![CDATA[
+		SELECT
+			rr.PARAMETERS_JSON jsonObj,
+			sr.SR_ID srId
+		FROM
+			BM_SR sr
+		LEFT JOIN BM_SR_RRINFO rr ON rr.SR_ID = sr.SR_ID
+		WHERE
+			sr.SR_TYPE_MARK = 'PEA'
+		AND sr.SR_ID = #srId#
+		]]>
+	</sql>
+		<select id="queryBmSrRrinfoPriceApprovalTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="queryBmSrRrinfoPriceApproval" />
+		) as recordTable
+	</select>
+	<select id="queryBmSrRrinfoPriceApprovalPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="queryBmSrRrinfoPriceApproval" />
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="getCloudRequestWaitDealBySrId"  parameterClass="java.lang.String" resultClass="bmToDoVo">
+        select s.sr_id as srId,
+              s.sr_code as srCode,
+              IFNULL(a.cname,"")  as appName,
+              d.datacenter_cname as datacenterName,
+              s.sr_type_mark as srTypeMark,
+              st.sr_type_name as srTypeName,
+              dic.dic_name as srStatus,
+              s.sr_status_code as srStatusCode,
+              concat(u.FIRST_NAME,u.LAST_NAME) as creator,
+              s.create_time as requestTime,
+              t.create_time as createTime,
+              t.todo_id as todoId,
+              t.page_url as pageUrl,
+              t.current_step as currentStep
+         from BM_SR s left join APP_INFO a on s.APP_ID = a.APP_ID
+                      left join RM_DATACENTER d on s.DATACENTER_ID = d.ID
+                      left join BM_SR_TYPE st on s.SR_TYPE_MARK = st.SR_TYPE_MARK
+                      left join ADMIN_DIC dic on s.SR_STATUS_CODE = dic.DIC_CODE
+                      left join SYS_USER u on s.CREATOR_ID = u.USER_ID,
+                    BM_TO_DO t
+        where s.sr_id = t.sr_id
+          and t.TODO_STATUS != '2'
+          and s.sr_id = #srId#
+    </select>
+</sqlMap>

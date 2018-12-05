@@ -1,0 +1,33 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title></title>
+
+<link href="../css/new.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body id="btnm" style="background:#add2da;border-top:solid 0px #ffffff;">
+<script type="text/javascript" language="javascript">
+function ExpandContents(controller)
+{
+    var mainFrame = window.parent.document.getElementsByTagName("frameset")[1];
+    if (mainFrame.cols == "217,10,*")
+    {
+        mainFrame.cols = "0,10,*";
+        controller.title = "展开";
+		controller.className="link2";
+    }
+    else
+    {
+        mainFrame.cols = "217,10,*";
+        controller.title = "折叠";
+		controller.className="link1";
+    }
+}
+-->
+</script>
+<div id="middle" ><a href="#" title="折叠" id="controller" onClick="javascript:ExpandContents(this);" class="link1"></a></div>
+</body>
+</html>

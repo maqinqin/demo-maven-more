@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<!-- Common Config For Project -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+	http://www.springframework.org/schema/tx 
+    http://www.springframework.org/schema/tx/spring-tx.xsd 
+    http://www.springframework.org/schema/context    
+ 	http://www.springframework.org/schema/context/spring-context.xsd
+	">
+	<context:component-scan base-package="com.git.cloud" />
+	<!-- <bean class="com.git.support.spring.SpringContextHolder" /> -->
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="jndiDataSource" />
+	</bean>
+
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="10" />
+		<property name="maxPoolSize" value="50" />
+		<property name="queueCapacity" value="1000" />
+		<property name="keepAliveSeconds" value="300" />
+	</bean>
+
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocations">
+		<list>
+			<value>
+				classpath:config/ibatis/${dbtype}/SqlMapConfig.xml
+			</value>
+			<value>
+				classpath*:resources/config/ibatis/${dbtype}/SqlMapConfig.xml
+			</value>			
+		</list>
+		</property>
+		<property name="dataSource" ref="jndiDataSource" />
+	</bean>
+
+	<bean id="commonDAO" class="com.git.cloud.common.dao.CommonDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource">
+			<ref bean="jndiDataSource" />
+		</property>
+		<property name="globalRollbackOnParticipationFailure" value="false" />
+	</bean>
+
+	<aop:config>  
+		<!-- 任意service包或子包中的类的任意方法 -->
+	    <aop:pointcut id="allServiceMethods" expression="execution(* com.git.cloud..service..*Impl.*(..)) and !execution(* com.git.cloud.workflow.service..*Impl.*(..))"/>  
+	    <aop:advisor advice-ref="defaultTransactionAdvice" pointcut-ref="allServiceMethods"/>  
+	</aop:config>  
+	  
+	<tx:advice id="defaultTransactionAdvice" transaction-manager="transactionManager">  
+	    <tx:attributes>  
+       		<tx:method  
+                name="*" read-only="true"/>  
+	        <tx:method  
+	                name="save*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/>  
+	        <tx:method  
+	                name="insert*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/>  
+	        <tx:method  
+	                name="delete*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/>  
+	        <tx:method  
+	                name="update*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="remove*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="start*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="create*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="drive*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="todo*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="close*" isolation="DEFAULT" propagation="REQUIRED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="doUpdateResourceAssign" isolation="DEFAULT" propagation="NOT_SUPPORTED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	        <tx:method  
+	                name="doUpdateResourceAssignNew" isolation="DEFAULT" propagation="NOT_SUPPORTED"  
+	                rollback-for="com.git.cloud.common.exception.RollbackableBizException"  
+	                timeout="1000"/> 
+	    </tx:attributes>
+	</tx:advice>
+	<aop:aspectj-autoproxy/>
+	
+	<bean id="icmsInterceptor" class="com.git.cloud.common.interceptor.IcmsInterceptor">
+		<property name="logDao" ref="logDaoImpl" />
+	</bean>
+</beans>

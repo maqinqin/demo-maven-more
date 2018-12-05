@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="sysMailMsg">
+	<typeAlias alias="sysMailMsgPo" type="com.git.cloud.sys.model.po.SysMailMsgPo"></typeAlias>
+	
+	<!-- 系统邮件消息表（SYS_MAIL_MSG） -->
+	<insert id="saveSysMailMsgPo" parameterClass="sysMailMsgPo">
+		INSERT INTO SYS_MAIL_MSG(
+			ID,TYPE,RECEIVES,CARBON_COPY,TITLE,CONTENT,SEND_STATUS,CREATE_DATETIME
+		)
+		VALUES(
+			#id#,#type#,#receives#,#carbonCopy#,#title#,#content#,#sendStatus#,#createDateTime#
+		)
+	</insert>
+	<!-- 删除系统邮件消息表 -->
+	<delete id="deleteSysMailMsgPo" parameterClass="java.lang.String">
+		delete from SYS_MAIL_MSG where ID = #id#
+	</delete>
+	<!-- 查找系统邮件信息 -->
+	<select id="selectSysMailMsgPo" resultClass="sysMailMsgPo">
+		select ID as id ,TYPE as type ,RECEIVES as receives , CARBON_COPY as carbonCopy ,TITLE as title,
+			CONTENT as content,SEND_STATUS as sendStatus,CREATE_DATETIME as createDateTime
+		from SYS_MAIL_MSG
+	</select>
+</sqlMap>

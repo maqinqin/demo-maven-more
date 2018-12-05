@@ -1,0 +1,130 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="workflow-package" extends="icms-package"
+		namespace="/workflow">
+	</package>
+	<!-- 组件管理 start -->
+	<package name="workflow-component" extends="workflow-package"
+		namespace="/workflow/component">
+		<action name="component" class="componentAction" method="index">
+			<result name="index">/pages/workflow/component/componentList.jsp
+			</result>
+		</action>
+		<action name="getCompList" class="componentAction" method="getCompList"></action>
+		<action name="*_*" class="{1}Action" method="{2}">
+			<result name="componentPoList" type="json">
+				<param name="root">componentPoList</param>
+			</result>
+			<result name="componentPo" type="json">
+				<param name="root">componentPo</param>
+			</result>
+			<result name="success">"success"</result>
+		</action>
+	</package>
+	<!-- 组件管理 end -->
+
+	<package name="workflow-designer" extends="workflow-package"
+		namespace="/workflow/template">
+		<action name="getTemplateTree" class="designerAction" method="getTemplateTree" />
+
+		<action name="getTemplateByType" class="designerAction" method="getTemplateByType" />
+
+		<action name="getTemplateById" class="designerAction" method="getTemplateById" />
+
+		<action name="checkDuplication" class="designerAction" method="checkDuplication" />
+
+		<action name="saveTemplate" class="designerAction" method="saveTemplate" />
+		
+		<action name="saveTemplateDiagram" class="designerAction" method="saveTemplateDiagram" />
+		<action name="saveTemplateDiagramNew" class="designerAction" method="saveTemplateDiagramNew" />
+
+		<action name="deleteTemplate" class="designerAction" method="deleteTemplate" />
+
+		<action name="publishTemplate" class="designerAction" method="publishTemplate" />
+		<action name="publishTemplateNew" class="designerAction" method="publishTemplateNew" />
+		<action name="designer" class="designerAction" method="index">
+			<result name="index">/pages/workflow/designer/designer.jsp</result>
+		</action>
+		<action name="designerNew" class="designerAction" method="indexNew">
+			<result name="indexNew">/pages/workflowNew/designer/designer.jsp</result>
+		</action>
+		<action name="findSysUserByRoleId" class="designerAction" method="findSysUserByRoleId" />
+	</package>
+
+	<!-- 流程实例 staret -->
+	<package name="workflow-instance" extends="workflow-package"
+		namespace="/workflow/instance">
+		<action name="bpmInstance" class="bpmInstanceAction" method="index">
+			<result name="index">/pages/workflow/instance/instanceList.jsp
+			</result>
+		</action>
+		<action name="*_*" class="{1}Action" method="{2}">
+			<result name="bpmInstanceVo" type="json">
+				<param name="root">bpmInstanceVo</param>
+			</result>
+			<result name="nodeList" type="json">
+				<param name="root">nodeList</param>
+			</result>
+			<result name="success">
+			 	/pages/workflowNew/instance/processInstance.jsp
+			</result>
+			<result name="rtnLog" type="json">
+				<param name="root">rtnLog</param>
+			</result>
+			<result name="result" type="json">
+				<param name="root">result</param>
+			</result>
+			<result name="map" type="json">
+				<param name="root">map</param>
+			</result>
+			<result name="bpmInstanceReportVo" type="json">
+				<param name="root">bpmInstanceReportVo</param>
+			</result>
+			<result name="bpmInstanceNodeReportVo" type="json">
+				<param name="root">bpmInstanceNodeReportVo</param>
+			</result>
+			<result name="hisRecord" type="json">
+				<param name="root">hisRecord</param>
+			</result>
+		</action>
+	</package>
+	<!-- 流程实例 end -->
+
+	<!-- 服务策略 start -->
+	<package name="workflow-strategy" extends="workflow-package"
+		namespace="/workflow/strategy">
+		<action name="serviceStrategy_*" class="ServiceStrategyAction"
+			method="{1}">
+			<result name="{1}">
+				/pages/workflow/serviceModule/{1}.jsp
+			</result>
+		</action>
+	</package>
+	<!-- 服务策略 end -->
+
+
+	<!-- 流程模板 start -->
+	<package name="workflow-model" extends="workflow-package"
+		namespace="/workflow/model">
+		<action name="model_*" class="BpmModelAction" method="{1}">
+			<result name="{1}">
+				/pages/workflow/model/{1}.jsp
+			</result>
+		</action>
+	</package>
+	<!-- 流程模板 end -->
+	<!-- pdf -->
+	<package name="workflow-pdf" namespace="/workflow/pdf" extends="workflow-package">
+		<action name="WorkFlowPdfDownLoadAction"  class="workFlowPdfAction" method="pdfDownLoad">
+			<result name="success" type="stream">  
+	                <param name="contentType">application/octet-stream;charset=UTF-8</param>  
+	                <param name="inputName">inputStream</param>  
+	                <param name="contentDisposition">attachment;filename="${fileName}"</param>  
+	      		   <param name="buffersize">1024</param>
+            </result> 
+		</action>	
+	</package>
+</struts>

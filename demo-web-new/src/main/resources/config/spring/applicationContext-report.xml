@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	<!-- action -->
+	<bean id="reportAction" class="com.git.cloud.reports.action.ReportAction" scope="prototype">
+		<property name="reportService" ref="reportService" />
+	</bean>
+
+	<!-- service -->
+	<bean id="reportService" class="com.git.cloud.reports.service.impl.ReportServiceImpl" scope="prototype">
+		<property name="reportDao" ref="reportDao" />
+		<property name="sysMenuDao" ref="sysMenuDao" />
+	</bean>
+
+	<!-- dao -->
+	<bean id="reportDao" class="com.git.cloud.reports.dao.impl.ReportDaoImpl">
+	</bean>
+	
+</beans>

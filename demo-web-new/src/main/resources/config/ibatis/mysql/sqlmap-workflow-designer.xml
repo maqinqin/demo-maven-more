@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="workflowDesigner">
+	<!-- 获取模板分类树  -->
+	<select id="getTemplateTree" resultClass="com.git.cloud.workflow.model.po.TemplateTypePo" parameterClass="java.util.Map">
+		SELECT tt.type_id as typeId,
+			   tt.type_name as typeName
+		 FROM BPM_TEMPLATE_TYPE tt 
+		 WHERE tt.type_level = #typeLevel#
+		 	and tt.parent_id = #parentId#
+	</select>
+	
+	<!-- 根据类型获取模板  -->
+	<select id="getTemplateByType" parameterClass="java.lang.String"
+			resultClass="com.git.cloud.common.model.CommonTreeNode">
+		SELECT t.template_id id,
+				t.template_name name,
+				t.type_id pId,
+				"mb" as bizType
+		FROM BPM_TEMPLATE t
+		WHERE t.type_id = #id# and t.is_active = 'Y'
+		ORDER BY t.template_name asc;
+	</select>
+	
+	<!-- 根据Id获取模板  -->
+	<select id="getTemplateById" parameterClass="java.lang.String"
+			resultClass="com.gitcloud.tankflow.model.po.BpmTemplatePo">
+		SELECT t.template_id templateId,
+			t.template_name templateName,
+			t.icon_xml iconxml,
+			t.json_data jsonData,
+			t.type_id typeId
+<!-- 			,t.app_id appId -->
+		FROM BPM_TEMPLATE t
+		WHERE t.template_id = #id#;
+	</select>
+	
+	<!-- 验证模板重名  -->
+	<select id="checkDuplication" parameterClass="java.lang.String"	resultClass="java.lang.String">
+		SELECT count(*) FROM BPM_TEMPLATE t where t.template_name=#templateName# and t.is_active = 'Y';
+	</select>
+	
+	<!-- 保存模板  -->
+	<typeAlias alias="TemplatePo" type="com.gitcloud.tankflow.model.po.BpmTemplatePo" />
+	<update id="saveTemplate" parameterClass="TemplatePo">
+		 update BPM_TEMPLATE set  
+		        template_name = #templateName#,
+		        type_id = #typeId#
+	     where template_id = #templateId#
+	</update>
+	
+	<update id="saveTemplateDiagram" parameterClass="TemplatePo">
+		 update BPM_TEMPLATE set  
+		        icon_xml = #iconxml#,
+		        json_data = #jsonData#
+	     where template_id = #templateId#
+	</update>
+	
+	<!-- 逻辑删除模板  -->
+	<update id="deleteTemplate" parameterClass="java.lang.String">
+	 update BPM_TEMPLATE set  
+		      IS_ACTIVE = 'N'
+	     where template_id = #templateId#
+	</update>
+	
+	<insert id="addTemplate" parameterClass="TemplatePo">  
+      INSERT INTO BPM_TEMPLATE(template_id,template_name,type_id,app_id,creator_id,create_date,icon_xml,file_path,is_active,model_id,json_data) 
+      	VALUES(#templateId#,#templateName#,#typeId#,#appId#,#creatorId#,#createDate#,#iconxml#,#filePath#,#isActive#,#modelId#,#jsonData#)
+<!--       INSERT INTO BPM_TEMPLATE(template_id,template_name,type_id,app_id,creator_id,create_date,is_active)  -->
+<!--       	VALUES(#templateId#,#templateName#,#typeId#,#appId#,#creatorId#,#createDate#,#isActive#) -->
+	</insert>
+	
+	<!-- 添加模型记录  -->
+	<typeAlias alias="ModelPo" type="com.gitcloud.tankflow.model.po.BpmModelPo" />
+	<insert id="addBpmModel" parameterClass="ModelPo">  
+      INSERT INTO BPM_MODEL
+      	(MODEL_ID,MODEL_NAME,TYPE_ID,CREATOR_ID,CREATE_DATE,WF_MODEL_ID,REMARK,IS_ACTIVE,TEMPLATE_ID) 
+      	VALUES(#modelId#,#modelName#,#typeId#,#creatorId#,#createDate#, #wfModelId#,#remark#,#isActive#,#templateId#)
+<!--       INSERT INTO BPM_MODEL -->
+<!--       	(MODEL_ID,MODEL_NAME,TYPE_ID,APP_ID,CREATOR_ID,CREATE_DATE,WF_MODEL_ID,REMARK,IS_ACTIVE,TEMPLATE_ID)  -->
+<!--       	VALUES(#modelId#,#modelName#,#typeId#,#appId#,#creatorId#,#createDate#, #wfModelId#,#remark#,#isActive#,#templateId#) -->
+	</insert>
+	
+	<!-- 添加模型参数记录  -->
+	<typeAlias alias="ModelParamsPo" type="com.gitcloud.tankflow.model.po.BpmModelParamsPo" />
+	<insert id="addBpmModelParams" parameterClass="ModelParamsPo">  
+      INSERT INTO BPM_MODEL_PARAMS
+      	(PARAM_ID,PARAM_KEY,PARAM_NAME,PARAM_VALUE,MODEL_ID,IS_AUTO) 
+      	VALUES(#paramId#,#paramKey#,#paramName#,#paramValue#,#modelId#,#isAuto#)
+	</insert>
+	
+	<!-- 添加流程定义记录  -->
+	<typeAlias alias="ModelDiagramPo" type="com.gitcloud.tankflow.model.po.BpmModelDiagramPo" />
+	<insert id="addModelDiagram" parameterClass="ModelDiagramPo">  
+      INSERT INTO BPM_MODEL_DIAGRAM
+      	(MODEL_ID,DIAGRAM_XML,JSON_DATA) 
+      	VALUES(#modelId#,#diagramXml#,#jsonData#)
+	</insert>
+	
+	<!-- 添加oa节点  -->
+	<typeAlias alias="ModelNodeOaPo" type="com.gitcloud.tankflow.model.po.BpmModelOataskPo" />
+	<insert id="addModelNodeOa" parameterClass="ModelNodeOaPo">  
+      INSERT INTO BPM_MODEL_NODE_OA(OANODE_ID,OANODE_NAME,MODEL_ID,WF_NODE_ID,KEY_WORD,URL) 
+      	VALUES(#oanodeId#,#oanodeName#,#modelId#,#wfNodeId#,#keyWord#,#url#)
+	</insert>
+	
+	<!-- 添加通用模板节点  -->
+	<typeAlias alias="ModelNodePo" type="com.gitcloud.tankflow.model.po.BpmModelNodePo" />
+	<insert id="addModelNode" parameterClass="ModelNodePo">  
+      INSERT INTO BPM_MODEL_NODE(MODEL_NODE_ID,NODE_NAME,TYPE_ID,EXCEPTION_CODE,OUTTIME,MODEL_ID,WF_NODE_ID,IS_AUTO_NODE,IS_ACTIVE) 
+      	                  VALUES(#modelNodeId#,#modelNodeName#,#typeId#,#exceptionCode#,#outtime#,#modelId#,#wfNodeId#,#isAutoNode#,#isActive#)
+	</insert>
+	
+	<!-- 添加通用模板节点关联  -->
+	<typeAlias alias="ModelNodeOriginalPo" type="com.gitcloud.tankflow.model.po.BpmModelNodeOriginalPo" />
+	<insert id="addModelNodeOriginal" parameterClass="ModelNodeOriginalPo">  
+      INSERT INTO BPM_MODEL_NODE_ORIGINAL(ORIGINAL_ID,MODEL_NODE_ID,SERVICE_MODULE_ID) 
+      	                  VALUES(#originalId#,#modelNodeId#,#serviceModuleId#)
+	</insert>
+	
+	<!-- 根据服务策略Id获取其参数  -->
+	<select id="getServiceModuleParams" parameterClass="hashMap"
+			resultClass="com.gitcloud.tankflow.model.po.BpmServiceModuleParamPo">
+		SELECT t.PARAM_ID paramId,
+			t.PARAM_KEY paramKey,
+			t.PARAM_NAME paramName,
+			t.PARAM_VALUE paramValue,
+			t.MODULE_ID moduleId,
+			t.PARAM_TYPE_CODE paramTypeCode,
+			t.PARAM_OPER_CODE paramOperCode,
+			t.PARENT_ID parentId,
+			t.PARAM_IO_CODE paramIoCode
+		FROM BPM_SERVICE_MODULE_PARAM t
+		WHERE t.MODULE_ID = #moduleId#;
+	</select>
+	
+	<!-- 添加自动节点参数  -->
+	<insert id="addModelNodeParams" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BPM_MODEL_NODE_PARAMS(PARAM_ID,PARAM_KEY,PARAM_NAME,PARAM_VALUE,PARAM_IO_CODE,PARAM_OPER_CODE,ORIGINAL_ID) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#modelNodeParams[].paramId#,#modelNodeParams[].paramKey#,#modelNodeParams[].paramName#,#modelNodeParams[].paramValue#,#modelNodeParams[].paramIoCode#,#modelNodeParams[].paramOperCode#,#modelNodeParams[].originalId#) 
+			]]>
+		</iterate>
+	</insert>
+	
+	<!-- 添加脚本节点  -->
+	<typeAlias alias="ModelNodeScriptsPo" type="com.gitcloud.tankflow.model.po.BpmModelNodeScriptsPo" />
+	<insert id="addModelNodeScripts" parameterClass="ModelNodeScriptsPo">  
+      INSERT INTO BPM_MODEL_NODE_SCRIPTS(SCRIPT_ID,REL_SCRIPT_ID,ORIGINAL_ID,EXE_ORDER) 
+      	                  VALUES(#scriptId#,#relScriptId#,#originalId#,#exeOrder#)
+	</insert>
+	
+	<!-- 添加命令节点  -->
+	<typeAlias alias="ModelNodeCommandsPo" type="com.gitcloud.tankflow.model.po.BpmModelNodeCommandsPo" />
+	<insert id="addModelNodeCommands" parameterClass="ModelNodeCommandsPo">  
+      INSERT INTO BPM_MODEL_NODE_COMMANDS(COMMAND_ID,COMMAND_CONTENT,ORIGINAL_ID,EXE_ORDER) 
+      	                  VALUES(#commandId#,#commandContent#,#originalId#,#exeOrder#)
+	</insert>
+	
+</sqlMap>

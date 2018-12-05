@@ -1,0 +1,14 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+<struts>
+  <package name="vmrc-package" extends="icms-package" namespace="/vmrc">
+  </package>
+  <package name="vmrc-main" extends="vmrc-package" namespace="/vmrc/main">
+  	 <action name="indexAct" class="vmrcAction" method="index">
+	  <result name="success">/pages/vmrc/vmrc.jsp</result>
+     </action>
+    <action name="showConsole" class="vmrcAction" method="showConsole"></action>
+  </package>
+  
+</struts>

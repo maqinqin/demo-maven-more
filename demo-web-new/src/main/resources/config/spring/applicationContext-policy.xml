@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	<!-- RmVmParam虚机分配参数 -->
+	<bean id="rmVmParamDao" class="com.git.cloud.policy.dao.impl.RmVmParamDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="rmVmParamService" class="com.git.cloud.policy.service.impl.RmVmParamServiceImpl">
+		<property name="rmVmParamDao" ref="rmVmParamDao" />
+	</bean>
+	
+	<bean id="rmVmParamAction" class="com.git.cloud.policy.action.RmVmParamAction" scope="prototype">
+		<property name="rmVmParamService" ref="rmVmParamService" />
+	</bean>
+	
+	<!-- RmVmRules虚机分配规则 -->
+	<bean id="rmVmRulesDao" class="com.git.cloud.policy.dao.impl.RmVmRulesDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="rmNwAllocDao" class="com.git.cloud.policy.dao.impl.RmNwAllocDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="rmVmRulesService" class="com.git.cloud.policy.service.impl.RmVmRulesServiceImpl">
+		<property name="rmVmRulesDao" ref="rmVmRulesDao" />
+	</bean>
+	
+	<bean id="rmVmRulesAction" class="com.git.cloud.policy.action.RmVmRulesAction" scope="prototype">
+		<property name="rmVmRulesService" ref="rmVmRulesService" />
+		<property name="dicService" ref="dicService" />
+	</bean>
+	
+	<!-- RmNwRule网络分配规则 -->
+	<bean id="rmNwRuleDao" class="com.git.cloud.policy.dao.impl.RmNwRuleDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="ipAllocToDeviceImpl" class="com.git.cloud.policy.service.impl.IpAllocToDeviceNewImpl">
+		<property name="rmNwRuleDao" ref="rmNwRuleDao" />
+	</bean>
+	
+	
+	<!-- 虚机分配策略 -->
+	<bean id="computePolicyDAO" class="com.git.cloud.policy.dao.impl.ComputePolicyDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="computePolicyService" class="com.git.cloud.policy.service.impl.ComputePolicyServiceImpl">
+		<property name="computePolicyDAO" ref="computePolicyDAO" />
+		<property name="cloudServiceDao" ref="cloudServiceDao" />
+		<property name="rmVmParamService" ref="rmVmParamService" />
+		<property name="rmVmRulesService" ref="rmVmRulesService" />
+	</bean>
+</beans>

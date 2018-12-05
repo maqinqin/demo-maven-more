@@ -1,0 +1,56 @@
+{
+	"STORAGE_MODEL":"VSP",
+	
+	"SERVICE_IP": "128.192.162.22",
+	"SUPER_USER_NAME":"admin",
+	"SUPER_USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+	"CHAR_SET":"UTF-8",
+	"IS_KEY":false,
+	"KEY_FILE_URL":"",
+	"KEY_PASSWORD":"",
+	
+	//for login vsp manager info
+	"SYSTEM_USER_NAME":"admin",
+	"SYSTEM_USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+	"CHECK_CMD":
+		{
+			"5777":{
+				"VSP_LOGIN":"raidcom -login \! \! -I100",
+				"VSP_LOGOUT":"raidcom -logout",
+				"CHECK_LUN_VSP":"raidcom get ldev -ldev_id \! | egrep 'Serial|PORTs'"
+			}
+			"5888":{
+				"VSP_LOGIN":"raidcom -login \! \! -I200",
+				"VSP_LOGOUT":"raidcom -logout",
+				"CHECK_LUN_VSP":"raidcom get ldev -ldev_id \! | egrep 'Serial|PORTs'"
+			}
+		}
+}
+
+{
+	"STORAGE_MODEL":"VMAX",
+	
+	"SERVICE_IP": "128.192.162.22",
+	"SUPER_USER_NAME":"admin",
+	"SUPER_USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+	"CHAR_SET":"UTF-8",
+	"IS_KEY":false,
+	"KEY_FILE_URL":"",
+	"KEY_PASSWORD":"",
+	"CHECK_CMD":[
+		{
+			"SN":"00000003712",
+			"CMDS":{
+				"CHECK_LUN_VMAX":"/usr/symcli/bin/symaccess -sid 3712 list assignment -devs 041F,0420 | sed '1,6d' | grep -v "^$" | awk '{ if($2 \=\= "-" && $3 \=\= "-" && $4 \=\= "-") print $1}'",
+				"CHECK_LUN_VMAX_OTHER":"/usr/symcli/bin/symaccess -sid 3712 list assignment -devs 041F,0420 | grep -v "^$" | awk '{ if($2 == "Identifier" || $1 == "------" || ($2 == "-" && $3 == "-" && $4 == "-")) print $0}'"
+			}
+		},
+		{
+			"SN":"00000004338",
+			"CMDS":{
+				"CHECK_LUN_VMAX":"/usr/symcli/bin/symaccess -sid 4338 list assignment -devs 041F,0420 | sed '1,6d' | grep -v "^$" | awk '{ if($2 \=\= "-" && $3 \=\= "-" && $4 \=\= "-") print $1}'",
+				"CHECK_LUN_VMAX_OTHER":"/usr/symcli/bin/symaccess -sid 4338 list assignment -devs 041F,0420 | grep -v "^$" | awk '{ if($2 == "Identifier" || $1 == "------" || ($2 == "-" && $3 == "-" && $4 == "-")) print $0}'"
+			}
+		}
+	]
+	}

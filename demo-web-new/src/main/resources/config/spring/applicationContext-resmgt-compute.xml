@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	
+	<!-- 计算资源池 -->
+	<bean id="rmResPoolDAO" class="com.git.cloud.resmgt.common.dao.impl.RmResPoolDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- cluster -->
+	<bean id="rmClusterDAO" class="com.git.cloud.resmgt.compute.dao.impl.RmClusterDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="rmClusterService" class="com.git.cloud.resmgt.compute.service.impl.RmClusterServiceImpl">
+		<property name="rmClusterDAO" ref="rmClusterDAO" />
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+		<property name="cmPasswordDAO" ref="cmPasswordDAO"/>
+		<property name="rmDCDAO" ref="rmDatacenterDAO"/>
+		<property name="rmVmMgServerDAO" ref="rmVmManageServerDAO"/>
+		<property name="rmVmTypeDAO" ref="rmVmTypeDAO"/>
+		<property name = "rmResPoolDAO" ref = "rmResPoolDAO"/>
+	</bean>
+	
+	<!-- 同步计算机资源池  openstack  -->
+	<bean id="openstackSynckDao" class="com.git.cloud.resmgt.compute.dao.impl.OpenstackSynckDaoImpl" >
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="rmHostTypeDAO" class="com.git.cloud.resmgt.common.dao.impl.RmHostTypeDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmVmGroupDao" class="com.git.cloud.resmgt.compute.dao.impl.CmVmGroupDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+</beans>

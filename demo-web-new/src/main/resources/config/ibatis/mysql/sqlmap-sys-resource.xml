@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="sys">
+	<typeAlias alias="menuPo" type="com.git.cloud.sys.model.po.MenuPo" />
+	<!-- 查询所有系统菜单 -->
+	<select id="selectAllMenus" resultClass="menuPo">
+		select ID id,MENU_NAME
+		menuName,MENU_URL menuUrl,PARENT_ID parentId from
+		SYS_MENU where 1=1
+		and IS_ACTIVE = 'Y'
+		order by ORDER_ID asc
+	</select>
+	<!-- 查询菜单 by parentId -->
+	<select id="selectMenusByParentId" resultClass="menuPo"
+		parameterClass="String">
+		select ID id,MENU_NAME
+		menuName,MENU_URL
+		menuUrl,PARENT_ID parentId ,IMAGE_URL imageUrl from
+		SYS_MENU where 1=1
+		and IS_ACTIVE = 'Y' and PARENT_ID = #parentId#
+		order by ORDER_ID asc
+	</select>
+
+
+	<typeAlias alias="sysMenu" type="com.git.cloud.sys.model.po.SysMenuPo" />
+
+	<resultMap id="sysMenuResult" class="sysMenu">
+		<result property="id" column="ID" />
+		<result property="menuName" column="MENU_NAME" />
+		<result property="menuCode" column="MENU_CODE" />
+		<result property="menuDesc" column="MENU_DESC" />
+		<result property="menuUrl" column="MENU_URL" />
+		<result property="parent.id" column="PARENT_ID" />
+		<result property="orderId" column="ORDER_ID" />
+		<result property="resourceType" column="RESOURCE_TYPE" />
+		<result property="isActive" column="IS_ACTIVE" />
+		<result property="imageUrl" column="IMAGE_URL" />
+	</resultMap>
+
+	<select id="SysMenu.tree" resultMap="sysMenuResult">
+		SELECT * FROM SYS_MENU where
+		IS_ACTIVE = "Y" order by ORDER_ID
+	</select>
+
+	<select id="SysMenu.isrepeat" resultMap="sysMenuResult"
+		parameterClass="java.util.Map">
+		SELECT * FROM SYS_MENU where IS_ACTIVE = "Y"
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="menuName">
+				MENU_NAME = #menuName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="menuId">
+				ID != #menuId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<select id="SysMenu.load" resultMap="sysMenuResult"
+		parameterClass="java.lang.String">
+		SELECT * FROM SYS_MENU where ID=#id#
+	</select>
+	<select id="SysMenu.loadChildren" resultClass="java.lang.String"
+		parameterClass="java.lang.String">
+		SELECT group_concat(id) id FROM SYS_MENU where
+		FIND_IN_SET(PARENT_ID,#id#)>0;
+	</select>
+
+	<update id="SysMenu.update" parameterClass="com.git.cloud.sys.model.po.SysMenuPo">
+		update SYS_MENU
+		set
+		MENU_NAME = #menuName# ,
+		MENU_CODE = #menuCode# ,
+		MENU_DESC = #menuDesc#,
+		MENU_URL = #menuUrl# ,
+		PARENT_ID = #parent.id#,
+		ORDER_ID = #orderId# ,
+		IMAGE_URL = #imageUrl#,
+		RESOURCE_TYPE = #resourceType#
+		where ID=#id#
+	</update>
+
+	<insert id="SysMenu.insert" parameterClass="com.git.cloud.sys.model.po.SysMenuPo">
+		insert into SYS_MENU
+		(ID, MENU_NAME, MENU_CODE,MENU_DESC, MENU_URL, PARENT_ID,
+		ORDER_ID,RESOURCE_TYPE,IS_ACTIVE,IMAGE_URL)
+		values (#id#, #menuName#,
+		#menuCode#,#menuDesc#, #menuUrl#, #parent.id#, #orderId#,
+		#resourceType#,#isActive#,#imageUrl#)
+	</insert>
+	<update id="SysMenu.delete0" parameterClass="java.lang.String">
+		update SYS_MENU set
+		IS_ACTIVE="N" where id = #id#
+	</update>
+	<!-- 与菜单模块没什么关系，这只是我写报表模块时没有办法写的sql
+	如果你不是修改报表模块的话就忽略这个sql吧。这个delete1也是我随便起的
+	没什么意义，delete0不是我起的，我也不知道什么意思。  -->
+	<update id="SysMenu.delete1" parameterClass="com.git.cloud.sys.model.po.MenuPo">
+		update SYS_MENU set
+		IS_ACTIVE="N" where MENU_URL = #menuUrl#
+	</update>
+	<delete id="SysMenu.delete" parameterClass="java.lang.String">
+		delete from SYS_MENU
+		where id = #id#
+	</delete>
+	<typeAlias alias="SysRolePo" type="com.git.cloud.sys.model.po.SysRolePo" />
+
+	<!-- 得到菜单表中所有的FUNCTION信息 -->
+	<select id="findAllFunctions" parameterClass="Map" resultClass="sysMenu">
+		select
+		res.id,
+		res.menu_name as menuName,
+		res.menu_code as menuCode,
+		res.menu_url as menuUrl,
+		res.parent_id as parentId
+		from
+		SYS_MENU res
+		where res.RESOURCE_TYPE = #resourceType# and res.IS_ACTIVE =
+		#isActive#
+	</select>
+
+	<select id="SysMenu.roles" resultClass="SysRolePo"
+		parameterClass="java.lang.String">
+		SELECT
+		b.ROLE_ID as roleId,
+		b.ROLE_NAME as roleName,
+		b.REMARK as remark,
+		b.IS_ACTIVE as isActive
+		FROM SYS_MENU_ROLE a join
+		SYS_ROLE b on a.ROLE_ID =
+		b.ROLE_ID
+		where a.MENU_ID = #id# and
+		b.IS_ACTIVE="Y"
+	</select>
+
+	
+	<select id="FindMenusByParentId" resultMap="sysMenuResult" parameterClass="java.lang.String">
+		SELECT
+			*
+		FROM
+			SYS_MENU m
+		WHERE
+			m.PARENT_ID = #parentId#	
+	</select>
+
+</sqlMap>

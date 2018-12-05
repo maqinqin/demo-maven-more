@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+        "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="rmNwProject">
+    <typeAlias alias="CloudProjectPo" type = "com.git.cloud.resmgt.network.model.po.CloudProjectPo"/>
+    
+    <select id="getProjectVpcPoById" parameterClass="java.lang.String" resultClass="CloudProjectPo">
+        <![CDATA[
+        SELECT
+            p.ID AS vpcId,
+            p. NAME AS vpcName,
+            p.DATACENTER_ID AS datacenterId,
+            p.VM_MS_ID AS vmMsId,
+            p.IAAS_UUID as iaasUuid
+        FROM
+            CLOUD_PROJECT p
+        WHERE
+            p.IS_ACTIVE = 'Y'
+        AND p.ID = #projectId#
+    ]]>
+    </select>
+    <select id="selectProjectIdByIaasUuid" parameterClass="java.lang.String" resultClass="CloudProjectPo">
+        <![CDATA[
+        SELECT
+            p.ID AS vpcId,
+            p. NAME AS vpcName,
+            p.DATACENTER_ID AS datacenterId,
+            p.VM_MS_ID AS vmMsId,
+            p.IAAS_UUID as iaasUuid
+        FROM
+            CLOUD_PROJECT p
+        WHERE
+            p.IS_ACTIVE = 'Y'
+        AND p.IAAS_UUID = #iaasUuid#
+    ]]>
+    </select>
+     <select id="findProjectInfoByVmId" parameterClass="java.lang.String" resultClass="CloudProjectPo">
+        <![CDATA[
+       SELECT
+		    p.ID AS vpcId,
+		    p. NAME AS vpcName,
+		    p.DATACENTER_ID AS datacenterId,
+		    p.VM_MS_ID AS vmMsId,
+		    p.IAAS_UUID AS iaasUuid
+		FROM
+		    cm_vm cv
+		LEFT JOIN CLOUD_PROJECT p ON cv.PROJECT_ID = p.ID
+		WHERE
+		    p.IS_ACTIVE = 'Y'
+		AND p.ID = #projectId#
+    ]]>
+    </select>
+</sqlMap>

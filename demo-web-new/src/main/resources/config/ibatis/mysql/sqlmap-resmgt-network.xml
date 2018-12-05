@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtNetWork">
+	<typeAlias alias="RmResPoolPo"
+		type="com.git.cloud.resmgt.common.model.po.RmResPoolPo" />
+
+	<typeAlias alias="RmPlatformPo"
+		type="com.git.cloud.resmgt.common.model.po.RmPlatformPo" />
+	<typeAlias alias="RmVirtualTypePo"
+		type="com.git.cloud.resmgt.common.model.po.RmVirtualTypePo" />
+
+
+	<typeAlias alias="VirtualNetworkPo" type = "com.git.cloud.resmgt.network.model.po.VirtualNetworkPo"/>
+	<typeAlias alias="VirtualSubnetPo" type = "com.git.cloud.resmgt.network.model.po.VirtualSubnetPo"/>
+	<typeAlias alias="OpenstackIpAddressPo" type = "com.git.cloud.resmgt.network.model.po.OpenstackIpAddressPo"/>
+	
+	<!-- 查询数据中心Id -->
+	<select id="selectRmResPoolPoById" parameterClass="java.lang.String"
+		resultClass="RmResPoolPo">
+		select DATACENTER_ID as datacenterId
+		from RM_RES_POOL where
+		is_active = 'Y' and id = #resPoolId# order by id
+		asc
+	</select>
+	
+	<!-- 查询平台POById -->
+	<select id="selectRmPlatformPoById" parameterClass="java.lang.String"
+		resultClass="RmPlatformPo">
+		select
+		PLATFORM_ID as platformId,
+		PLATFORM_CODE as
+		platformCode,
+		PLATFORM_NAME as platformName,
+		IS_ACTIVE as isActive
+		from
+		RM_PLATFORM where is_active = 'Y' and platform_Id = #platformId#
+	</select>
+	<!-- 查询虚拟化类型POById -->
+	<select id="selectRmVirtualTypePoById" parameterClass="java.lang.String"
+		resultClass="RmVirtualTypePo">
+		select
+		VIRTUAL_TYPE_ID as virtualTypeId,
+		VIRTUAL_TYPE_CODE
+		as virtualTypeCode,
+		VIRTUAL_TYPE_NAME as virtualTypeName,
+		PLATFORM_ID as
+		platformId,
+		IS_ACTIVE as isActive
+		from RM_VIRTUAL_TYPE where is_active =
+		'Y' and virtual_Type_Id =
+		#virtualTypeId#
+	</select>
+	
+	<!-- 内部网络管理 -->
+	<select id="selectVirtualNetwork" parameterClass="java.lang.String" resultClass="VirtualNetworkPo">
+		SELECT ID as id,project_id as projectId,use_id useId ,iaas_uuid as iaasUuid
+		from RM_NW_OPENSTACK_VIRTUAL_NETWORK 
+		where ID= #networkId#
+	</select>
+	
+	<select id="selectIpAddressNetwork" parameterClass="java.lang.String" resultClass="OpenstackIpAddressPo">
+		SELECT
+			ip.id,
+			ip.ip,
+			ip.network_id networkId
+		FROM
+			RM_NW_OPENSTACK_IP_ADDRESS ip
+		WHERE
+			ip.NETWORK_ID = #networkId#
+		AND ip.USE_REL_CODE = 'NA'
+		ORDER BY length(ip.IP), ip.IP
+	</select>
+	
+	<select id="selectIpAddressByInstanceIdAndIp" parameterClass="OpenstackIpAddressPo" resultClass="OpenstackIpAddressPo">
+		SELECT
+			ip.id,
+			ip.ip,
+			ip.instance_id instanceId,
+			ip.network_id networkId,
+			ip.USE_REL_CODE useRelCode,
+			ip.NW_RULE_LIST_ID nwRuleListId,
+			ip.port_group_id portGroupId
+		FROM
+			RM_NW_OPENSTACK_IP_ADDRESS ip
+		WHERE
+			ip.INSTANCE_ID = #instanceId#
+		AND ip.ip = #ip#
+	</select>
+	
+	<select id="selectIpAddressByNetworkAndIp" parameterClass="OpenstackIpAddressPo" resultClass="OpenstackIpAddressPo">
+		SELECT
+			ip.id,
+			ip.ip,
+			ip.instance_id instanceId,
+			ip.network_id networkId,
+			ip.USE_REL_CODE useRelCode
+		FROM
+			RM_NW_OPENSTACK_IP_ADDRESS ip
+		WHERE
+			ip.network_id = #networkId#
+		AND ip.ip = #ip#
+	</select>
+	
+	<select id="selectSubnetByNetwork" parameterClass="java.lang.String" resultClass="VirtualSubnetPo">
+		SELECT
+			id virtualSubnetId,
+			NAME virtualSubnetName,
+			SUBNET_MASK subnetMask,
+			GATEWAY gateway 
+		FROM
+			RM_NW_OPENSTACK_VIRTUAL_SUBNET
+		WHERE
+			VIRTUAL_NETWORK_ID = #networkId#
+		AND IS_ACTIVE = 'Y';
+	</select>
+	
+	<select id="selectIpAddressByDeviceId" parameterClass="java.lang.String" resultClass="OpenstackIpAddressPo">
+		select ip.id,
+			ip.ip,
+			ip.network_id networkId,
+			network.IAAS_UUID as iaasUuid
+		from RM_NW_OPENSTACK_IP_ADDRESS ip,rm_nw_openstack_virtual_network network
+		where IP.NETWORK_ID = network.ID 
+			 and ip.instance_id = #deviceId#
+		ORDER BY length(ip.IP), ip.IP
+	</select>
+	
+	<update id="updateIpAddressByNetwork" parameterClass="OpenstackIpAddressPo">
+		 UPDATE RM_NW_OPENSTACK_IP_ADDRESS SET
+		 instance_id = #instanceId#, 
+		 USE_REL_CODE = #useRelCode#,
+		 ORIGINAL_IP = #originalIp#,
+		 nw_rule_list_id = #nwRuleListId#,
+		 port_group_id = #portGroupId#
+		 WHERE ID= #id#
+	</update>
+	
+	<update id="updateIpAddressRecycleByVm" parameterClass="OpenstackIpAddressPo">
+		 UPDATE RM_NW_OPENSTACK_IP_ADDRESS set INSTANCE_ID = '', USE_REL_CODE = 'NA',ORIGINAL_IP = '' WHERE INSTANCE_ID= #instanceId#
+	</update>
+	
+	<select id="selectVirtualSubnetPoById" parameterClass="java.lang.String" resultClass="VirtualSubnetPo">
+        SELECT
+            id virtualSubnetId,
+            NAME virtualSubnetName,
+            SUBNET_MASK subnetMask,
+            GATEWAY gateway,
+            IAAS_UUID  iaasUuid 
+        FROM
+            RM_NW_OPENSTACK_VIRTUAL_SUBNET
+        WHERE
+            id = #virtualSubnetId#
+        AND IS_ACTIVE = 'Y';
+    </select>
+	
+</sqlMap>

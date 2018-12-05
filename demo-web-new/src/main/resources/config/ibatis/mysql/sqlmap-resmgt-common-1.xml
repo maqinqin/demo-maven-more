@@ -1,0 +1,1479 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="com.git.cloud.resmgt.common.dao.ICmDeviceDAO">
+	<typeAlias alias="CmHostBo" type="com.git.cloud.resmgt.common.model.bo.CmHostBo" />
+	<typeAlias alias="CmHostPo" type="com.git.cloud.resmgt.common.model.po.CmHostPo" />
+	<typeAlias alias="CmClusterHostShowBo" type="com.git.cloud.resmgt.common.model.bo.CmClusterHostShowBo" />
+	<typeAlias alias="CmClusterHostNetShowBo" type="com.git.cloud.resmgt.common.model.bo.CmClusterHostNetShowBo" />
+	<typeAlias alias="CmDeviceHostShowBo" type="com.git.cloud.resmgt.common.model.bo.CmDeviceHostShowBo" />
+	<typeAlias alias="CmDeviceVMShowBo" type="com.git.cloud.resmgt.common.model.bo.CmDeviceVMShowBo" />
+	<typeAlias alias="CmDeviceVMNetShowBo" type="com.git.cloud.resmgt.common.model.bo.CmDeviceVMNetShowBo" />
+	<typeAlias alias="RmDatacenterPo" type="com.git.cloud.resmgt.common.model.po.RmDatacenterPo" />
+	<typeAlias alias="CmDevicePo" type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="CmVmPo" type="com.git.cloud.resmgt.common.model.po.CmVmPo" />
+	<typeAlias alias="RmVirtualTypePo" type="com.git.cloud.resmgt.common.model.po.RmVirtualTypePo" />
+	<typeAlias alias="RmVmManageServerPo" type="com.git.cloud.resmgt.common.model.po.RmVmManageServerPo" />
+	<typeAlias alias="CmPasswordPo" type="com.git.cloud.resmgt.common.model.po.CmPasswordPo" />
+	<typeAlias alias="AllocIpParamVo" type="com.git.cloud.policy.model.vo.AllocIpParamVo" />
+	<typeAlias alias="RmPlatformPo" type="com.git.cloud.resmgt.common.model.po.RmPlatformPo" />
+	<typeAlias alias="CmSeatPo" type="com.git.cloud.resmgt.common.model.po.CmSeatPo" />
+	<typeAlias alias="CmDeviceHostShowBo" type="com.git.cloud.resmgt.common.model.bo.CmDeviceHostShowBo" />
+	<typeAlias alias="CmIpShowBo" type="com.git.cloud.resmgt.common.model.bo.CmIpShowBo" />
+	<typeAlias alias="CmHostRefVo" type="com.git.cloud.resmgt.common.model.vo.CmHostRefVo" />
+	<typeAlias alias="CmHostDatastoreRefPo" type="com.git.cloud.resmgt.common.model.po.CmHostDatastoreRefPo"/>
+	<typeAlias alias="CmHostUsernamePasswordPo" type="com.git.cloud.resmgt.common.model.po.CmHostUsernamePasswordPo"/>
+	<typeAlias alias="ScanHmcHostPo" type="com.git.cloud.resmgt.compute.model.po.ScanHmcHostPo"/>
+	<typeAlias alias="DataStoreVo" type="com.git.cloud.excel.model.vo.DataStoreVo"/>
+	<typeAlias alias="RmDeviceVolumesRefPo" type="com.git.cloud.resmgt.common.model.po.RmDeviceVolumesRefPo"/>
+		<!-- Datastore 信息PO -->
+	<typeAlias alias="CmDatastorePo" type="com.git.cloud.resmgt.common.model.po.CmDatastorePo"/>
+	<!-- 检查位置信息表，是否编码已经存在 -->
+	<select id="checkCode" parameterClass="CmSeatPo" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+			CM_SEAT
+		WHERE
+			SEAT_CODE=#seatCode#
+			<isNotEmpty prepend="and" property="id"> 
+				ID &lt;&gt; #id#
+			</isNotEmpty>
+	</select>
+
+	<!-- 根据数据中心id，查询机房信息列表 -->
+	<select id="getComputerRoomByDcId" parameterClass="java.lang.String" resultClass="CmSeatPo">
+		SELECT
+			ID id,
+			SEAT_CODE seatCode,		<!-- 位置编码-->
+			SEAT_NAME seatName,		<!-- 位置名称-->
+			PARENT_CODE parentCode,	<!-- 位置父节点编码-->
+			DESCRIPTION description,<!-- 位置信息描述-->
+			CREATE_USER createUser,
+			CREATE_DATETIME createDateTime,
+			UPDATE_USER updateUser,
+			UPDATE_DATETIME updateDateTime
+		FROM
+			CM_SEAT
+		WHERE
+			DATACENTER_ID=#dcId#
+		AND IS_ACTIVE='Y'
+		AND	(
+				PARENT_CODE IS NULL 
+				OR PARENT_CODE=''
+				OR PARENT_CODE=SEAT_CODE
+			)
+		ORDER BY SEAT_NAME
+	</select>
+
+	<!-- 根据机房id，查询机柜信息列表 -->
+	<select id="getComputerCabinetByRoomCode" parameterClass="java.lang.String" resultClass="CmSeatPo">
+		SELECT
+			b.ID id,
+			b.SEAT_CODE seatCode,		<!-- 位置编码-->
+			b.SEAT_NAME seatName,		<!-- 位置名称-->
+			b.PARENT_CODE parentCode,	<!-- 位置父节点编码-->
+			b.DESCRIPTION description,	<!-- 位置信息描述-->
+			b.CREATE_USER createUser,
+			b.CREATE_DATETIME createDateTime,
+			b.UPDATE_USER updateUser,
+			b.UPDATE_DATETIME updateDateTime
+		FROM
+			CM_SEAT a,
+			CM_SEAT b
+		WHERE
+			a.ID=#roomCode#
+		AND a.SEAT_CODE=b.PARENT_CODE
+		AND a.IS_ACTIVE='Y'
+		AND b.IS_ACTIVE='Y'
+		ORDER BY b.SEAT_NAME
+	</select>
+
+	<!-- 根据机柜房id，查询U位信息列表 -->
+	<select id="getUByCabinetCode" parameterClass="java.lang.String" resultClass="CmSeatPo">
+		SELECT
+			b.ID id,
+			b.SEAT_CODE seatCode,		<!-- 位置编码-->
+			b.SEAT_NAME seatName,		<!-- 位置名称-->
+			b.PARENT_CODE parentCode,	<!-- 位置父节点编码-->
+			b.DESCRIPTION description,	<!-- 位置信息描述-->
+			b.CREATE_USER createUser,
+			b.CREATE_DATETIME createDateTime,
+			b.UPDATE_USER updateUser,
+			b.UPDATE_DATETIME updateDateTime
+		FROM
+			CM_SEAT a,
+			CM_SEAT b
+		WHERE
+			a.ID=#cabinetCode#
+		AND a.SEAT_CODE=b.PARENT_CODE
+		AND a.IS_ACTIVE='Y'
+		AND b.IS_ACTIVE='Y'
+		ORDER BY b.SEAT_NAME
+	</select>
+	
+	<!-- 根据主键，查询机房信息，机柜信息，U位信息 -->
+	<select id="getSeatInfoById" parameterClass="java.lang.String" resultClass="CmSeatPo">
+		SELECT
+			a.ID id,
+			a.SEAT_CODE seatCode,		<!-- 位置编码-->
+			a.SEAT_NAME seatName,		<!-- 位置名称-->
+			a.PARENT_CODE parentCode,	<!-- 位置父节点编码-->
+			a.DESCRIPTION description,	<!-- 位置信息描述-->
+			a.U_HEIGHT uheight,			<!-- 位置U位高度-->
+			a.CREATE_USER createUser,
+			a.CREATE_DATETIME createDateTime,
+			a.UPDATE_USER updateUser,
+			a.UPDATE_DATETIME updateDateTime,
+			b.ID hostId,
+			b.DEVICE_NAME deviceName
+		FROM
+			CM_SEAT a
+			LEFT JOIN
+				CM_DEVICE b ON b.SEAT_ID=a.ID AND b.IS_ACTIVE='Y'
+		WHERE
+			a.ID=#id#
+		AND a.IS_ACTIVE='Y'
+	</select>
+
+	<!-- 添加数据到位置信息表 -->
+	<insert id="insertSeatInfo"  parameterClass="CmSeatPo">
+		<![CDATA[INSERT INTO CM_SEAT(ID,SEAT_CODE,SEAT_NAME,PARENT_CODE,IS_ACTIVE,DESCRIPTION,CREATE_USER,CREATE_DATETIME,UPDATE_USER,UPDATE_DATETIME,DATACENTER_ID,U_HEIGHT) VALUES(#id#,#seatCode#,#seatName#,#parentCode#,#isActive#,#description#,#createUser#,#createDateTime#,#updateUser#,#updateDateTime#,#datacenterId#,#uheight#)]]>
+    </insert>
+    
+	<!-- 修改位置信息表 -->
+	<update id="updateSeatInfo"  parameterClass="CmSeatPo">
+		 UPDATE
+		 	CM_SEAT
+		 SET
+			SEAT_CODE		=#seatCode#,	<!-- 位置编码 -->
+			SEAT_NAME		=#seatName#,	<!-- 位置名称 -->
+			DESCRIPTION		=#description#,	<!-- 位置信息描述 -->
+			U_HEIGHT		=#uheight#,		<!-- U位高度 -->
+			UPDATE_USER		=#updateUser#,
+			UPDATE_DATETIME	=#updateDateTime#
+		 WHERE
+		 	ID=#id#
+    </update>
+    
+    <select id="selectCountU" parameterClass="java.lang.String" resultClass="int">
+		SELECT
+		  COUNT(1)
+		FROM
+		  CM_DEVICE a,
+		  CM_SEAT b
+		WHERE b.ID=#Uid#
+		  AND a.SEAT_ID = b.ID 
+		  AND a.IS_ACTIVE = 'Y' 
+		  AND b.IS_ACTIVE = 'Y' 
+    </select>
+    
+	<!-- 删除位置信息表的U位信息 -->
+	<update id="deleteUInfo"  parameterClass="java.lang.String">
+		 UPDATE
+		 	CM_SEAT
+		 SET
+			IS_ACTIVE="N" <!-- 位置信息是否可用 -->
+		 WHERE
+		 	ID=#Uid#
+    </update>
+    
+	<!-- 查询机柜下面正在使用的U位 -->
+    <select id="selectCountUtoCabinet" parameterClass="java.lang.String" resultClass="int">
+		SELECT
+		  COUNT(1)
+		FROM
+		  CM_DEVICE a,
+		  CM_SEAT b,
+		  CM_SEAT c
+		WHERE b.ID=#Cabinetid#
+		  AND b.SEAT_CODE=c.PARENT_CODE
+		  AND a.SEAT_ID=c.ID
+		  AND a.IS_ACTIVE='Y'
+		  AND b.IS_ACTIVE='Y'
+		  AND c.IS_ACTIVE='Y'
+    </select>
+
+	<!-- 查询机房下面正在使用的U位 -->
+    <select id="selectCountUtoRoom" parameterClass="java.lang.String" resultClass="int">
+		SELECT
+		  COUNT(1)
+		FROM
+		  CM_DEVICE a,
+		  CM_SEAT b,
+		  CM_SEAT c,
+		  CM_SEAT d
+		WHERE b.ID=#RoomId#
+		  AND b.SEAT_CODE=c.PARENT_CODE
+		  AND c.SEAT_CODE=d.PARENT_CODE
+		  AND a.SEAT_ID=d.ID
+		  AND a.IS_ACTIVE='Y'
+		  AND b.IS_ACTIVE='Y'
+		  AND c.IS_ACTIVE='Y'
+		  AND d.IS_ACTIVE='Y'
+    </select>
+
+	<!-- 查询机房下面正在使用的U位 -->
+    <select id="selectCabinetByRoomId" parameterClass="java.lang.String" resultClass="CmSeatPo">
+		SELECT
+			b.ID id,
+			b.SEAT_CODE seatCode,		<!-- 位置编码-->
+			b.SEAT_NAME seatName,		<!-- 位置名称-->
+			b.PARENT_CODE parentCode,	<!-- 位置父节点编码-->
+			b.DESCRIPTION description,	<!-- 位置信息描述-->
+			b.CREATE_USER createUser,
+			b.CREATE_DATETIME createDateTime,
+			b.UPDATE_USER updateUser,
+			b.UPDATE_DATETIME updateDateTime
+		FROM
+		  CM_SEAT a,
+		  CM_SEAT b
+		WHERE a.ID=#RoomId#
+		  AND a.SEAT_CODE=b.PARENT_CODE
+		  AND a.IS_ACTIVE='Y'
+		  AND b.IS_ACTIVE='Y'
+    </select>
+
+	<!-- 删除位置信息表的机柜信息 -->
+	<update id="deleteCabinetInfo"  parameterClass="java.lang.String">
+		 UPDATE
+		 	CM_SEAT
+		 SET
+			IS_ACTIVE="N" <!-- 位置信息是否可用 -->
+		 WHERE
+		 	ID=#CabinetId#
+    </update>
+    
+	<!-- 批量删除位置信息表的U位信息 -->
+	<update id="deleteUInfoBatch"  parameterClass="java.util.List">
+		<![CDATA[ 
+			 UPDATE
+			 	CM_SEAT
+			 SET
+				IS_ACTIVE="N"
+			 WHERE
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				ID=#boList[].id#
+			]]>
+		</iterate>
+<!-- 		 UPDATE -->
+<!-- 		 	CM_SEAT -->
+<!-- 		 SET -->
+<!-- 			IS_ACTIVE="N" 位置信息是否可用 -->
+<!-- 		 WHERE -->
+<!-- 		 	ID=#id# -->
+    </update>
+
+	<!-- 批量删除位置信息表的机柜信息 -->
+	<update id="deleteCabinetInfoBatch"  parameterClass="java.util.List">
+		<![CDATA[ 
+			 UPDATE
+			 	CM_SEAT
+			 SET
+				IS_ACTIVE="N"
+			 WHERE
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				ID=#boList[].id#
+			]]>
+		</iterate>
+    </update>
+
+	<!-- 批量删除位置信息表的U位信息 -->
+	<update id="deleteUInfoBatch2"  parameterClass="java.util.List">
+		<![CDATA[ 
+			 UPDATE
+			 	CM_SEAT
+			 SET
+				IS_ACTIVE="N"
+			 WHERE
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				PARENT_CODE=#boList[].seatCode#
+			]]>
+		</iterate>
+    </update>
+
+	<!-- 删除位置信息表的机房信息 -->
+	<update id="deleteRoomInfo"  parameterClass="java.lang.String">
+		 UPDATE
+		 	CM_SEAT
+		 SET
+			IS_ACTIVE="N" <!-- 位置信息是否可用 -->
+		 WHERE
+		 	ID=#RoomId#
+    </update>
+    
+	<!-- 根据机柜id，查找指定机柜下的所有U位信息 -->
+    <select id="selectUByCabinetId" parameterClass="java.lang.String" resultClass="CmSeatPo">
+		SELECT 
+			b.ID id,
+			b.SEAT_CODE seatCode,		<!-- 位置编码-->
+			b.SEAT_NAME seatName,		<!-- 位置名称-->
+			b.PARENT_CODE parentCode,	<!-- 位置父节点编码-->
+			b.DESCRIPTION description,	<!-- 位置信息描述-->
+			b.CREATE_USER createUser,
+			b.CREATE_DATETIME createDateTime,
+			b.UPDATE_USER updateUser,
+			b.UPDATE_DATETIME updateDateTime
+		FROM
+			CM_SEAT a,
+			CM_SEAT b
+		WHERE a.ID=#Cabinetid#
+			AND a.SEAT_CODE=b.PARENT_CODE
+			AND a.IS_ACTIVE = 'Y'
+			AND b.IS_ACTIVE = 'Y'
+    </select>
+    
+	<!-- 抽取未关联位置的所有指定数据中心下的主机。 -->
+    <sql id="getCmseatAllHostCanRelevance">
+		SELECT 
+		  a.ID id,
+		  a.DEVICE_NAME device_name,			<!-- 所属物理机名称-->
+		  a.SN sn,								<!-- 编号-->
+		  c.CLUSTER_NAME cluster_name,			<!-- 所属集群名称-->
+		  e.POOL_NAME pool_name,				<!-- 所属资源池名称-->
+		  f.DATACENTER_CNAME datacenter_cname	<!-- 所属数据中心名称-->
+		FROM
+		  CM_DEVICE a,
+		  CM_HOST b,
+		  RM_CLUSTER c,
+		  RM_RES_POOL e,
+		  RM_DATACENTER f
+		WHERE a.ID = b.ID
+		  AND b.CLUSTER_ID = c.ID
+		  AND c.RES_POOL_ID = e.ID
+		  AND e.DATACENTER_ID = f.ID
+		  AND f.ID = #datacenterId#
+		  AND (
+		    a.SEAT_ID IS NULL
+		    OR a.SEAT_ID = ''
+		  )
+			<isNotEmpty prepend="and" property="sn">
+				a.SN=#sn#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="deviceName">
+				a.DEVICE_NAME LIKE '%$deviceName$%'
+			</isNotEmpty>
+		  AND a.IS_ACTIVE = 'Y'
+		  AND c.IS_ACTIVE = 'Y'
+		  AND e.IS_ACTIVE = 'Y'
+		  AND f.IS_ACTIVE = 'Y'
+		ORDER BY a.SN
+    </sql>
+    
+	<!-- 抽取未关联位置的所有指定数据中心下的主机 -->
+	<select id="getCmseatAllHostCanRelevancePage" parameterClass="hashMap" resultClass="CmDeviceHostShowBo">
+		<include refid="getCmseatAllHostCanRelevance"/> limit #startIndex#,#pageSize#
+	</select>
+	<select id="getCmseatAllHostCanRelevanceTotal" parameterClass="hashMap" resultClass="java.lang.Integer">
+		select count(1) from ( <include refid="getCmseatAllHostCanRelevance"/> ) as total
+    </select>
+    
+    <!-- 修改主机表，加入位置信息 -->
+	<update id="updateDeviceSeat"  parameterClass="java.util.Map"> 
+      UPDATE CM_DEVICE SET SEAT_ID=#uId# WHERE ID=#id#
+	</update> 
+	
+	<!-- 管理物理机到集群时，分配IP，需要获取的网络地址区间信息 -->
+	<select id="selectAllocIpParam" parameterClass="java.lang.String" resultClass="AllocIpParamVo">
+		SELECT		
+			a.RES_POOL_ID resPoolId,				
+			e.PLATFORM_CODE platformType,				
+			f.VIRTUAL_TYPE_CODE vmType,					
+			a.NETWORK_CONVERGENCE networkConvergence,	
+			a.ID clusterId,								
+			d.SECURE_AREA_TYPE secureAreaType,		
+			d.SECURE_LAYER secureLayer,				
+			c.DATACENTER_ID datacenterId,
+			a.CDP_ID cdpId			
+		FROM
+			RM_CLUSTER a
+			LEFT JOIN RM_PLATFORM e ON a.PLATFORM_TYPE = e.PLATFORM_ID
+			LEFT JOIN RM_VIRTUAL_TYPE f ON a.VM_TYPE = f.VIRTUAL_TYPE_ID,
+			 RM_RES_POOL c,
+			 RM_HOST_RES_POOL d
+		WHERE a.RES_POOL_ID = c.ID
+			AND c.ID = d.ID
+			AND a.ID = #cluster_id#
+	</select>
+	
+	<!-- 如果管理服务器已使用(与CDP存在关联关系) -->
+	<select id="selectVMServerCount" parameterClass="java.lang.String" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+			RM_CLUSTER
+		WHERE
+			(MANAGE_SERVER=#id#
+		OR  MANAGE_SERVER_BAK=#id#) AND RM_CLUSTER.IS_ACTIVE='Y'
+	</select>
+	
+	<!--删除虚机管理服务器-->
+	<update id="deleteVMServer"  parameterClass="java.lang.String"> 
+      UPDATE  RM_VM_MANAGE_SERVER SET IS_ACTIVE='N' WHERE ID=#id#
+	</update> 
+	
+	<!-- 检查虚机管理服务器的名称是否已经存在 -->
+	<select id="selectVMServerName" parameterClass="RmVmManageServerPo" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+			RM_VM_MANAGE_SERVER
+		WHERE
+			SERVER_NAME=#serverName#
+			<isNotEmpty prepend="and" property="id"> 
+				ID &lt;&gt; #id#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="datacenterId"> 
+				DATACENTER_ID=#datacenterId#
+			</isNotEmpty>
+	</select>
+	
+	<!-- 检查虚机管理服务器的IP是否已经存在 -->
+	<select id="selectVMServerIp" parameterClass="RmVmManageServerPo" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+			RM_VM_MANAGE_SERVER
+		WHERE
+			MANAGE_IP=#manageIp#
+			<isNotEmpty prepend="and" property="id"> 
+				ID &lt;&gt; #id#
+			</isNotEmpty>
+	</select>
+	
+	<!-- 检查虚机管理服务器是否已经存在 -->
+	<select id="selectVMServer" parameterClass="RmVmManageServerPo" resultClass="int">
+		SELECT
+			count(1)
+		FROM
+			RM_VM_MANAGE_SERVER
+		WHERE
+			ID=#id#
+	</select>
+	
+	<!-- 根据id查询密码表中数据是否存在 -->
+	<select id="selectByPassword.file" resultClass="CmPasswordPo">
+		SELECT * FROM CM_PASSWORD WHERE ID= #cmId#
+	</select>
+	<!-- 修改虚机管理服务器表 -->
+	<update id="updateVmManageServer"  parameterClass="RmVmManageServerPo"> 
+      UPDATE RM_VM_MANAGE_SERVER SET USER_NAME=#userName#,SERVER_NAME=#serverName#,PLATFORM_TYPE=#platformType#
+		,VM_TYPE=#vmType#,MANAGE_IP=#manageIp#,UPDATE_DATETIME=#updateDateTime#,DATACENTER_ID=#datacenterId#
+		,SUB_MASK=#subMask#, DOMAIN_NAME=#domainName#,version=#version#,manage_one_ip=#manageOneIp#
+		,manage_one_oc_ip=#manageOneOcIp#
+		,manage_project_id = #manageProjectId#
+		WHERE ID=#id#
+	</update> 
+	
+	<!-- 修改虚机管理服务器的用户名和密码 -->
+	<update id="updateCmPasswordPo"  parameterClass="CmPasswordPo"> 
+      UPDATE CM_PASSWORD SET USER_NAME=#userName#,PASSWORD=#password#,UPDATE_DATETIME=#updateDateTime# WHERE ID=#id# AND RESOURCE_ID=#resourceId#
+	</update> 
+	
+	<!-- 添加数据到虚机管理服务器表 -->
+	<insert id="insertVmManageServer"  parameterClass="RmVmManageServerPo">
+		<![CDATA[INSERT INTO RM_VM_MANAGE_SERVER(ID,USER_NAME,SERVER_NAME,PLATFORM_TYPE,VM_TYPE,MANAGE_IP,CREATE_DATETIME
+		,IS_ACTIVE,DATACENTER_ID,SUB_MASK,DOMAIN_NAME,version,manage_one_ip,manage_one_oc_ip
+		,manage_project_id)
+		VALUES(#id#,#userName#,#serverName#,#platformType#,#vmType#,#manageIp#,#createDateTime#,#isActive#,#datacenterId#
+		,#subMask#,#domainName#,#version#,#manageOneIp#,#manageOneOcIp#
+		,#manageProjectId#)]]>
+    </insert>
+    
+	<!-- 添加数据到虚机管理服务器的用户名和密码 -->
+	<insert id="insertCmPasswordPo"  parameterClass="CmPasswordPo">
+		<![CDATA[INSERT INTO CM_PASSWORD(ID,RESOURCE_ID,USER_NAME,PASSWORD,CREATE_DATETIME) VALUES(#id#,#resourceId#,#userName#,#password#,#createDateTime#)]]>
+    </insert>
+    
+	<!-- 查看指定虚机管理服务器信息 -->
+	<select id="findVMServerInfo" parameterClass="java.lang.String" resultClass="RmVmManageServerPo">
+		SELECT
+			a.ID id,							<!-- 虚机管理服务器id-->
+			a.SERVER_NAME serverName,		    <!-- 虚机管理服务器名称-->
+			a.MANAGE_IP manageIp,				<!--IP -->
+			b.PLATFORM_ID platformType,			<!-- 平台类型-->
+			b.PLATFORM_NAME platformName,		<!-- 平台类型名称-->
+			b.PLATFORM_CODE platformCode,
+			c.VIRTUAL_TYPE_ID vmType,			<!-- 虚拟机类型-->
+			c.VIRTUAL_TYPE_NAME virtualTypeName,<!-- 虚拟机类型名称-->
+			a.CREATE_USER createUser,			<!-- 创建者-->
+			a.CREATE_DATETIME createDateTime,	<!-- 创建日期-->
+			a.UPDATE_USER updateUser,			<!-- 更新者-->
+			a.UPDATE_DATETIME updateDateTime,	<!-- 更新日期-->
+			d.ID cmPasswordid,					<!-- 密码表的主键-->
+			d.USER_NAME userName,  				<!-- 用户名-->
+			d.PASSWORD password,   				<!-- 密码-->
+			a.DATACENTER_ID datacenterId,		<!-- 数据中心名称ID-->
+			e.DATACENTER_CNAME dataCenterName,	<!-- 数据中心名称-->
+			a.DOMAIN_NAME domainName,           <!-- 域名名称-->
+			a.version version,
+			a.manage_one_ip manageOneIp,
+			a.manage_one_oc_ip manageOneOcIp
+			,a.manage_project_id manageProjectId
+		FROM
+			RM_VM_MANAGE_SERVER a
+		LEFT JOIN
+			RM_PLATFORM b ON a.PLATFORM_TYPE=b.PLATFORM_ID
+		LEFT JOIN
+			RM_VIRTUAL_TYPE c ON a.VM_TYPE=c.VIRTUAL_TYPE_ID
+		LEFT JOIN
+			CM_PASSWORD d ON a.ID=d.RESOURCE_ID
+		LEFT JOIN
+			RM_DATACENTER e ON a.DATACENTER_ID=e.ID
+		WHERE
+			a.IS_ACTIVE='Y'
+		AND e.IS_ACTIVE='Y'
+		AND a.ID=#serverId#
+	</select>
+	<!-- 获取vc列表信息 -->
+	<select id="selectVMServerList"  resultClass="RmVmManageServerPo">
+		SELECT
+			a.ID as id,							<!-- 虚机管理服务器id-->
+			a.SERVER_NAME as serverName,		    <!-- 虚机管理服务器名称-->
+			a.MANAGE_IP as manageIp,				<!--IP -->
+			b.PLATFORM_NAME as platformType,		<!-- 平台类型-->
+			c.VIRTUAL_TYPE_NAME as vmType,			<!-- 虚拟机类型-->
+			d.USER_NAME as userName,             	<!-- 用户名-->
+			d.PASSWORD as password,				<!-- 密码-->
+			a.DATACENTER_ID as datacenterId,		<!-- 数据中心id-->
+			e.DATACENTER_CNAME as dataCenterName	<!-- 数据中心名称-->
+		FROM
+			RM_VM_MANAGE_SERVER a
+		LEFT JOIN
+			RM_PLATFORM b ON a.PLATFORM_TYPE=b.PLATFORM_ID
+		LEFT JOIN
+			RM_VIRTUAL_TYPE c ON a.VM_TYPE=c.VIRTUAL_TYPE_ID
+		LEFT JOIN
+			CM_PASSWORD d ON a.ID=d.RESOURCE_ID AND a.USER_NAME=d.USER_NAME
+		LEFT JOIN
+			RM_DATACENTER e ON e.ID=a.DATACENTER_ID
+		WHERE
+			a.IS_ACTIVE='Y' AND a.VM_TYPE = '1' AND a.PLATFORM_TYPE = '1'
+	</select>
+	
+	<select id="selectVMServerListByType" resultClass="RmVmManageServerPo">
+		SELECT 
+			vmSer.ID AS id , 
+			vmSer.SERVER_NAME AS serverName,
+			vmSer.MANAGE_IP AS manageIp,
+			pass.USER_NAME AS userName,
+			pass.`PASSWORD` AS password,
+			vmSer.DATACENTER_ID as datacenterId
+		FROM 
+			RM_VM_MANAGE_SERVER vmSer
+		LEFT JOIN CM_PASSWORD pass ON pass.RESOURCE_ID = vmSer.ID
+		WHERE 1=1 AND IS_ACTIVE='Y' AND vmSer.VM_TYPE = '4' AND vmSer.PLATFORM_TYPE = '2'
+	</select>
+
+	<!-- 查看虚机管理服务器信息列表 -->
+	<sql id="selectVMServerInfoSql">
+		SELECT
+			a.ID id,							<!-- 虚机管理服务器id-->
+			a.SERVER_NAME serverName,		    <!-- 虚机管理服务器名称-->
+			a.MANAGE_IP manageIp,				<!--IP -->
+			b.PLATFORM_NAME platformType,		<!-- 平台类型-->
+			c.VIRTUAL_TYPE_NAME vmType,			<!-- 虚拟机类型-->
+			d.USER_NAME userName,             	<!-- 用户名-->
+			e.DATACENTER_CNAME dataCenterName,	<!-- 数据中心名称-->
+			a.version version,
+			a.manage_one_ip manageOneIp
+		FROM
+			RM_VM_MANAGE_SERVER a
+		LEFT JOIN
+			RM_PLATFORM b ON a.PLATFORM_TYPE=b.PLATFORM_ID
+		LEFT JOIN
+			RM_VIRTUAL_TYPE c ON a.VM_TYPE=c.VIRTUAL_TYPE_ID
+		LEFT JOIN
+			CM_PASSWORD d ON a.ID=d.RESOURCE_ID AND a.USER_NAME=d.USER_NAME
+		LEFT JOIN
+			RM_DATACENTER e ON e.ID=a.DATACENTER_ID
+		WHERE
+				a.IS_ACTIVE='Y'
+			<isNotEmpty prepend="and" property="serverName"> 
+				a.SERVER_NAME LIKE '%$serverName$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="manageIp"> 
+				a.MANAGE_IP LIKE '%$manageIp$%'
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="platformType"> 
+				a.PLATFORM_TYPE=#platformType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="vmType"> 
+				a.VM_TYPE=#vmType#
+			</isNotEmpty>
+		<!-- ORDER BY a.MANAGE_IP -->
+	</sql>
+	
+	<!-- 查看虚机管理服务器信息 -->
+	<select id="findVMServerPage" parameterClass="hashMap" resultClass="RmVmManageServerPo">
+		<include refid="selectVMServerInfoSql"/> $_orderby$ limit #startIndex#,#pageSize#
+	</select>
+	<select id="findVMServerTotal" parameterClass="hashMap" resultClass="java.lang.Integer">
+		select count(1) from ( <include refid="selectVMServerInfoSql"/> ) as total
+    </select>
+    
+	<select id="selectPlatformInfo" parameterClass="java.lang.String" resultClass="RmPlatformPo">
+		SELECT
+			a.PLATFORM_ID platformId,		<!--平台类型id-->
+			a.PLATFORM_CODE platformCode,	<!--平台类型代码-->
+			a.PLATFORM_NAME platformName  	<!--平台机类型名称-->
+		FROM
+			RM_PLATFORM a
+		WHERE
+			IS_ACTIVE='Y'
+	</select>
+	
+	<select id="getPlatformInfoById" parameterClass="java.util.HashMap" resultClass="RmPlatformPo">
+		SELECT
+			a.PLATFORM_ID platformId,		<!--平台类型id-->
+			a.PLATFORM_CODE platformCode,	<!--平台类型代码-->
+			a.PLATFORM_NAME platformName  	<!--平台机类型名称-->
+		FROM
+			RM_PLATFORM a
+		WHERE
+			a.PLATFORM_ID = #platformId#
+	</select>
+
+	<select id="selectVmTypeNameInfo" parameterClass="java.lang.String" resultClass="RmVirtualTypePo">
+		SELECT
+			a.VIRTUAL_TYPE_ID virtualTypeId,		<!--虚机类型id-->
+			a.VIRTUAL_TYPE_CODE virtualTypeCode,	<!--虚机类型代码-->
+			a.VIRTUAL_TYPE_NAME virtualTypeName, 	<!--虚拟机类型名称-->
+			a.PLATFORM_ID platformId, 				<!--平台类型id-->
+			a.IS_ACTIVE isActive 					<!--是否可用-->
+		FROM
+			RM_VIRTUAL_TYPE a
+		WHERE
+			a.PLATFORM_ID=#platformId#
+		and a.IS_ACTIVE = 'Y'
+	</select>
+	
+	<select id="findRmVirtualTypeInfo" parameterClass="java.util.HashMap" resultClass="RmVirtualTypePo">
+		SELECT
+			a.VIRTUAL_TYPE_ID virtualTypeId,		<!--虚机类型id-->
+			a.VIRTUAL_TYPE_CODE virtualTypeCode,	<!--虚机类型代码-->
+			a.VIRTUAL_TYPE_NAME virtualTypeName, 	<!--虚拟机类型名称-->
+			a.PLATFORM_ID platformId, 				<!--平台类型id-->
+			a.IS_ACTIVE isActive 					<!--是否可用-->
+		FROM
+			RM_VIRTUAL_TYPE a
+		WHERE
+			a.VIRTUAL_TYPE_ID = #vmTypeId#
+		and a.IS_ACTIVE = 'Y'
+	</select>
+	
+	<select id="findRmVirtualTypeByVmId" parameterClass="java.util.HashMap" resultClass="RmVirtualTypePo">
+		SELECT
+			a.VIRTUAL_TYPE_ID virtualTypeId,		
+			a.VIRTUAL_TYPE_CODE virtualTypeCode,
+			a.VIRTUAL_TYPE_NAME virtualTypeName, 
+			a.PLATFORM_ID platformId, 				
+			a.IS_ACTIVE isActive 				
+		FROM
+			CM_VM v, CM_HOST h, RM_CLUSTER cl, RM_VIRTUAL_TYPE a
+		WHERE
+			v.HOST_ID = h.ID
+		AND h.CLUSTER_ID = cl.ID
+		AND cl.VM_TYPE = a.VIRTUAL_TYPE_ID
+		AND a.IS_ACTIVE = 'Y'
+		AND v.ID = #vmId#
+	</select>
+	
+	<!-- 设置用户名和密码 -->
+	<insert id="setPassword"  parameterClass="java.util.Map">
+		<![CDATA[INSERT INTO CM_PASSWORD(ID,RESOURCE_ID,USER_NAME,PASSWORD) VALUES(#passwordId#,#id#,#username#,#password#)]]>
+    </insert>
+
+	<!-- 保存主机，和数据存储设备的对应关系 -->
+	<insert id="insertHostDatastoreRef"  parameterClass="java.util.Map">
+		<![CDATA[INSERT INTO CM_HOST_DATASTORE_REF(ID,HOST_ID,DATASTORE_ID) VALUES(#hostDatastoreRefId#,#hostId#,#datastore_id#)]]>
+    </insert>
+	
+	<select id="selectHostOrderNum" parameterClass="java.lang.String" resultClass="int">
+		SELECT
+			IFNULL(MAX(ORDER_NUM),0) orderNum
+		FROM
+			CM_HOST
+	</select>
+	
+	<!-- 更新设备名称和所属资源池 -->
+	<update id="batchUpdateDevice" parameterClass="java.util.Map">
+		UPDATE CM_DEVICE
+		SET DEVICE_NAME=#device_name#,
+		RES_POOL_ID=#res_pool_id#
+		WHERE id=#id#
+	</update>
+
+	<!-- 将指定物理机关联到指定的集群 -->
+	<update id="updateCmHost"  parameterClass="java.util.Map">
+		UPDATE CM_HOST
+		SET CLUSTER_ID=#cluster_id#,ORDER_NUM=#order_num#,DEFAULT_DATASTORE_ID=#datastoreId#,DEFAULT_DATASTORE_TYPE=#datastorerType#,
+		CONTROL_TIME=STR_TO_DATE(#control_time#,'%Y-%m-%d %H:%i:%s'),IS_INVC=#is_invc#  
+		WHERE id=#id#
+	</update>
+
+	<!-- 统计指定集群所属的CDP下所有物理机的数量 -->
+	<select id="countCmAllHost" parameterClass="java.lang.String" resultClass="int">
+		SELECT
+		    count(1)
+		FROM
+		    RM_CLUSTER b,
+		    CM_HOST c
+		WHERE
+		    b.id = c.CLUSTER_ID
+		AND c.CLUSTER_ID = #clusterid#
+	</select>
+
+	<!-- 查看集群下的所有物理机详细信息 -->
+	<select id="selectCmHostInfo" parameterClass="java.util.Map" resultClass="CmClusterHostShowBo">
+		SELECT
+			a.ID id,							<!--设备id-->
+			a.DEVICE_NAME device_name,		    <!--所属物理机名称-->
+			a.SN sn,							<!--编号-->
+<!-- 			c.SEAT_NAME seat_name              	位置信息 -->
+			a.SEAT_ID seat_name              	<!--位置信息-->
+		FROM
+			RM_CLUSTER d,
+			CM_DEVICE a
+		LEFT JOIN
+			CM_SEAT c ON a.SEAT_ID=c.ID,
+			CM_HOST b
+		WHERE 1=1 
+			<isNotEmpty prepend="and" property="bizId"> 
+				d.id=#bizId#
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="sn"> 
+				a.SN=#sn#
+			</isNotEmpty> 
+			<isNotEmpty prepend="and" property="deviceName"> 
+				a.DEVICE_NAME LIKE '%$deviceName$%'
+			</isNotEmpty> 
+	        AND a.id=b.id
+	        AND d.id=b.CLUSTER_ID
+	        AND b.CLUSTER_ID IS NOT NULL
+			AND b.CLUSTER_ID &lt;&gt; ""
+	</select>
+
+	<!-- 查看物理机详细信息 -->
+	<select id="selectCmIpInfo" parameterClass="java.lang.String" resultClass="CmIpShowBo">
+		SELECT DISTINCT
+            a.IP ip,
+            resPool.USE_ID useId,
+            resPool.HOST_TYPE_ID hostTypeId,
+            resPool.SECURE_AREA_ID secureAreaId
+        FROM
+            rm_nw_openstack_ip_address a
+        LEFT JOIN rm_nw_openstack_virtual_network resPool ON a.NETWORK_ID = resPool.ID
+        WHERE
+            a.INSTANCE_ID = #device_id#
+        and resPool.IS_ACTIVE = 'Y'
+	</select>
+
+	<!-- 查看物理机详细信息 -->
+	<select id="selectCmDeviceHostInfo" parameterClass="java.lang.String" resultClass="CmDeviceHostShowBo">
+SELECT a.id as id,
+			a.DEVICE_NAME device_name,		
+			a.SN sn, 
+			ch.cpu cpu,
+			IFNULL(ch.CPU_USED,0) cpuUsed,
+			a.RUNNING_STATE as state, 
+			ch.MEM mem,
+			IFNULL(ch.MEM,0) memUsed,
+			h.DEVICE_MODEL device_model,
+			h.DEVICE_MANUFACTURER manufacturer,
+			a.IS_ACTIVE is_active,    
+			a.SEAT_ID seat_name
+			,rc.CLUSTER_NAME cluster_name
+			,rc.MANAGE_SERVER manageServerId,
+			rc.ID clusterId, 
+			ch.DEFAULT_DATASTORE_TYPE datastore_type,
+			ch.DEFAULT_DATASTORE_ID	datastore_id,	
+			rd.DATACENTER_CNAME datacenter_cname,  
+			rd.ID datacenter_id,	 i.DIC_NAME dic_name,
+			ch.IS_INVC isInvc, DATE_FORMAT(ch.CONTROL_TIME,'%Y-%m-%d %H:%i:%s') control_time,
+			rc.PLATFORM_TYPE as platformCode, 
+			ch.IPMI_PWD as ipmiPwd,ch.IPMI_USER as ipmiUser,ch.IPMI_URL as ipmiUrl,ch.IPMI_VER as ipmiVer
+		FROM
+			CM_DEVICE a
+		LEFT JOIN
+			CM_HOST ch on ch.ID = a.id
+		LEFT JOIN
+			CM_SEAT c ON a.SEAT_ID=c.ID
+		LEFT JOIN
+			CM_DEVICE_MODEL h ON a.DEVICE_MODEL_ID=h.id
+		LEFT JOIN		ADMIN_DIC i ON a.DEVICE_STATUS=i.DIC_CODE and i.DIC_TYPE_CODE='DEVICE_STATUS'
+		left join RM_CLUSTER rc on rc.ID = ch.CLUSTER_ID
+		left JOIN RM_RES_POOL rrp on rrp.ID = rc.RES_POOL_ID
+		left join RM_DATACENTER rd on rrp.DATACENTER_ID = rd.ID
+		WHERE a.id=#bizId#
+	</select>
+
+
+	<!-- 查看虚拟机详细信息 -->
+	<select id="selectCmDeviceVMInfo" parameterClass="java.lang.String" resultClass="CmDeviceVMShowBo">
+			SELECT DISTINCT
+                rhrp.AZ_ID as availableZoneId,
+                rhrp.AZ_NAME azName,
+                rhrp.VM_MS_ID vmMsId,
+                a.id,
+                v.VIRTUAL_TYPE_CODE virtualTypeCode,
+                a.DEVICE_NAME vm_name,
+                ten.NAME tenantName,
+                a.SN sn,
+                a.RUNNING_STATE vmState,
+                b.CPU cpu,
+                b.MEM mem,
+                b.DISK disk,
+                b.DU_ID duID,
+                b.HOST_ID hostId,
+                b.PROJECT_ID projectId,
+                c.DEVICE_NAME device_name,
+                d.id clusterId,
+                d.MANAGE_SERVER manageServerId,
+                d.CLUSTER_NAME cluster_name,
+                f.POOL_NAME pool_name,
+                g.DATACENTER_CNAME datacenter_cname,
+                i.DIC_NAME dic_name,
+                du.FULL_CNAME du_name,
+                du.DATACENTER_ID datacenterID,
+                du.APP_ID appID,
+                du.SERVICE_ID serviceId,
+                info.FULL_CNAME appInfo_name,
+                b.ONLINE_TIME online_time,
+                rp.PLATFORM_CODE platFormCode,
+                us.LOGIN_NAME loginName,
+                us.FIRST_NAME firstName,
+                us.LAST_NAME lastName,
+                tenant.NAME userName,
+                b.IAAS_UUID  as iaasUuid,
+                (SELECT count(*) FROM RM_DEVICE_VOLUMES_REF v WHERE v.DEVICE_ID=#bizId# AND v.MOUNT_STATUS='mount') as mountDiskNumber,
+                (SELECT sum(v.DISK_SIZE) FROM RM_DEVICE_VOLUMES_REF v WHERE v.DEVICE_ID=#bizId# AND v.MOUNT_STATUS='mount') as mountDiskSize
+            FROM
+                CM_DEVICE a
+            LEFT JOIN ADMIN_DIC i ON a.DEVICE_STATUS = i.DIC_CODE AND i.DIC_TYPE_CODE = 'DEVICE_STATUS'
+            LEFT JOIN CM_VM b ON b.id = a.id
+            LEFT JOIN CLOUD_TENANT ten ON ten.ID = b.TENANT_ID
+            LEFT JOIN APP_DU du ON b.DU_ID = du.DU_ID
+            LEFT JOIN APP_INFO info ON du.APP_ID = info.APP_ID
+            LEFT JOIN CM_DEVICE c ON b.HOST_ID = c.id
+            LEFT JOIN CM_HOST h ON b.HOST_ID = h.id 
+            LEFT JOIN RM_CLUSTER d ON d.ID = h.CLUSTER_ID
+            LEFT JOIN RM_HOST_RES_POOL rhrp ON rhrp.ID = d.RES_POOL_ID
+            LEFT JOIN RM_RES_POOL f ON f.ID = rhrp.ID AND f.IS_ACTIVE = 'Y'
+            LEFT JOIN RM_VIRTUAL_TYPE v ON v.VIRTUAL_TYPE_CODE = d.VM_TYPE
+            LEFT JOIN RM_DATACENTER g ON f.DATACENTER_ID = g.id
+            LEFT JOIN RM_PLATFORM rp ON rp.PLATFORM_ID = rhrp.PLATFORM_TYPE
+            LEFT JOIN SYS_USER us ON us.USER_ID = b.USER_ID
+            LEFT JOIN CLOUD_TENANT tenant ON tenant.ID = b.TENANT_ID
+            WHERE
+                b.id = #bizId#
+            AND h.CLUSTER_ID = d.id
+	</select>
+	
+	<!--资源池平台类型为openstackX86 查询查看物理机详细信息  -->
+	<select id="selectCmDeviceHostOpenStackInfo" parameterClass="java.lang.String" resultClass="CmDeviceHostShowBo">
+		SELECT ch.ID AS id,a.DEVICE_NAME AS device_name,a.DEVICE_MODEL_ID AS device_model,
+			d.DATACENTER_ID AS datacenter_id, d.POOL_NAME AS pool_name,
+			p.PLATFORM_CODE as platformCode ,
+			ch.CPU AS cpu,ch.CPU_USED AS cpuUsed,
+			ch.MEM AS mem, ch.MEM_USED AS memUsed,ch.DISK AS disk ,g.DATACENTER_CNAME datacenter_cname,
+			a.IS_ACTIVE AS is_active,  h.CLUSTER_NAME AS cluster_name,h.ID AS clusterId
+		FROM CM_DEVICE a 
+		LEFT JOIN
+			CM_HOST ch on ch.ID = a.ID,  
+			RM_HOST_RES_POOL c ,RM_RES_POOL d ,RM_PLATFORM p,RM_DATACENTER g,RM_CLUSTER h
+		WHERE a.ID= #bizId# AND 
+			  ch.ID =a.ID AND p.PLATFORM_ID = c.PLATFORM_TYPE AND 
+			  d.ID = a.RES_POOL_ID AND c.ID=a.RES_POOL_ID AND d.DATACENTER_ID=g.id AND ch.CLUSTER_ID=h.ID
+	</select>
+	
+	<!-- 根据ID查数据中心对象 -->
+	<select id="selectDataCenterById" parameterClass="String" resultClass="RmDatacenterPo">
+	SELECT 
+		D.ID as id,
+		D.DATACENTER_CNAME as datacenterCname,
+		D.DATACENTER_CODE as datacenterCode,
+    	D.ENAME as ename,
+		D.ADDRESS as address,
+		D.STATUS as status,
+		D.IS_ACTIVE as isActive,
+		D.REMARK as remark,
+		D.QUEUE_IDEN as queueIden
+	FROM 
+	RM_DATACENTER D
+	WHERE D.IS_ACTIVE = 'Y' AND D.ID = #id#
+	ORDER BY D.ID ASC
+	</select>
+	
+	<select id="selectHmcHostInfoById" parameterClass="String" resultClass="ScanHmcHostPo">
+		<!-- SELECT
+			vmMgSer.MANAGE_IP AS url,
+			vmMgSer.USER_NAME AS userName,
+			device.DEVICE_NAME AS hostName,
+			pass.`PASSWORD` AS password,
+			dc.QUEUE_IDEN AS queueIden
+		FROM
+			RM_VM_MANAGE_SERVER vmMgSer
+			LEFT JOIN RM_CLUSTER cluster ON cluster.PLATFORM_TYPE = vmMgSer.PLATFORM_TYPE AND cluster.VM_TYPE = vmMgSer.VM_TYPE AND cluster.IS_ACTIVE = 'Y'
+			LEFT JOIN CM_HOST host ON `host`.CLUSTER_ID = cluster.ID
+			LEFT JOIN CM_DEVICE device ON device.ID = `host`.ID AND device.IS_ACTIVE = 'Y'
+			LEFT JOIN CM_PASSWORD pass ON pass.RESOURCE_ID = vmMgSer.ID
+			LEFT JOIN RM_RES_POOL res ON res.ID = device.RES_POOL_ID AND res.IS_ACTIVE = 'Y'
+			LEFT JOIN RM_DATACENTER dc ON dc.ID = res.DATACENTER_ID AND dc.IS_ACTIVE = 'Y'
+		WHERE
+			`host`.ID = #hostId# AND vmMgSer.IS_ACTIVE = 'Y' -->
+		<![CDATA[
+			SELECT
+				vms.MANAGE_IP url,
+				vms.USER_NAME userName,
+				d.DEVICE_NAME hostName,
+				pw.`PASSWORD` password,
+				dc.QUEUE_IDEN queueIden
+			FROM
+				CM_HOST h,
+				CM_DEVICE d,
+				RM_CLUSTER cl,
+				RM_RES_POOL rp,
+				RM_VM_MANAGE_SERVER vms,
+				RM_DATACENTER dc,
+				CM_PASSWORD pw
+			WHERE
+				h.ID = d.ID
+			AND h.CLUSTER_ID = cl.ID
+			AND cl.RES_POOL_ID = rp.ID
+			AND cl.MANAGE_SERVER = vms.ID
+			AND rp.DATACENTER_ID = vms.DATACENTER_ID
+			AND rp.DATACENTER_ID = dc.ID
+			AND vms.ID = pw.RESOURCE_ID
+			AND d.IS_ACTIVE = 'Y'
+			AND rp.IS_ACTIVE = 'Y'
+			AND dc.IS_ACTIVE = 'Y'
+			AND vms.IS_ACTIVE = 'Y'
+			AND h.ID = #hostId#
+		]]>
+	</select>
+	
+	<!-- 根据物理机id查询datacenter对象 -->
+	<select id="selectDataCenterByHostId" parameterClass="String" resultClass="RmDatacenterPo">
+		SELECT 
+			datacenter.ID AS id,
+			datacenter.DATACENTER_CNAME as datacenterCname,
+			datacenter.DATACENTER_CODE as datacenterCode,
+			datacenter.QUEUE_IDEN as queueIden
+		FROM
+			RM_DATACENTER datacenter
+			LEFT JOIN RM_RES_POOL pool ON datacenter.ID = pool.DATACENTER_ID AND datacenter.IS_ACTIVE = 'Y'
+			LEFT JOIN CM_DEVICE device ON pool.ID = device.RES_POOL_ID AND pool.IS_ACTIVE = 'Y'
+		WHERE
+			device.ID = #hostId# AND device.IS_ACTIVE = 'Y'
+	</select>
+	
+	<!-- 查询指定数据中心对象 lizhizhong -->
+	<select id="getStorageTreeSpecified" parameterClass="String" resultClass="RmDatacenterPo">
+	SELECT 
+		D.ID as id,
+		D.DATACENTER_CNAME as datacenterCname,
+		D.DATACENTER_CODE as datacenterCode,
+		D.ENAME as ename,
+		D.ADDRESS as address,
+		D.STATUS as status,
+		D.IS_ACTIVE as isActive,
+		D.REMARK as remark
+	FROM 
+		RM_DATACENTER D,
+		RM_RES_POOL E,
+		RM_CLUSTER G
+	WHERE
+		D.IS_ACTIVE='Y'
+		AND E.DATACENTER_ID=D.ID
+		AND G.RES_POOL_ID=E.ID
+		AND G.ID=#clusterId#
+	ORDER BY D.ID ASC
+	</select>
+	
+	<!-- 查询所有数据中心对象 -->
+	<select id="selectDataCenter" parameterClass="String" resultClass="RmDatacenterPo">
+	SELECT 
+		D.ID as id,
+		D.DATACENTER_CNAME as datacenterCname,
+		D.DATACENTER_CODE as datacenterCode,
+    	D.ENAME as ename,
+		D.ADDRESS as address,
+		D.STATUS as status,
+		D.IS_ACTIVE as isActive,
+		D.REMARK as remark
+	FROM 
+	RM_DATACENTER D
+	WHERE D.IS_ACTIVE = 'Y'
+	ORDER BY D.SORT ASC
+	</select>
+	
+	<!-- 查询数据中心对象根据名称模糊查询 -->
+	<select id="selectDataCenterByLike" parameterClass="String" resultClass="RmDatacenterPo">
+	SELECT 
+		D.ID as id,
+		D.DATACENTER_CNAME as datacenterCname,
+		D.DATACENTER_CODE as datacenterCode,
+    	D.ENAME as ename,
+		D.ADDRESS as address,
+		D.STATUS as status,
+		D.IS_ACTIVE as isActive,
+		D.REMARK as remark
+	FROM 
+	RM_DATACENTER D
+	WHERE D.IS_ACTIVE = 'Y' AND D.DATACENTER_CNAME LIKE '%$datacenterCname$%'
+	ORDER BY D.ID ASC
+	</select>
+	<select id="selectHostByClusterId" parameterClass="java.util.HashMap" resultClass="CmDevicePo">
+		SELECT 
+			cd.ID,
+			cd.DEVICE_NAME as deviceName,
+			cd.SN,
+			h.DEVICE_MODEL as deviceModel,
+			h.DEVICE_MANUFACTURER as manufacturer,
+			cd.SEAT_ID as seatId,
+			h.DEVICE_TYPE as deviceType,
+			cd.RES_POOL_ID as resPoolId,
+			cd.DESCRIPTION
+		FROM
+			CM_DEVICE cd
+		LEFT JOIN
+			CM_DEVICE_MODEL h ON cd.DEVICE_MODEL_ID=h.id,
+			CM_HOST ch 
+		where cd.id = ch.id
+			and cd.IS_ACTIVE = 'Y'
+			and ch.cluster_id = #clusterId#
+			ORDER BY CONVERT(cd.DEVICE_NAME USING gbk) ASC
+	</select>
+	<select  id="selectVMDeviceInfoByHostId" parameterClass="java.util.HashMap" resultClass="CmDevicePo">
+		SELECT 
+			cd.ID,
+			cd.DEVICE_NAME as deviceName,
+			cd.SN,
+			h.DEVICE_MODEL as deviceModel,
+			h.DEVICE_MANUFACTURER as manufacturer,
+			cd.SEAT_ID as seatId,
+			h.DEVICE_TYPE as deviceType,
+			cd.RES_POOL_ID as resPoolId,
+			cd.DESCRIPTION,
+			cd.RUNNING_STATE as runningState
+		FROM
+			CM_DEVICE cd
+		LEFT JOIN
+			CM_DEVICE_MODEL h ON cd.DEVICE_MODEL_ID=h.id,
+			CM_VM cv
+		where cd.id = cv.id
+			and cd.IS_ACTIVE = 'Y'
+			and cv.host_id = #hostId#
+			ORDER BY CONVERT(cd.DEVICE_NAME USING gbk) ASC
+	</select>
+	<select id='selectHostCpuCdpInfo' parameterClass="java.lang.String" resultClass="java.util.HashMap">
+		SELECT 
+			h.id,
+			h.CPU as cpu ,
+			c.MANAGE_SERVER as vcId,
+			c.ENAME as ename 
+		FROM 
+			CM_HOST h,
+			RM_CLUSTER c
+		WHERE  
+			h.cluster_id = c.Id
+			AND h.id = #hostId#
+			AND c.IS_ACTIVE='Y'
+	</select>
+	
+	<!-- 根据物理机id获取物理机用户名和密码 -->
+	<select id='selectHostUsernamePasswordById' parameterClass="java.lang.String" resultClass="CmHostUsernamePasswordPo">
+		SELECT 
+			p.USER_NAME AS username,
+			p.`PASSWORD` AS `password`
+		FROM
+			CM_PASSWORD p
+		WHERE
+			p.RESOURCE_ID = #hostId#
+	</select>
+	<!-- 根据物理机id获取localdisk信息 -->
+	<select id='selectDiskInfoByHostId' parameterClass="java.lang.String" resultClass="DataStoreVo">
+		SELECT
+			disk.ID AS id,
+			disk.`NAME` AS dsName
+		FROM
+			CM_LOCAL_DISK disk
+		WHERE 
+			disk.DEVICE_ID = #hostId#
+	</select>
+	
+	<!-- 根据物理机id获取hostip -->
+	<select id="selectHostIpById" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT
+		    ch.host_ip
+		FROM
+		    cm_host ch
+		LEFT JOIN cm_device cd ON cd.ID = ch.ID
+		WHERE
+		    cd.IS_ACTIVE = 'Y'
+	</select>
+	
+	<select id='queryHostRefInfoById' parameterClass="java.util.List" resultClass="CmHostRefVo">
+		SELECT
+		    h.ID AS deviceId,
+		    d.DEVICE_NAME AS deviceName,
+		    vmType.VIRTUAL_TYPE_CODE AS vmTypeCode,
+		    h.CLUSTER_ID AS clusterId,
+		    clu.MANAGE_SERVER AS managerServer,
+		    h.IS_INVC AS isInvc
+		FROM
+		    CM_HOST h,
+		    RM_CLUSTER clu,
+		    RM_VIRTUAL_TYPE vmType,
+		    CM_DEVICE d
+		WHERE
+		    h.CLUSTER_ID = clu.ID
+		AND clu.VM_TYPE = vmType.VIRTUAL_TYPE_CODE
+		AND d.ID = h.ID
+		AND h.ID IN
+		<iterate conjunction="," open="(" close=")">
+  			#ids[]#
+  		</iterate>
+	</select>
+	<update id="updateHostClusterId" parameterClass="java.util.List">
+		UPDATE CM_HOST SET CLUSTER_ID = NULL,IS_INVC='NA'  WHERE ID IN 
+		<iterate conjunction="," open="(" close=")">
+  			#ids[]#
+  		</iterate>
+	</update>
+	<update id="updateHostResPoolId" parameterClass="java.util.List">
+		UPDATE CM_DEVICE SET RES_POOL_ID = NULL WHERE ID IN 
+		<iterate conjunction="," open="(" close=")">
+  			#ids[]#
+  		</iterate>
+	</update>
+	<update id="updateHostVCStatus" parameterClass="java.util.List">
+		UPDATE 
+			CM_HOST SET IS_INVC = 'N',
+			DEFAULT_DATASTORE_ID = '',
+			DEFAULT_DATASTORE_TYPE = ''
+		WHERE ID IN  
+		<iterate conjunction="," open="(" close=")">
+  			#ids[]#
+  		</iterate>
+	</update>
+	<select id="queryHostManagerInfo" parameterClass="java.lang.String" resultClass="CmHostRefVo">
+		SELECT
+		    d.`DEVICE_NAME` AS deviceName,
+		    vmType.VIRTUAL_TYPE_CODE AS vmTypeCode,
+		    clu.`MANAGE_SERVER` AS managerServer,
+		    h.IS_INVC AS isInvc
+		FROM
+		    CM_DEVICE d,
+		    CM_HOST h,
+		    RM_CLUSTER clu,
+		    RM_VIRTUAL_TYPE vmType
+		WHERE
+		    h.`CLUSTER_ID` = clu.`ID`
+		AND clu.VM_TYPE = vmType.VIRTUAL_TYPE_CODE
+		AND h.`ID` = d.`ID`
+		AND h.`ID` = #deviceId#
+	</select>
+	<select id="selectCmClusterHostInfos" parameterClass="java.lang.String" resultClass="CmClusterHostShowBo">
+	SELECT DISTINCT CLUSTER_NAME device_name
+	FROM RM_CLUSTER rm,CM_HOST cm
+	WHERE cm.CLUSTER_ID = rm.ID 
+	  AND rm.IS_ACTIVE='Y' AND cm.IS_INVC=='Y' AND rm.ID=#id#</select>
+	 
+	<select id ="selectBpmModelId" parameterClass ="java.lang.String" resultClass="java.lang.String" >
+	   select DISTINCT b.MODEL_ID from BPM_MODEL b where b.MODEL_NAME = #modelName# ORDER BY b.CREATE_DATE DESC LIMIT 1;
+	   
+	 </select>
+	 <select id ="selectModelName" parameterClass ="java.lang.String" resultClass="java.lang.String" >
+	  SELECT a.PARAM_VALUE FROM ADMIN_PARAM a WHERE a.PARAM_NAME='MODEL_NAME';
+	 </select>
+	 <!-- 挂载datastore -->
+	 <insert id="saveDatastoreInfo" parameterClass="CmHostDatastoreRefPo"> 
+		INSERT INTO CM_HOST_DATASTORE_REF(ID,HOST_ID,DATASTORE_ID) VALUES (#id#,#hostId#,#datastoreId#)
+	</insert>
+	 <!-- 在物理机上面删除datastore -->
+	 <delete id="deleteDatastoreInfo" parameterClass="Map">
+		<![CDATA[ 
+			DELETE
+			FROM
+				CM_HOST_DATASTORE_REF
+			WHERE
+				HOST_ID = #hostId# AND DATASTORE_ID  = #datastoreId#
+		]]>
+	</delete>
+	
+	<update id="saveDefaultDatastore"  parameterClass="CmDevicePo">
+		UPDATE CM_HOST
+		SET DEFAULT_DATASTORE_ID = #datastoreId#
+		WHERE ID = #id#
+    </update>
+    
+    <select id="getDefaultDatastore" parameterClass="java.util.Map" resultClass="cmDevicePo">
+	    SELECT
+			DEFAULT_DATASTORE_ID as datastoreId,
+			ID as id
+		FROM
+			CM_HOST
+		WHERE ID = #hostId#
+	</select>
+	<select id="findDataStoreById" parameterClass="java.lang.String" resultClass="CmHostPo">
+	    SELECT
+			DEFAULT_DATASTORE_ID as datastoreId,
+			DEFAULT_DATASTORE_TYPE as datastoreType
+		FROM
+			CM_HOST
+		WHERE ID = #hostId#
+	</select>
+	<update id="updataVmById" parameterClass="CmVmPo">
+			UPDATE 
+				CM_VM
+			SET 
+				HOST_ID = #hostId#,
+				DATASTORE_ID = #datastoreId#,
+				DATASTORE_TYPE = #datastoreType#
+			WHERE ID = #id#
+	</update>
+	
+	<select id="getAllDatastoreRef"  resultClass="CmHostDatastoreRefPo" parameterClass="java.lang.String">
+		SELECT
+			ID AS id,
+			HOST_ID AS hostId,
+			DATASTORE_ID AS datastoreId
+		FROM
+			CM_HOST_DATASTORE_REF
+		WHERE datastore_id= #datastoreId#
+	</select>
+	<select id="getDatastoreById"  resultClass="CmDatastorePo" parameterClass="java.lang.String">
+		select DATASTORE_ID id,DATASTORE_NAME  name from cm_datastore 
+		where IS_ACTIVE='Y'
+		and  datastore_id= #datastoreId#
+	</select>
+	<select id="findDeviceDefaultDatastore" resultClass="CmDevicePo" parameterClass="java.lang.String">
+		SELECT
+			d.DEVICE_NAME AS deviceName,
+			h.DEFAULT_DATASTORE_ID AS datastoreId
+		FROM
+			CM_HOST h
+		LEFT JOIN CM_DEVICE d ON d.ID = h.ID
+		WHERE
+			h.DEFAULT_DATASTORE_ID = #datastoreId#
+		AND d.IS_ACTIVE = 'Y'
+		AND h.IS_INVC = 'Y'
+	</select>
+	
+		<select id="findCmHostDatastoreRefPoByStorageId" resultClass="CmHostDatastoreRefPo" parameterClass="java.lang.String">
+		SELECT
+			c.DEVICE_NAME hostName,
+			d.`NAME` datastoreName
+		FROM
+			CM_HOST_DATASTORE_REF r
+		LEFT JOIN CM_DEVICE c ON c.ID = r.HOST_ID
+		LEFT JOIN CM_DATASTORE d ON d.ID = r.DATASTORE_ID
+		WHERE
+			r.DATASTORE_ID IN(
+				SELECT
+					d.ID
+				FROM
+					CM_STORAGE s,
+					CM_DATASTORE d
+				WHERE
+					s.ID = d.STORAGE_ID
+				AND s.ID = #cmStorageId#
+			)
+	</select>
+	<select id="selectDcByHostId" resultClass="CmDeviceHostShowBo" parameterClass="java.lang.String">
+		SELECT
+			p.DATACENTER_ID datacenter_id,
+			h.ID id,
+			h.CLUSTER_ID clusterId,
+			h.CPU cpu,
+			h.MEM mem,
+			h.CPU_USED cpuUsed,
+			h.MEM_USED memUsed
+		FROM
+			CM_HOST h
+		LEFT JOIN RM_CLUSTER c ON h.CLUSTER_ID = c.ID
+		AND c.IS_ACTIVE = 'Y'
+		LEFT JOIN RM_RES_POOL p ON p.ID = c.RES_POOL_ID
+		AND p.IS_ACTIVE = 'Y'
+		WHERE
+			h.ID = #hostId#
+		AND h.IS_INVC = 'Y'
+	</select>
+	<select id="getGYRXHostDatastore" parameterClass="java.lang.String" resultClass="java.lang.String">
+		SELECT
+			c.`NAME`,
+			c.FREE_SIZE size
+		FROM
+			CM_HOST_DATASTORE_REF r
+		LEFT JOIN CM_DATASTORE c ON c.ID = r.DATASTORE_ID
+		AND c.IS_ACTIVE = 'Y'
+		WHERE
+			r.HOST_ID = #hostId# ORDER BY size DESC limit 1
+	</select>
+	<!-- 单个添加虚拟机对应的磁盘信息-->
+	<insert id="insertRmDeviceVolumesRefPo"  parameterClass="RmDeviceVolumesRefPo">
+		<![CDATA[
+		INSERT INTO RM_DEVICE_VOLUMES_REF(
+			ID,
+			DISK_SIZE,
+			DISK_TYPE,
+			DEVICE_ID,
+			MOUNT_STATUS,
+			TARGET_VOLUME_ID,
+			VOLUME_ID,
+			VOLUME_NAME
+		)
+		VALUES(#id#,#diskSize#,#diskType#,#deviceId#,#mountStatus#,#targetVolumeId#,#volumeId#,#volumeName#)
+		]]>
+    </insert>
+   
+    <!--批量插入虚拟机对应的磁盘信息  -->
+    <insert id="rmDeviceVolumesPoBatchInsert"  parameterClass="java.util.List">
+		<![CDATA[ 
+			INSERT INTO RM_DEVICE_VOLUMES_REF(
+			ID,
+			DISK_SIZE,
+			DISK_TYPE,
+			DEVICE_ID,
+			MOUNT_STATUS,
+			VOLUME_NAME
+			) VALUES
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+			(#boList[].id#,#boList[].diskSize#,#boList[].diskType#,#boList[].deviceId#,#boList[].mountStatus#,#boList[].volumeName#)
+			]]>
+		</iterate>
+		
+    </insert>
+    
+    <sql id="selectRmDeviceVolumesRefPoList">
+		<![CDATA[
+			SELECT
+				v.ID id,
+				v.DISK_SIZE diskSize,
+				v.DISK_TYPE diskType,
+				v.DEVICE_ID deviceId,
+				v.MOUNT_STATUS mountStatus,
+				v.VOLUME_NAME volumeName,
+				v.TARGET_VOLUME_ID targetVolumeId
+			FROM
+				RM_DEVICE_VOLUMES_REF v
+			WHERE
+				v.DEVICE_ID = #deviceId# 
+				AND v.MOUNT_STATUS = 'mount'
+				ORDER BY
+					v.DISK_SIZE ASC
+		 ]]>
+			</sql>
+    <select id="findRmDeviceVolumesRefPoTotal"  parameterClass="hashMap" resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+       		<include refid="selectRmDeviceVolumesRefPoList"/>
+        ) as recordTable
+    </select>
+    <select id="findRmDeviceVolumesRefPoPage"  parameterClass="hashMap" resultClass="hashMap" remapResults="true">
+       	<include refid="selectRmDeviceVolumesRefPoList"/> limit #startIndex# ,#pageSize#
+    </select>
+    <!-- 更新挂载磁盘的状态 -->
+    <update id="updateDeviceMountStatus"  parameterClass="RmDeviceVolumesRefPo">
+		 UPDATE
+		 	RM_DEVICE_VOLUMES_REF 
+		 SET
+			MOUNT_STATUS=#mountStatus#
+		 WHERE
+		 	DEVICE_ID=#deviceId#
+    </update>
+    <!-- 根据条件，查找磁盘信息 -->
+    <select id="getRmDeviceVolumesRefByMap" parameterClass="hashMap" resultClass="RmDeviceVolumesRefPo">
+    	<![CDATA[
+    	SELECT
+			f.ID id,
+			f.DISK_SIZE diskSize,
+			f.DISK_TYPE diskType,
+			f.DEVICE_ID deviceId,
+			f.MOUNT_STATUS mountStatus,
+			F.VOLUME_NAME volumeName
+		FROM
+			RM_DEVICE_VOLUMES_REF f
+		WHERE
+				f.DEVICE_ID = #deviceId# 
+			AND f.DISK_SIZE=#diskSize# 
+			AND f.MOUNT_STATUS='unmount' 
+			AND f.VOLUME_ID is NULL
+			 ]]>
+    </select>
+    <!-- 更新磁盘对应的卷Id -->
+    <update id="updateRmDvRefVolumeId" parameterClass="RmDeviceVolumesRefPo">
+	    UPDATE
+		 	RM_DEVICE_VOLUMES_REF 
+		SET
+			TARGET_VOLUME_ID=#targetVolumeId#
+		WHERE
+		 	ID=#id# 
+    </update>
+    <!-- 获取openstack服务器信息 -->
+	<select id="selectOpenstackServerList"  resultClass="RmVmManageServerPo">
+		SELECT b.DATACENTER_ID AS datacenterId , a.DATACENTER_CNAME AS dataCenterName,
+					   b.ID AS id , b.SERVER_NAME AS serverName ,b.DOMAIN_NAME AS domainName , b.MANAGE_IP AS manageIp 
+ 				 FROM RM_DATACENTER a , RM_VM_MANAGE_SERVER b 
+				WHERE  b.IS_ACTIVE ='Y'  AND  b.PLATFORM_TYPE='4' AND a.ID = b.DATACENTER_ID
+	</select>
+	<select id="getVmMsIdByHostPoolId"  resultClass="java.lang.String" parameterClass="java.lang.String">
+	   SELECT DISTINCT
+		    c.ID id
+		FROM
+		    rm_host_res_pool a,
+		    rm_vm_manage_server c
+		WHERE
+		    a.VM_MS_ID = c.ID
+		AND a.ID = #resPoolId#					
+	</select>
+    <delete id="deleteRmDeviceVolumesRef" parameterClass="hashMap">
+    	DELETE
+		FROM
+			RM_DEVICE_VOLUMES_REF
+		WHERE
+			TARGET_VOLUME_ID = #targetVolumeId# AND DEVICE_ID = #deviceId# 
+    </delete>
+    <!-- 更新虚机名称 -->
+    <update id="updateVmName" parameterClass="hashMap">
+	    UPDATE
+		 	CM_DEVICE 
+		SET
+			DEVICE_NAME = #deviceName#
+		WHERE
+		 	ID=#deviceId# 
+    </update>
+    <update id="updateVmHost" parameterClass="hashMap">
+	    UPDATE
+		 	CM_VM 
+		SET
+			HOST_ID = #host#
+		WHERE
+		 	ID=#deviceId# 
+    </update>
+    <update id="updateVmPowerStatus" parameterClass="hashMap">
+	    UPDATE
+		 	CM_DEVICE 
+		SET
+			RUNNING_STATE = #powerStatus#
+		WHERE
+		 	ID=#deviceId# 
+    </update>
+    <update id="updateVmProjectId" parameterClass="hashMap">
+	    UPDATE
+		 	CM_VM
+		SET
+			PROJECT_ID = #projectId#
+		WHERE
+		 	ID=#vmId# 
+    </update>
+</sqlMap>

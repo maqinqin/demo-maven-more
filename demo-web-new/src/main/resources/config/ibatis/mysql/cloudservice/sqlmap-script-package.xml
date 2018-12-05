@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="package">
+	<typeAlias alias="PackageModel"
+		type="com.git.cloud.cloudservice.model.po.PackageModel" />
+	<typeAlias alias="sModel" type="com.git.cloud.cloudservice.model.po.ModelModel" />
+
+	<resultMap id="packageModelResult" class="PackageModel">
+		<result property="id" column="ID" />
+		<result property="name" column="NAME" />
+		<result property="remark" column="REMARK" />
+		<result property="filePath" column="FILE_PATH" />
+		<result property="fzr" column="FZR" />
+		<result property="isActive" column="IS_ACTIVE" />
+		<result property="createUser" column="CREATE_USER" />
+		<result property="createDateTime" column="CREATE_DATETIME" />
+		<result property="updateUser" column="UPDATE_USER" />
+		<result property="updateDateTime" column="UPDATE_DATETIME" />
+	</resultMap>
+	<select id="package.selectAll" resultClass="PackageModel">
+		SELECT * FROM CLOUD_SCRIPT_PACKAGE where IS_ACTIVE = "Y" order by ID
+	</select>
+	<select id="package.load" resultMap="packageModelResult"
+		parameterClass="java.lang.String">
+		SELECT * FROM CLOUD_SCRIPT_PACKAGE where id=#id# 
+	</select>
+
+	<update id="package.update" parameterClass="com.git.cloud.cloudservice.model.po.PackageModel">
+		update CLOUD_SCRIPT_PACKAGE set name = #name# ,
+		 REMARK = #remark# , FILE_PATH = #filePath# , FZR = #fzr# ,UPDATE_USER = #updateUser#,UPDATE_DATETIME = #updateDateTime#
+		
+		where id=#id#
+	</update>
+
+	<insert id="package.insert" parameterClass="com.git.cloud.cloudservice.model.po.PackageModel">
+		insert into
+		CLOUD_SCRIPT_PACKAGE (ID, NAME, REMARK,FILE_PATH, FZR,CREATE_USER,CREATE_DATETIME,IS_ACTIVE)
+		values (#id#, #name#, #remark#, #filePath#, #fzr#, #createUser#, #createDateTime#,#isActive#)
+	</insert>
+	<update id="package.delete0" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT_PACKAGE set IS_ACTIVE="N" where id = #id#
+	</update>
+	<update id="package.delete01" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT_PARAM set IS_ACTIVE="N" WHERE ID IN( SELECT X.ID FROM (SELECT A.ID,D.ID PID FROM CLOUD_SCRIPT_PARAM A JOIN CLOUD_SCRIPT B ON A.SCRIPT_MODEL_FK = B.ID JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID JOIN CLOUD_SCRIPT_PACKAGE D ON C.PACKAGE_MODEL_FK = D.ID )X WHERE PID = #id#)
+	</update>
+	<update id="package.delete02" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT set IS_ACTIVE="N" WHERE ID IN(SELECT X.ID FROM (SELECT B.ID,D.ID PID FROM CLOUD_SCRIPT B JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID JOIN CLOUD_SCRIPT_PACKAGE D ON C.PACKAGE_MODEL_FK = D.ID )X WHERE PID = #id#)
+	</update>
+	<update id="package.delete03" parameterClass="java.lang.String">
+	    update CLOUD_SCRIPT_MODEL set IS_ACTIVE="N" WHERE ID IN(SELECT X.ID FROM (SELECT C.ID,D.ID PID FROM CLOUD_SCRIPT_MODEL C JOIN CLOUD_SCRIPT_PACKAGE D ON C.PACKAGE_MODEL_FK = D.ID)X WHERE PID = #id#)
+	</update>
+	<delete id="package.delete" parameterClass="java.lang.String">
+	    delete from CLOUD_SCRIPT_PACKAGE where id = #id#
+	</delete>
+
+	<resultMap id="package.treeData" class="java.util.HashMap">
+		<result property="id" column="id" />
+		<result property="name" column="name" />
+		<result property="pid" column="pid" />
+		<result property="type" column="type" />
+		<result property="nid" column="nid" />
+	</resultMap>
+	<select id="package.loadTree" resultMap="treeData">
+		Select "0" nid,"0" ID ,"介质" name,"-1" pid, 0 type  from dual
+		union
+		(SELECT concat ("1_",ID) nid,ID ID, NAME, "0" pid ,1 type   FROM CLOUD_SCRIPT_PACKAGE where IS_ACTIVE = "Y" order by CREATE_DATETIME)
+		union
+		(SELECT concat ("2_",ID) nid,ID ID, NAME, concat ("1_",PACKAGE_MODEL_FK) pid,2 type FROM CLOUD_SCRIPT_MODEL where IS_ACTIVE = "Y" order by CREATE_DATETIME)
+		union
+		(SELECT concat ("3_",ID) nid,ID ID, NAME,concat ("2_",MODEL_MODEL_FK) pid,3 type FROM CLOUD_SCRIPT where IS_ACTIVE = "Y" order by CREATE_DATETIME)
+	</select>
+	
+	
+	<!-- 级联删除 -->
+	<delete id="package.delete1" parameterClass="java.lang.String">
+	    DELETE FROM CLOUD_SCRIPT_PARAM WHERE ID IN( SELECT X.ID FROM (SELECT A.ID,D.ID PID FROM CLOUD_SCRIPT_PARAM A JOIN CLOUD_SCRIPT B ON A.SCRIPT_MODEL_FK = B.ID JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID JOIN CLOUD_SCRIPT_PACKAGE D ON C.PACKAGE_MODEL_FK = D.ID )X WHERE PID = #id#)
+	</delete>
+	
+	<delete id="package.delete2" parameterClass="java.lang.String">
+	    DELETE FROM CLOUD_SCRIPT WHERE ID IN(SELECT X.ID FROM (SELECT B.ID,D.ID PID FROM CLOUD_SCRIPT B JOIN CLOUD_SCRIPT_MODEL C ON B.MODEL_MODEL_FK = C.ID JOIN CLOUD_SCRIPT_PACKAGE D ON C.PACKAGE_MODEL_FK = D.ID )X WHERE PID = #id#)
+	</delete>
+	<delete id="package.delete3" parameterClass="java.lang.String">
+	    DELETE FROM CLOUD_SCRIPT_MODEL WHERE ID IN(SELECT X.ID FROM (SELECT C.ID,D.ID PID FROM CLOUD_SCRIPT_MODEL C JOIN CLOUD_SCRIPT_PACKAGE D ON C.PACKAGE_MODEL_FK = D.ID)X WHERE PID = #id#)
+	</delete>
+	<select id="findPackageModelByNameList" parameterClass="hashMap" resultClass="PackageModel">
+		<![CDATA[
+			SELECT concat(sp.id, ',', sm.id) id, concat(sp.file_path, ',', sm.file_path) as filePath
+			FROM CLOUD_SCRIPT_PACKAGE sp
+			LEFT JOIN CLOUD_SCRIPT_MODEL sm ON sp.ID = sm.PACKAGE_MODEL_FK
+			WHERE
+				sp.IS_ACTIVE = 'Y'
+			AND sm.IS_ACTIVE = 'Y'
+			AND sp.NAME IN ($packNames$)
+		]]>
+	</select>
+	<select id="package.id" parameterClass="java.lang.String"  resultClass="sModel">
+	  <![CDATA[ 
+	  SELECT  * FROM CLOUD_SCRIPT_MODEL WHERE IS_ACTIVE='Y'  AND PACKAGE_MODEL_FK=#ID#
+	   ]]>
+    </select> 
+    <!-- 检查包名是否存在 -->
+	<select id="checkPackageName" parameterClass="java.lang.String"  resultClass="packageModel">
+	  <![CDATA[
+	  SELECT * FROM CLOUD_SCRIPT_PACKAGE WHERE NAME = #packageName# AND IS_ACTIVE='Y'
+	   ]]>
+    </select> 
+    <!-- 检查模块名是否存在 -->
+	<select id="checkModelName" parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+	  <![CDATA[
+	  	SELECT 
+			COUNT(1)
+		FROM
+			CLOUD_SCRIPT_MODEL model
+		WHERE
+			model.`NAME` = #modelName# AND model.PACKAGE_MODEL_FK = #packageId# AND model.IS_ACTIVE = 'Y'
+	   ]]>
+    </select> 
+    <!-- 检查脚本名是否存在 -->
+	<select id="checkScriptName" parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+	  <![CDATA[
+	  	SELECT 
+			COUNT(1)
+		FROM
+			CLOUD_SCRIPT script
+		WHERE
+			script.`NAME` = #scriptName# AND script.MODEL_MODEL_FK = #modelId# AND script.IS_ACTIVE = 'Y'
+	   ]]>
+    </select> 
+</sqlMap>

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<!-- 日志管理 -->
+	<bean id="logAction" class="com.git.cloud.log.action.LogAction"
+		scope="prototype">
+		<property name="logService" ref="log_service" />
+	</bean>
+	<bean id="logDaoImpl" class="com.git.cloud.log.dao.impl.LogDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="log_service" class="com.git.cloud.log.service.impl.LogServiceImpl">
+		<property name="logDao" ref="logDaoImpl" />
+	</bean>
+</beans>

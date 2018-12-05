@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	
+	<!-- **************** DAO层 ******************* -->
+	<bean id="rmNwUseDAO" class="com.git.cloud.resmgt.network.dao.impl.RmNwUseDAO">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>	
+	<!-- ***********DAO层结束 ******************* -->
+	<!-- IP用途管理  service、action-->
+	<bean id="rmNwUseAction" class="com.git.cloud.resmgt.network.action.RmNwUseAction">
+         <property name="rmNwUseService" ref="rmNwUseServiceImpl" />
+	</bean>
+	<bean id="rmNwUseServiceImpl" class="com.git.cloud.resmgt.network.service.impl.RmNwUseServiceImpl">
+		<property name="rmNwUseDAO" ref="rmNwUseDAO" />
+	</bean>
+</beans>

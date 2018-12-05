@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="CloudService">
+	<resultMap id="BaseResultMap" class="com.git.cloud.cloudservice.model.po.CloudServicePo">
+		<result column="SERVICE_ID" property="serviceId" />
+		<result column="SERVICE_NAME" property="serviceName" />
+		<result column="IMAGE_ID" property="imageId" />
+		<result column="SERVICE_STATUS" property="serviceStatus" />
+		<result column="SERVICE_TYPE" property="serviceType" />
+		<result column="HA_TYPE" property="haType" />
+		<result column="PLATFORM_TYPE" property="platformType" />
+		<result column="VM_TYPE" property="vmType" />
+		<result column="IS_VM" property="isVm" />
+		<result column="VM_BASE" property="vmBase" />
+		<result column="FUNC_REMARK" property="funcRemark" />
+		<result column="UNFUNC_REMARK" property="unfuncRemark" />
+		<result column="IS_ACTIVE" property="isActive" />
+		<result column="SYSTEM_TYPE" property="systemType" />
+		<result column="STORAGE_DATA_TYPE" property="storageDataType" />
+		<result column="HOST_TYPE_ID" property="hostType" />
+		<result column="CLOUD_TYPE" property="cloudType" />
+		<result column="CLOUD_TYPE_CODE" property="cloudTypeCode" />
+	</resultMap>
+	<resultMap id="cloudServiceVo" class="com.git.cloud.cloudservice.model.po.CloudServiceVo">
+		<result column="SERVICE_ID" property="serviceId" />
+		<result column="SERVICE_NAME" property="serviceName" />
+		<result column="IMAGE_ID" property="imageId" />
+		<result column="IMAGE_NAME" property="imageName" />
+		<result column="SERVICE_STATUS" property="serviceStatus" />
+		<result column="SERVICE_TYPE" property="serviceType" />
+		<result column="SERVICE_TYPE_NAME" property="serviceTypeName" />
+		<result column="HA_TYPE" property="haType" />
+		<result column="HA_TYPE_NAME" property="haTypeName" />
+		<result column="PLATFORM_TYPE" property="platformType" />
+		<result column="PLATFORM_TYPE_NAME" property="platformTypeName" />
+		<result column="PLATFORM_TYPE_CODE" property="platformTypeCode" />
+		<result column="VM_TYPE" property="vmType" />
+		<result column="HOST_TYPE_NAME" property="hostTypeName" />
+		<result column="VIRTUAL_TYPE_NAME" property="vmTypeName" />
+		<result column="IS_VM" property="isVm" />
+		<result column="VM_BASE" property="vmBase" />
+		<result column="FUNC_REMARK" property="funcRemark" />
+		<result column="UNFUNC_REMARK" property="unfuncRemark" />
+		<result column="IS_ACTIVE" property="isActive" />
+		<result column="SYSTEM_TYPE" property="systemType" />
+		<result column="STORAGE_DATA_TYPE" property="storageDataType" />
+		<result column="SYSTEM_TYPE_NAME" property="systemTypeName" />
+		<result column="STORAGE_DATA_TYPE_NAME" property="storageDataTypeName" />
+		<result column="RRINFO_ID" property="rrinfoId" />
+		<result column="DISK_CAPACITY" property="diskCapacity" />
+		<result column="CLOUD_TYPE" property="cloudType" />
+		<result column="CLOUD_TYPE_CODE" property="cloudTypeCode" />
+	</resultMap>
+
+	<select id="CloudService.load" resultMap="BaseResultMap">
+		SELECT SRV.* FROM CLOUD_SERVICE SRV WHERE SRV.IS_ACTIVE='Y' AND SERVICE_ID =#serviceId# 
+	</select>
+	<select id="CloudService.file" resultClass="com.git.cloud.resmgt.common.model.po.CmPasswordPo">
+		SELECT 
+			cm.ID AS id,
+			cm.RESOURCE_ID AS resourceId,
+			cm.USER_NAME AS userName,
+			cm.PASSWORD AS password,
+			cm.LAST_MODIFY_TIME AS lastModifyTime
+		FROM CM_PASSWORD cm
+			LEFT JOIN CLOUD_SERVICE cloud ON cloud.SERVICE_ID = cm.RESOURCE_ID
+		WHERE cloud.SERVICE_ID = #serviceId#
+	</select>
+	<select id="CloudService.loadAll" resultMap="cloudServiceVo">
+	   SELECT
+		    SRV.*, C.DISK_CAPACITY AS DISK_CAPACITY,
+		    DIC1.DIC_NAME AS SERVICE_TYPE_NAME,
+		    DIC2.DIC_NAME AS HA_TYPE_NAME,
+		    PF.PLATFORM_NAME AS PLATFORM_TYPE_NAME,
+		    DIC3.DIC_NAME AS SYSTEM_TYPE_NAME,
+		    DIC4.DIC_NAME AS STORAGE_DATA_TYPE_NAME,
+		    C.IMAGE_NAME,
+		    T.VIRTUAL_TYPE_NAME,
+		    HT.HOST_TYPE_NAME AS HOST_TYPE_NAME,
+		    PF.PLATFORM_CODE AS PLATFORM_TYPE_CODE,
+		    SRV.CLOUD_TYPE AS CLOUD_TYPE,
+		    SRV.CLOUD_TYPE_CODE AS CLOUD_TYPE_CODE,C.IAAS_UUID  as IAAS_UUID
+		FROM
+		    CLOUD_SERVICE SRV
+		LEFT JOIN ADMIN_DIC DIC1 ON DIC1.DIC_TYPE_CODE = 'CLOUD_SRV_TYPE'
+		AND DIC1.DIC_CODE = SRV.SERVICE_TYPE
+		LEFT JOIN ADMIN_DIC DIC2 ON DIC2.DIC_TYPE_CODE = 'HA_TYPE'
+		AND DIC2.DIC_CODE = SRV.HA_TYPE
+		LEFT JOIN RM_PLATFORM PF ON PF.PLATFORM_ID = SRV.PLATFORM_TYPE
+		AND PF.IS_ACTIVE = 'Y'
+		LEFT JOIN ADMIN_DIC DIC3 ON DIC3.DIC_TYPE_CODE = 'SYSTEM_TYPE'
+		AND DIC3.DIC_CODE = SRV.SYSTEM_TYPE
+		LEFT JOIN ADMIN_DIC DIC4 ON DIC4.DIC_TYPE_CODE = 'STORAGE_DATA_TYPE'
+		AND DIC4.DIC_CODE = SRV.STORAGE_DATA_TYPE
+		LEFT JOIN CLOUD_IMAGE C ON SRV.IMAGE_ID = C.IMAGE_ID
+		AND C.IS_ACTIVE = 'Y'
+		LEFT JOIN RM_HOST_TYPE HT ON SRV.HOST_TYPE_ID = HT.HOST_TYPE_ID
+		AND HT.IS_ACTIVE = 'Y'
+		LEFT JOIN RM_VIRTUAL_TYPE T ON SRV.VM_TYPE = T.VIRTUAL_TYPE_ID
+		AND T.IS_ACTIVE = 'Y'
+		WHERE
+		    SRV.IS_ACTIVE = 'Y'
+		AND SERVICE_ID = #serviceId# 
+	</select>
+	<select id="CloudService.search" parameterClass="java.util.Map"
+		resultMap="cloudServiceVo">
+		SELECT 
+			 DISTINCT
+			 SRV.*,
+			 DIC1.DIC_NAME AS SERVICE_TYPE_NAME,
+			 DIC2.DIC_NAME AS HA_TYPE_NAME,
+			 PF.PLATFORM_NAME AS PLATFORM_TYPE_NAME, 
+			 PF.PLATFORM_CODE AS PLATFORM_TYPE_CODE,
+			 DIC3.DIC_NAME AS SYSTEM_TYPE_NAME, 
+			 DIC4.DIC_NAME AS STORAGE_DATA_TYPE_NAME,
+			 C.IMAGE_NAME,
+			 C.DISK_CAPACITY,
+			 T.VIRTUAL_TYPE_NAME,
+			 HT.HOST_TYPE_NAME AS HOST_TYPE_NAME,
+			 BMR.RRINFO_ID AS rrinfoId,
+			 BMR.CPU AS cpu,
+			 BMR.MEM AS mem,
+			 BMR.SYS_DISK AS sysDisk,
+			 BMR.VM_NUM AS vmNum
+	    FROM 
+	         CLOUD_SERVICE SRV 
+	         LEFT JOIN ADMIN_DIC DIC1 ON DIC1.DIC_TYPE_CODE='CLOUD_SRV_TYPE' AND DIC1.DIC_CODE=SRV.SERVICE_TYPE 
+	         LEFT JOIN ADMIN_DIC DIC2 ON DIC2.DIC_TYPE_CODE='HA_TYPE' AND DIC2.DIC_CODE=SRV.HA_TYPE 
+	         LEFT JOIN RM_PLATFORM PF ON PF.PLATFORM_ID=SRV.PLATFORM_TYPE AND PF.IS_ACTIVE='Y' 
+	         LEFT JOIN ADMIN_DIC DIC3 ON DIC3.DIC_TYPE_CODE='SYSTEM_TYPE' AND DIC3.DIC_CODE=SRV.SYSTEM_TYPE 
+	         LEFT JOIN ADMIN_DIC DIC4 ON DIC4.DIC_TYPE_CODE='STORAGE_DATA_TYPE' AND DIC4.DIC_CODE=SRV.STORAGE_DATA_TYPE 
+	         LEFT JOIN CLOUD_IMAGE C ON SRV.IMAGE_ID=C.IMAGE_ID AND C.IS_ACTIVE='Y' 
+	         LEFT JOIN RM_VIRTUAL_TYPE T ON SRV.VM_TYPE=T.VIRTUAL_TYPE_ID AND T.IS_ACTIVE='Y'
+	         LEFT JOIN RM_HOST_TYPE HT ON SRV.HOST_TYPE_ID=HT.HOST_TYPE_ID AND HT.IS_ACTIVE='Y'
+	         LEFT JOIN BM_SR_RRINFO BMR ON SRV.RRINFO_ID = BMR.RRINFO_ID,
+	         SYS_ROLE_MANAGE manage 
+	    WHERE 
+	    	 SRV.IS_ACTIVE='Y'
+	    	 AND(
+				manage.CLOUD_SERVICE_ID = SRV.SERVICE_ID
+				OR manage.CLOUD_SERVICE_ID = 'ALL'
+			)
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="userId">
+				manage.USER_ID = #userId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="serviceName">
+				SRV.SERVICE_NAME like concat('%', #serviceName#, '%')
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="serviceId">
+				SRV.SERVICE_ID = #serviceId#				
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="serviceStatic">
+				SRV.SERVICE_STATUS =
+				#serviceStatic#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="haType">
+				SRV.HA_TYPE =
+				#haType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="platformType">
+				SRV.PLATFORM_TYPE =
+				#platformType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="vmType">
+				SRV.VM_TYPE =
+				#vmType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="hostTypeId">
+				SRV.HOST_TYPE_ID =
+				#hostTypeId#
+			</isNotEmpty>			
+			<isNotEmpty prepend="and" property="serviceType">
+				SRV.SERVICE_TYPE =
+				#serviceType#
+			</isNotEmpty>			
+		</dynamic>
+
+		order by SRV.SERVICE_NAME limit #startIndex# ,#pageSize#
+	</select>
+	<select id="CloudService.count" parameterClass="java.util.Map"
+		resultClass="java.lang.Integer">
+		SELECT
+			count(DISTINCT SERVICE_ID)
+		FROM
+			CLOUD_SERVICE SRV,
+			SYS_ROLE_MANAGE manage
+		WHERE
+			IS_ACTIVE = 'Y'
+		AND(
+			manage.CLOUD_SERVICE_ID = SRV.SERVICE_ID
+			OR manage.CLOUD_SERVICE_ID = 'ALL'
+		)
+		<dynamic prepend=" and ">
+			<isNotEmpty prepend="and" property="userId">
+				manage.USER_ID = #userId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="serviceName">
+				SERVICE_NAME like concat('%', #serviceName#, '%')
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="serviceId">
+				SERVICE_ID = #serviceId#				
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="serviceStatic">
+				SERVICE_STATUS =
+				#serviceStatic#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="haType">
+				HA_TYPE =
+				#haType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="vmType">
+				VM_TYPE =
+				#vmType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="platformType">
+				PLATFORM_TYPE =
+				#platformType#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="hostTypeId">
+				HOST_TYPE_ID =
+				#hostTypeId#
+			</isNotEmpty>							
+		</dynamic>
+	</select>
+
+	<insert id="CloudService.insert" parameterClass="com.git.cloud.cloudservice.model.po.CloudServicePo">
+		insert into
+		CLOUD_SERVICE ( SERVICE_ID , SERVICE_NAME , IMAGE_ID ,
+		SERVICE_STATUS ,
+		SERVICE_TYPE , HA_TYPE , PLATFORM_TYPE , VM_TYPE ,
+		IS_VM , VM_BASE ,
+		FUNC_REMARK , UNFUNC_REMARK , IS_ACTIVE,  SYSTEM_TYPE, 
+		STORAGE_DATA_TYPE,CREATE_DATETIME,HOST_TYPE_ID,CLOUD_TYPE,CLOUD_TYPE_CODE)values(
+		#serviceId#,
+		#serviceName#, #imageId#, #serviceStatus#,
+		#serviceType#,
+		#haType#, #platformType#, #vmType#, #isVm#,
+		#vmBase#,
+		#funcRemark#,
+		#unfuncRemark#, #isActive#, #systemType#, #storageDataType#,
+		#createDateTime#,#hostType#,#cloudType#,#cloudTypeCode#)
+	</insert>
+	<update id="CloudService.update" parameterClass="com.git.cloud.cloudservice.model.po.CloudServicePo">
+		update
+		CLOUD_SERVICE set
+		SERVICE_NAME = #serviceName# ,
+		IMAGE_ID =#imageId# ,
+		SERVICE_STATUS =#serviceStatus# ,
+		SERVICE_TYPE =#serviceType# ,
+		HA_TYPE = #haType# ,
+		PLATFORM_TYPE = #platformType# ,
+		VM_TYPE = #vmType# ,
+		HOST_TYPE_ID = #hostType# , 
+		IS_VM = #isVm# ,
+		VM_BASE = #vmBase# ,
+		FUNC_REMARK =
+		#funcRemark# ,
+		UNFUNC_REMARK = #unfuncRemark#, SYSTEM_TYPE =#systemType#, STORAGE_DATA_TYPE=#storageDataType#,
+		RRINFO_ID = #rrinfoId#,
+		UPDATE_DATETIME = #updateDateTime#,
+		CLOUD_TYPE = #cloudType#,
+		CLOUD_TYPE_CODE = #cloudTypeCode#
+		where SERVICE_ID = #serviceId#
+	</update>
+	<update id="updateCloudServiceRRinfo" parameterClass="com.git.cloud.cloudservice.model.po.CloudServicePo">
+		update
+		CLOUD_SERVICE set
+		RRINFO_ID = #rrinfoId#
+		where SERVICE_ID = #serviceId#
+	</update>
+	<!-- <delete id="CloudService.delete" parameterClass="java.lang.String">
+		delete from CLOUD_SERVICE where SERVICE_ID = #serviceId#
+	</delete> -->	
+	<select id="findCloudServicesByparam" parameterClass="com.git.cloud.cloudservice.model.po.CloudServicePo" resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM  CLOUD_SERVICE WHERE SERVICE_NAME = #serviceName# AND IS_ACTIVE ='Y'
+		<isNotEmpty prepend="and" property="serviceId">
+			SERVICE_ID != #serviceId#
+		</isNotEmpty>
+	</select>
+	<select id="findCloudServicesByCode" parameterClass="com.git.cloud.cloudservice.model.po.CloudServicePo" resultClass="String">
+		SELECT SERVICE_ID FROM  CLOUD_SERVICE WHERE CLOUD_TYPE_CODE = #cloudTypeCode# 
+		
+	</select>
+	<select id="CloudService.queryVmType" parameterClass="java.util.Map" resultClass="java.util.HashMap">
+		SELECT VM.VIRTUAL_TYPE_ID AS VALUE,VM.VIRTUAL_TYPE_NAME AS NAME FROM RM_VIRTUAL_TYPE VM WHERE VM.IS_ACTIVE='Y'
+		<isNotEmpty prepend="and" property="platFormId">
+			PLATFORM_ID=#platFormId#
+		</isNotEmpty>
+	</select>
+	<update id="CloudService.delete" parameterClass="java.lang.String">
+		UPDATE CLOUD_SERVICE SET IS_ACTIVE='N'  WHERE SERVICE_ID = #serviceId#
+	</update>
+	<update id="CloudService.deleteAttr" parameterClass="java.lang.String">
+		UPDATE CLOUD_SERVICE_ATTR SET IS_ACTIVE='N' WHERE SERVICE_ID= #serviceId#
+	</update>	
+	<update id="CloudService.deleteAttrSel" parameterClass="java.lang.String">
+		DELETE from CLOUD_SERVICE_ATTR_SEL WHERE ATTR_ID in (SELECT ATTR_ID from CLOUD_SERVICE_ATTR where SERVICE_ID= #serviceId#)
+	</update>
+	<select id="CloudService.selectCloudServiceOsRef" parameterClass="java.util.Map" resultClass="com.git.cloud.rest.model.CloudServiceOsRef">
+		SELECT
+			f.CLOUD_SERVICE_ID cloudServiceId
+		FROM
+			CLOUD_SERVICE_OS_REF f
+		WHERE
+			f.OS_TYPE = #osType#
+			<dynamic prepend="and">
+			<isNull prepend="and" property="softWareType">
+				f.SOFTWARE_TYPE is null 
+			</isNull>
+			<isNotNull prepend="and" property="softWareType">
+				f.SOFTWARE_TYPE=#softWareType#
+			</isNotNull>
+			</dynamic>
+	</select>
+	
+</sqlMap>

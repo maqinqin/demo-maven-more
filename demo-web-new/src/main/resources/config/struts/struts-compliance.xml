@@ -1,0 +1,24 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+ <struts>
+   <package name="parameter-management" extends="icms-package" namespace="/parameter/management">
+      <action name="init" class="com.git.cloud.parame.action.ParameterTestAction" method="init"> 
+      <result name="success">/pages/management/parame.jsp</result>
+      </action>
+      <action name="save" class="com.git.cloud.parame.action.ParameterTestAction" method="save"/>
+      <action name="search" class="com.git.cloud.parame.action.ParameterTestAction" method="search"/>
+      <action name="view"  class="com.git.cloud.parame.action.ParameterTestAction"  method="view"/>
+      <action name="delete" class="com.git.cloud.parame.action.ParameterTestAction" method="delete"/>
+      <action  name="getParamName" class="com.git.cloud.parame.action.ParameterTestAction" method="getParamName"/>
+      <action  name="pageRefreshTime" class="com.git.cloud.parame.action.ParameterTestAction" method="pageRefreshTime"/>
+   
+    <action name="getAllBizParamInst" class="com.git.cloud.parame.action.BizParamInstAction" method="getAllBizParamInst"> 
+      <result name="success">/pages/management/bizParamInst.jsp</result>
+      </action>
+   <action  name="updateParamValue" class="com.git.cloud.parame.action.BizParamInstAction" method="updateParamValue"/>
+   <action  name="getBizParamInstById" class="com.git.cloud.parame.action.BizParamInstAction" method="getBizParamInstById"/>
+   <action  name="addBizParamInst" class="com.git.cloud.parame.action.BizParamInstAction" method="addBizParamInst"/>
+   </package>
+  
+ </struts>         

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="adminParam">
+	<typeAlias alias="parameterPo" type="com.git.cloud.parame.model.po.ParameterPo" />
+	<!-- 查找系统邮件信息 -->
+	<select id="selectAdminParamList" resultClass="parameterPo">
+		select PARAM_ID paramId,
+			   PARAM_NAME paramName,
+			   PARAM_VALUE paramValue,
+			   REMARK remark,
+		       IS_ACTIVE isActive,
+			   IS_ENCRYPTION isEncryption
+		from ADMIN_PARAM
+		where IS_ACTIVE='Y'
+	</select>
+</sqlMap>

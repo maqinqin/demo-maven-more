@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="certificatett">
+      <typeAlias alias="certificate" type="com.git.cloud.shiro.model.CertificatePo" />
+      <select id="selectCertificate" parameterClass="java.lang.String"   resultClass="certificate">
+	  <![CDATA[ 
+	  SELECT  
+	     CERTIFICATE_NAME AS certificateName,
+         CERTIFICATE_PATH AS certificatePath ,
+         SYSDATE() AS lastLoginTime   FROM  SYS_CERTIFICATE_PARAM WHERE ID='1'
+	   ]]>
+	 
+	  </select> 
+	  <!-- 保存数据 -->
+	  <update id="save.certificate" parameterClass="certificate">
+	    UPDATE SYS_CERTIFICATE_PARAM 
+           SET 
+           CERTIFICATE_NAME=#certificateName#,
+           CERTIFICATE_PATH=#certificatePath#,
+           LAST_LOGIN_TIME=#lastLoginTime#
+         WHERE ID=#id#
+	  </update>
+	  <update id="saveTime" parameterClass="certificate">
+	   UPDATE SYS_CERTIFICATE_PARAM 
+           SET 
+           LAST_LOGIN_TIME=#lastLoginTime#
+         WHERE ID='1'
+	  </update>
+	  
+</sqlMap>		
+
+	
+	
+	

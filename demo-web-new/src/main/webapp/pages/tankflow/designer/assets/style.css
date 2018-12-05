@@ -1,0 +1,36 @@
+/* CSS file */
+@namespace s "library://ns.adobe.com/flex/spark";
+@namespace mx "library://ns.adobe.com/flex/mx";
+
+mx|ToolTip
+{
+	fontSize:12;
+}
+
+.nodeLabel
+{
+	fontSize:12;
+	fontFamily:Î¢ÈíÑÅºÚ;
+	color:#666666;
+}
+mx|Alert{
+	borderColor: #5775cb;
+	borderAlpha:0.4;
+	backgroundColor: #feebbf;
+	backgroundAlpha:1;
+	dropShadowVisible: true;
+	chromeColor: #5775cb;
+	titleStyleName: alertTitle;
+	messageStyleName: alertMessage;
+	buttonStyleName: alertButton;
+}
+.alertTitle{
+	fontSize: 12;
+	color: #000000;
+}
+.alertMessage {
+	color: #000000;
+}
+.alertButton {
+	color: #000000;
+}

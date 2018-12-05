@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="notification">
+	
+	<typeAlias alias="NotificationPo" type="com.git.cloud.log.model.po.NotificationPo" />
+	<!--获取通知列表 -->
+	<sql id="queryNotiList">
+		<![CDATA[
+		SELECT
+			t.ID AS id,
+			t.RESOURCE_ID AS resourceId,
+			t.RESOURCE_TYPE AS resourceType,
+			t.SOURCE AS source,
+			t.TYPE AS type,
+			d.DIC_NAME AS operationType,
+			t.OPERATE_CONTENT AS operationContent,
+			t.STATE AS state,
+			t.CREATE_TIME AS createTime,
+			t.OPERATOR AS operator,
+			t.CREATOR AS creator,
+			t.DEAL_TIME AS dealTime,
+			t.TENANT_ID AS tenantId,
+			t.USER_ID AS userId
+		
+		FROM
+			RM_NOTIFICATION t
+		LEFT JOIN ADMIN_DIC d ON d.DIC_CODE = t.OPERATION_TYPE
+		WHERE
+			1 = 1
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="resourceId" prepend=" and ">
+				<![CDATA[t.RESOURCE_ID = #resourceId#]]>
+			</isNotEmpty>
+			<isNotEmpty property="resourceType" prepend=" and ">
+				t.RESOURCE_TYPE = #resourceType#
+			</isNotEmpty>
+			<isNotEmpty property="state" prepend=" and ">
+				t.STATE = #state#
+			</isNotEmpty>
+			<isNotEmpty property="type" prepend=" and ">
+				t.TYPE = #type#
+			</isNotEmpty>
+			<isNotEmpty property="operationType" prepend=" and ">
+				t.OPERATION_TYPE = #operationType#
+			</isNotEmpty>
+			<!-- <isNotEmpty property="operateContent" prepend=" and ">
+				t.OPERATE_CONTENT like concat('%', #operateContent#, '%')
+			</isNotEmpty> -->
+		</dynamic>
+	</sql>
+	<select id="queryNotiListTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="queryNotiList" />
+		) as recordTable
+	</select>
+	<select id="queryNotiListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="queryNotiList" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+	<!-- 根据alarm key查询报警信息 -->
+	<select id="findNotificationIdByAlarmKey" parameterClass="java.lang.String" resultClass="NotificationPo" remapResults="true">
+	  SELECT ID as id FROM RM_NOTIFICATION WHERE ALARM_KEY = #alarmKey#
+	</select>
+	 <!--获得日志信息 -->
+	<!-- <select id="queryNotiByParams" parameterClass="hashMap" resultClass="NotificationPo">
+		<![CDATA[
+		   select 
+		        t.ID as id,
+				t.MODULE_TYPE as moduleType,
+				t.MODULE_NAME as moduleName,
+				t.OPERATE_TYPE as operateType,
+				t.OPERATE_NAME as operateName,
+				t.OPERATE_CONTENT as operateContent,
+				t.OPERATOR as operator,
+				t.OPERATE_TIME as operateTime,
+				t.IP_ADDR as ipAddr 
+			from SYS_LOG d where 1=1 
+		]]>
+		<isNotEmpty property="id" prepend=" and ">
+			<![CDATA[t.ID = #id#]]>
+		</isNotEmpty>
+	</select> -->
+	
+	<insert id="addNotification" parameterClass="NotificationPo">
+		<![CDATA[ 
+			INSERT INTO RM_NOTIFICATION(
+				ID,
+				RESOURCE_ID,
+				RESOURCE_TYPE,
+				SOURCE,
+				TYPE,
+				OPERATION_TYPE,
+				OPERATE_CONTENT,
+				STATE,
+				CREATOR,
+				CREATE_TIME,
+				OPERATOR,
+				DEAL_TIME
+				,ALARM_KEY
+				,ALARM_TOTAL,
+				TENANT_ID,
+				USER_ID
+		
+		
+			)
+			VALUES
+				(
+					#id#,#resourceId#,#resourceType#,#source#,#type#,#operationType#,#operationContent#,#state#,#creator#,#createTime#,#operator#,#dealTime#
+					,#alarmKey#,#alarmTotal#,#tenantId#,#userId#
+				)
+		]]>
+	</insert>
+	<update id="updateNotiState" parameterClass="NotificationPo">
+	UPDATE RM_NOTIFICATION
+	SET STATE = #state#
+	WHERE
+		ID = #id#
+	</update>
+	<!-- 更新报警的时间和状态 -->
+	<update id="updateAlarmState" parameterClass="NotificationPo">
+	  UPDATE RM_NOTIFICATION 
+	   SET STATE = #state#
+	      ,CREATE_TIME = #createTime#
+	      ,OPERATOR = NULL
+	      ,DEAL_TIME = NULL
+	      ,ALARM_TOTAL = ALARM_TOTAL + 1
+	  WHERE ID = #id#
+	</update>
+</sqlMap>

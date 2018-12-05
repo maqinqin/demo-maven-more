@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+
+<sqlMap namespace="src">
+	<typeAlias alias="cloudImage" type="com.git.cloud.cloudservice.model.po.CloudImage" />
+	<typeAlias alias="cloudImageVo" type="com.git.cloud.cloudservice.model.vo.CloudImageVo" />
+	<typeAlias alias="cloudSoftWare" type="com.git.cloud.cloudservice.model.po.CloudSoftware" />
+	<typeAlias alias="cloudSoftWareVer" type="com.git.cloud.cloudservice.model.po.CloudSoftwareVer" />
+	<typeAlias alias="cloudSoftwareVersVo" type="com.git.cloud.cloudservice.model.vo.CloudSoftwareVersVo" />
+	<typeAlias alias="cloudSoftwareVo" type="com.git.cloud.cloudservice.model.vo.CloudSoftwareVo" />
+	
+	<resultMap id="cloudSoftWareResult" class="cloudSoftWare">
+		<result property="softwareId" column="SOFTWARE_ID" ></result>
+		<result property="softwareName" column="SOFTWARE_NAME" ></result>
+		<result property="softwareType" column="SOFTWARE_TYPE" ></result>
+		<result property="softwarePath" column="SOFTWARE_PATH" ></result>
+		<result property="remark" column="remark" ></result>
+		<result property="isActive" column="IS_ACTIVE" ></result>
+	</resultMap>
+	
+	<sql id="findImage" >
+		  select
+		  IMAGE_ID as imageId,IMAGE_NAME as imageName, IMAGE_PATH as imagePath, IMAGE_URL as imageUrl,
+		  IMAGE_SIZE as imageSize,DISK_CAPACITY as diskCapacity, REMARK as remark, MANAGER as manager,
+		  PASSWORD as password, IS_ACTIVE as isActive , is_admin_user_entered as isAdminUserEntered,
+		  is_sync as isSync
+		  from CLOUD_IMAGE where IS_ACTIVE='Y' <dynamic prepend="and">
+			<isNotEmpty prepend="and" property="selectImageName">
+					IMAGE_NAME like concat('%', #selectImageName#, '%')
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	
+	<select id="findImageList" parameterClass="java.util.Map"  resultClass="cloudImage">
+		<include refid="findImage"/> 
+		ORDER BY $sidx$ $sord$
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="selectAllImagesCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="findImage"/>
+        ) as recordTable
+	</select>
+	
+	
+	<!-- 镜像自检测模块 开始 -->
+	<select id="findCloudImageList" resultClass="cloudImage">
+		SELECT
+			IMAGE_ID as imageId,
+			IMAGE_NAME as imageName, 
+			IMAGE_PATH as imagePath, 
+			IMAGE_URL as imageUrl, 
+			IMAGE_SIZE as imageSize,
+			DISK_CAPACITY as diskCapacity, 
+			REMARK as remark, MANAGER as manager, 
+			PASSWORD as password, 
+			IS_ACTIVE as isActive
+		FROM
+			CLOUD_IMAGE 
+		WHERE IS_ACTIVE='Y' 
+	</select>
+	<!-- 镜像自检测模块 结束-->
+	
+	<select id="findCloudImagesByparam" parameterClass="cloudImage"  resultClass="java.lang.Integer">
+		SELECT COUNT(1)   FROM CLOUD_IMAGE WHERE IS_ACTIVE='Y'
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="imageId" >
+				IMAGE_ID != #imageId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="imageName" >
+				IMAGE_NAME = #imageName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="imageUrl" >
+				IMAGE_URL = #imageUrl#
+			</isNotEmpty>
+		</dynamic>
+		
+	</select>
+	
+	<insert id="insertImage"  parameterClass="cloudImage">
+		 insert into CLOUD_IMAGE(IMAGE_ID,IMAGE_NAME,IMAGE_PATH,IMAGE_URL,IMAGE_SIZE,DISK_CAPACITY,REMARK,MANAGER,PASSWORD,IS_ACTIVE,MANAGE_TYPE,IMAGE_TYPE)
+		 values(#imageId#,#imageName#,#imagePath#,#imageUrl#,#imageSize#,#diskCapacity#,#remark#,#manager#,#password#,#isActive#,#manageType#,#imageType#)
+	</insert>
+	
+	<update id="updateImage"  parameterClass="cloudImage">
+		 update CLOUD_IMAGE
+		<dynamic prepend="set">
+			<isNotNull prepend="," property="imageName">IMAGE_NAME=#imageName#</isNotNull>
+			<isNotNull prepend="," property="imagePath">IMAGE_PATH=#imagePath#</isNotNull>
+			<isNotNull prepend="," property="imageUrl">IMAGE_URL=#imageUrl#</isNotNull>
+			<isNotNull prepend="," property="imageSize">IMAGE_SIZE=#imageSize#</isNotNull>
+			<isNotNull prepend="," property="remark">REMARK=#remark#</isNotNull>
+			<isNotNull prepend="," property="manager">MANAGER=#manager#</isNotNull>
+			<isNotNull prepend="," property="password">PASSWORD=#password#</isNotNull>
+			<isNotNull prepend="," property="diskCapacity">DISK_CAPACITY=#diskCapacity#</isNotNull>
+			<isNotNull prepend="," property="isActive">IS_ACTIVE=#isActive#</isNotNull>
+			<isNotNull prepend="," property="imageType">IMAGE_TYPE=#imageType#</isNotNull>
+			<isNotNull prepend="," property="manageType">MANAGE_TYPE=#manageType#</isNotNull>
+		</dynamic>
+		 where IMAGE_ID=#imageId#
+	</update>
+	
+	<update id="deleteImage" parameterClass="java.lang.String">
+		UPDATE CLOUD_IMAGE  SET IS_ACTIVE='N' where IMAGE_ID=#imageId#
+	</update>
+	
+	<select id="selectImage"  resultClass="cloudImage" parameterClass="java.lang.String">
+	select ci.IMAGE_ID as imageId,ci.IMAGE_NAME as imageName, ci.IMAGE_PATH as 
+	imagePath, ci.IMAGE_URL as imageUrl, ci.IMAGE_SIZE as imageSize, ci.REMARK as 
+	remark, ci.MANAGER as manager, ci.PASSWORD as password, ci.IS_ACTIVE as 
+	isActive,ci.DISK_CAPACITY as diskCapacity,ci.MANAGE_TYPE as manageType,ci.IMAGE_TYPE as imageType 
+	,ci.IAAS_UUID as iaasUuid
+	from CLOUD_IMAGE ci where
+	IS_ACTIVE='Y' and IMAGE_ID=#imageId#
+	</select>
+	
+	<select id="selectImageSoftWareRef"  resultClass="cloudSoftWare" parameterClass="java.lang.String">
+		 SELECT * FROM CLOUD_SOFTWARE soft JOIN CLOUD_SOFTWARE_VER ver ON CLOUD_SOFTWARE_VER.SOFTWARE_VER_ID = CLOUD_SOFTWARE.SOFTWARE_ID where soft.IS_ACTIVE='Y' and ver.IS_ACTIVE='Y' and SOFTWARE_VER_ID=#softWareVerId#
+	</select>
+	<!-- 软件信息管理 -->
+	<select id="selectSoftWareAll"  resultMap="cloudSoftWareResult">
+		 select * from CLOUD_SOFTWARE WHERE IS_ACTIVE='Y'
+	</select>
+	
+	<select id="findCloudSoftwaresByParam" parameterClass="cloudSoftWare" resultClass="java.lang.Integer">
+		SELECT COUNT(1)  from CLOUD_SOFTWARE WHERE IS_ACTIVE='Y'
+		<isNotEmpty prepend="and" property="softwareName">
+					SOFTWARE_NAME = #softwareName#
+		</isNotEmpty>
+		<isNotEmpty prepend="and" property="softwareId">
+					SOFTWARE_ID != #softwareId#
+		</isNotEmpty>
+	</select>
+	
+	<sql id="selectSoftAll" >
+		  select SOFTWARE_ID as softwareId,SOFTWARE_NAME as softwareName,SOFTWARE_TYPE as softwareType,SOFTWARE_PATH as softwarePath,IS_ACTIVE as isActive,soft.REMARK as remark ,dic.DIC_NAME as softwareTypeName from CLOUD_SOFTWARE soft ,ADMIN_DIC dic where dic.DIC_TYPE_CODE='CLOUD_SOFTWARE_TYPE' and dic.DIC_CODE=soft.SOFTWARE_TYPE and IS_ACTIVE='Y' 
+		<isNotEmpty prepend="and" property="selectSoftName">
+					SOFTWARE_NAME like concat('%', #selectSoftName#, '%')
+			</isNotEmpty>
+	</sql>
+	
+	<select id="findSoftList" parameterClass="java.util.Map"  resultClass="cloudSoftwareVo">
+		<include refid="selectSoftAll"/> $_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+	<select id="selectAllSoftCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="selectSoftAll"/>
+        ) as recordTable
+	</select>
+	
+	<insert id="insertSoftWare"  parameterClass="cloudSoftWare">
+		  insert into CLOUD_SOFTWARE (SOFTWARE_ID,SOFTWARE_NAME,SOFTWARE_TYPE,SOFTWARE_PATH,REMARK,IS_ACTIVE)
+		 values(#softwareId#,#softwareName#,#softwareType#,#softwarePath#,#remark#,#isActive#)
+	</insert>
+	
+	<update id="updateSoftWare"  parameterClass="cloudSoftWare">
+		 update CLOUD_SOFTWARE set  
+		 SOFTWARE_NAME=#softwareName#,
+		 SOFTWARE_TYPE=#softwareType#,
+		 SOFTWARE_PATH=#softwarePath#,
+		 REMARK=#remark#,
+		 IS_ACTIVE=#isActive#
+		 where SOFTWARE_ID=#softwareId#
+	</update>
+	<update id="deleteSoftWare" parameterClass="java.lang.String">
+		UPDATE CLOUD_SOFTWARE SET IS_ACTIVE='N' where SOFTWARE_ID=#softwareId#
+	</update>
+	
+	<update id="deleteSoftWareVerBySoftId" parameterClass="java.lang.String">
+		UPDATE CLOUD_SOFTWARE_VER SET IS_ACTIVE='N' where SOFTWARE_ID=#softwareId#
+	</update>
+	
+	<select id="selectSoftWareById"  resultClass="cloudSoftWare" parameterClass="java.lang.String">
+		 select SOFTWARE_ID as softwareId,SOFTWARE_NAME as softwareName,SOFTWARE_TYPE as softwareType,SOFTWARE_PATH as softwarePath,REMARK as remark,IS_ACTIVE as isActive from CLOUD_SOFTWARE where IS_ACTIVE='Y' and  SOFTWARE_ID=#softwareId#
+	</select>
+	
+	<select id="showVerBySoftWareId"  resultClass="cloudSoftWareVer"  parameterClass="java.lang.String">
+		 select SOFTWARE_VER_ID as softwareVerId,SOFTWARE_ID as softwareId,VER_NAME as verName,REMARK as remark,IS_ACTIVE as isActive  from CLOUD_SOFTWARE_VER where IS_ACTIVE='Y' and SOFTWARE_ID=#softwareId#
+	</select>
+	<sql id="findVerBySoftWareId"  >
+		 select SOFTWARE_VER_ID as softwareVerId,SOFTWARE_ID as softwareId,VER_NAME as verName,REMARK as remark,IS_ACTIVE as isActive  from CLOUD_SOFTWARE_VER where IS_ACTIVE='Y' and SOFTWARE_ID=#softwareId#
+	</sql>
+	<select id="findVerListBySoftId" parameterClass="java.util.Map"  resultClass="cloudSoftWareVer">
+		<include refid="findVerBySoftWareId"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="selectAllVerCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="findVerBySoftWareId"/>
+        ) as recordTable
+	</select>
+	<insert id="insertSoftWareVer"  parameterClass="cloudSoftWareVer">
+		  insert into CLOUD_SOFTWARE_VER (SOFTWARE_VER_ID,SOFTWARE_ID,VER_NAME,REMARK,IS_ACTIVE)
+		 values(#softwareVerId#,#softwareId#,#verName#,#remark#,#isActive#)
+	</insert>
+	<select id="selectSoftWareVerById"  resultClass="cloudSoftWareVer"  parameterClass="java.lang.String">
+		 select SOFTWARE_VER_ID as softwareVerId,SOFTWARE_ID as softwareId,VER_NAME as verName,REMARK as remark,IS_ACTIVE as isActive  from CLOUD_SOFTWARE_VER where IS_ACTIVE='Y' and SOFTWARE_VER_ID=#softwareVerId#
+	</select>
+	<update id="updateSoftWareVer"  parameterClass="cloudSoftWareVer">
+		 update CLOUD_SOFTWARE_VER set  
+		 VER_NAME=#verName#,
+		 REMARK=#remark#,
+		 IS_ACTIVE=#isActive#
+		 where SOFTWARE_VER_ID=#softwareVerId#
+	</update>
+	<update id="deleteSoftWareVer" parameterClass="java.lang.String">
+		<![CDATA[
+			UPDATE CLOUD_SOFTWARE_VER SET IS_ACTIVE='N'   WHERE SOFTWARE_VER_ID=#softwareVerId#
+		]]>
+	</update>
+	<select id="findCloudSoftWareVersByparam"  resultClass="java.lang.Integer"  parameterClass="cloudSoftWareVer">
+		SELECT COUNT(1)   FROM CLOUD_SOFTWARE_VER WHERE VER_NAME=#verName# AND SOFTWARE_ID=#softwareId# AND IS_ACTIVE='Y'
+		<isNotEmpty prepend="and" property="softwareVerId" >
+			SOFTWARE_VER_ID != #softwareVerId#
+		</isNotEmpty>
+	</select>
+</sqlMap>

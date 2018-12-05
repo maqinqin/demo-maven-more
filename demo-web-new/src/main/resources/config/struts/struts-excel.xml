@@ -1,0 +1,34 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+
+	<package name="excel-list" extends="icms-package" namespace="/excel/create">
+		<action name="createExcelAction" class="com.git.cloud.excel.action.CreatExcelAction" method="createExcelAction"></action>
+		
+		<action name="excelInfomationAction" class="com.git.cloud.excel.action.ExcelInformationAction" method="excelInfomationAction"></action>
+		
+		<action name="outPutExcelAction" class="com.git.cloud.excel.action.ExcelInformationAction" method="outPutExcelAction">
+		
+			<result name="success" type="stream">
+					<param name="contentType">${fileContentType}</param>
+					<param name="contentDisposition">
+						attachment;filename=${fileName}
+					</param>
+					<param name="bufferSize">2048</param>
+					<param name="inputPath">inputStream</param>
+				</result>
+				<result name="error">/jsp/common/file/error.jsp</result>
+			
+		</action>
+		
+		
+		<action name="uploadAction" class="com.git.cloud.excel.action.UploadExcelAction" method="uploadAction">
+			<result name="success">/pages/uploadexcel/upload_excel.jsp</result>
+		</action>
+		
+		<action name="excelWriteDataBaseAction" class="com.git.cloud.excel.action.ExcelWriteDataBaseAction" method="excelWriteDataBase"></action>
+		
+	</package>
+</struts>

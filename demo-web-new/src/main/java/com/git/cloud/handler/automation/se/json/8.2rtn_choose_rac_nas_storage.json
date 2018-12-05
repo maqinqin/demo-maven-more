@@ -1,0 +1,8 @@
+
+{
+	"NAS_SN":"000292603714",
+	"VOLUME_POOL":{
+		{"vol1":"aggr1"},
+		{"vol2":"aggr2"}
+	}
+}

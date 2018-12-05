@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	
+	
+	<bean id="cmPortGroupDao" class="com.git.cloud.resmgt.compute.dao.impl.CmPortGroupDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="cmVirtualSwitchDao" class="com.git.cloud.resmgt.compute.dao.impl.CmVirtualSwitchDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="cmPortGroupService" class="com.git.cloud.resmgt.compute.service.impl.CmPortGroupServiceImpl">
+		<property name="cmPortGroupDao" ref="cmPortGroupDao" />
+	</bean>
+	
+	<bean id="cmVirtualSwitchService" class="com.git.cloud.resmgt.compute.service.impl.CmVirtualSwitchServiceImpl">
+		<property name="cmVirtualSwitchDao" ref="cmVirtualSwitchDao" />
+	</bean>
+	
+</beans>

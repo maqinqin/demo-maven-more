@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:task="http://www.springframework.org/schema/task" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+	http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd">
+	<bean id="iRmComputeVmListService" class="com.git.cloud.resmgt.compute.service.impl.RmComputeVmListServiceImpl">
+         <property name="iRmComputeVmListDao" ref="iRmComputeVmListDao" />
+         <property name="cmDeviceDAO" ref="cmDeviceDAO" />
+	</bean>
+	
+	<!-- DAO -->
+	<bean id="iComputeAbstractDao" class="com.git.cloud.resmgt.compute.dao.impl.ComputeAbstractDaoImpl" scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	
+	<bean id="iRmComputeVmListDao" class="com.git.cloud.resmgt.compute.dao.impl.RmComputeVmListDaoImpl" scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="scanVcService" class="com.git.cloud.resmgt.common.service.impl.ScanVcServiceImpl" scope="prototype">
+		<property name="rmResPoolDAO" ref="rmResPoolDAO" />
+		<property name="rmClusterDAO" ref="rmClusterDAO" />
+		<property name="cmHostDAO" ref="cmHostDAO" />
+		<property name="cmVmDAO" ref="cmVmDAO" />
+		<property name="commonDAO" ref="commonDAO" />
+		<property name="cmDeviceDAO" ref="cmDeviceDAO" />
+		<property name="cmLocalDiskDAO" ref="cmLocalDiskDAO" />
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+		<property name="rmVmManageServerDAO" ref="rmVmManageServerDAO" />
+	</bean>
+<!-- 	<task:scheduled-tasks> -->
+<!-- 		<task:scheduled ref="scanVcService" method="saveOrUpdateOrDelSyncData" cron="0 0 * * * ?"/> -->
+<!-- 	</task:scheduled-tasks> -->
+</beans>

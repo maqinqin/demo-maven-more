@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN" "http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="resmgtCmDevice-datacenter">
+
+<typeAlias alias="RpVo" type="com.git.cloud.resmgt.compute.model.vo.RpVo"/>
+<typeAlias alias="PhysicsMachineVo" type="com.git.cloud.resmgt.compute.model.vo.PhysicsMachineVo"/>
+<typeAlias alias="hostVo" type="com.git.cloud.excel.model.vo.HostVo"/>
+<typeAlias alias="RmComputeVmListVo" type="com.git.cloud.resmgt.compute.model.vo.RmComputeVmListVo"/>
+	
+	
+	<!-- 更新 -->
+	<update id="updateHost" parameterClass="hostVo">
+		UPDATE  CM_HOST 
+		SET CPU_USED  = #usedCpu#,MEM_USED = #usedMem#,CPU = #hostCpu#,MEM = #hostMem#
+		WHERE ID = #id#;
+	</update>
+	
+	<update id="updateHostStorage" parameterClass="PhysicsMachineVo">
+		<![CDATA[
+			UPDATE  CM_HOST
+			SET CPU_USED  = #cpuUsed#,MEM_USED = #ramUsed#
+			WHERE ID = #devceId#;
+		]]>	
+	</update>
+	
+	<!-- 更新 -->
+	<update id="updateVCMVMId" parameterClass="PhysicsMachineVo">
+		<![CDATA[
+			UPDATE CM_VM SET HOST_ID = #devceId# WHERE ID = #vid#
+		]]>	
+	</update>
+	<select id="selectHostIdByIp" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.common.model.vo.CmHostVo">
+	   SELECT
+		    ch.host_ip hoatIp,
+		    ch.ID id
+		FROM
+		    cm_host ch
+		LEFT JOIN cm_device cd ON ch.ID = cd.ID
+		WHERE
+		    cd.IS_ACTIVE = 'Y'
+		AND id = #hostIp#
+	</select>
+</sqlMap>

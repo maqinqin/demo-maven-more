@@ -1,0 +1,41 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="policy-package" extends="icms-package" namespace="/policy">
+	
+	</package>
+	<!-- 虚机分配参数 -->
+	<package name="policy-rmvmparam" extends="policy-package" namespace="/policy/rmvmparam">
+		<action name="indexAct" class="rmVmParamAction" method="index">
+			<result name="success">/pages/policy/rmVmParamList.jsp</result>
+		</action>
+		<action name="queryRmVmParamPoPaginationAct" class="rmVmParamAction" method="queryRmVmParamPoPagination"/>
+		<action name="findRmVmParamPoByIdAct" class="rmVmParamAction" method="findRmVmParamPoById"/>
+		<action name="updateRmVmParamPoAct" class="rmVmParamAction" method="updateRmVmParamPo"/>
+		<action name="saveRmVmParamPoAct" class="rmVmParamAction" method="saveRmVmParamPo"/>
+		<action name="deleteRmVmParamPoByIdAct" class="rmVmParamAction" method="deleteRmVmParamPoById"></action>
+		<action name="checkRmVmParamPoAct" class="rmVmParamAction" method="checkRmVmParamPo"></action>
+		<action name="queryPoolList" class="rmVmParamAction" method="queryPoolList"></action>
+		<action name="queryCdpList" class="rmVmParamAction" method="queryCdpList"></action>
+	</package>
+	
+	<!-- 虚机分配规则 -->
+	<package name="policy-rmvmrules" extends="policy-package" namespace="/policy/rmvmrules">
+		<action name="indexAct" class="rmVmRulesAction" method="index">
+			<result name="success">/pages/policy/rmVmRulesList.jsp</result>
+		</action>
+		<action name="queryRmVmRulesPoPaginationAct" class="rmVmRulesAction" method="queryRmVmRulesPoPagination"/>
+		<action name="findRmVmRulesPoByIdAct" class="rmVmRulesAction" method="findRmVmRulesPoById"/>
+		<action name="updateRmVmRulesPoAct" class="rmVmRulesAction" method="updateRmVmRulesPo"/>
+		<action name="saveRmVmRulesPoAct" class="rmVmRulesAction" method="saveRmVmRulesPo"/>
+		<action name="deleteRmVmRulesPoByIdAct" class="rmVmRulesAction" method="deleteRmVmRulesPoById"></action>
+		<action name="getSortTypeNamesAct" class="rmVmRulesAction" method="getSortTypeNames"></action>
+	</package>
+	
+	<!-- 虚机分配 -->
+	<!-- <package name="policy-compute" extends="policy-package" namespace="/policy/compute">
+		<action name="distribHostForVmAct" class="computePolicyAction" method="distribHostForVm"/>
+	</package> -->
+</struts>

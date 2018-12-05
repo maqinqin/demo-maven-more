@@ -1,0 +1,98 @@
+
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "NETAPP",
+		"OPERATION": 3018
+	},
+	"BODY":{
+		"DATACENTER_NAME":"NH/YQ",
+		"NAS_MODEL":"NETAPP FAS",
+		"DATA_TYPE":"NASHeartbeat",
+		"NAS_SN":"000292603714",
+		"SERVICE_IP":"128.192.162.48",
+		"USER_NAME":"admin",
+		"USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+		"VOL_INFO":[
+			{
+				"VOL_NAME":"Vol1",
+				"SNAPSHOT_INFO":{
+					"SNAPSHOT_RESERVE_PERCENT":"0",
+					"SNAPSHOT_SCHEDULE_WEEKS":"0",
+					"SNAPSHOT_SCHEDULE_DAYS":"0",
+					"SNAPSHOT_SCHEDULE_HOURS":"0"
+				},
+				"EXPORTFS_INFO":[
+					{
+						"PERSISTENT_FLAG":true,
+						"PATH_NAME":"/vol/Vol1/Qtree1",
+						"RW_HOSTS":[
+							{"HOST_IP":"128.192.162.10"},
+							{"HOST_IP":"128.192.162.20"},
+							{"HOST_IP":"128.192.162.30"}
+						],
+						"ROOT_HOSTS":[
+							{"HOST_IP":"128.192.162.10"},
+							{"HOST_IP":"128.192.162.20"},
+							{"HOST_IP":"128.192.162.30"}
+						]
+					},
+					{
+						"PERSISTENT_FLAG":true,
+						"PATH_NAME":"/vol/Vol1/Qtree12",
+						"RW_HOSTS":[
+							{"HOST_IP":"128.192.162.10"},
+							{"HOST_IP":"128.192.162.20"},
+							{"HOST_IP":"128.192.162.30"}
+						],
+						"ROOT_HOSTS":[
+							{"HOST_IP":"128.192.162.10"},
+							{"HOST_IP":"128.192.162.20"},
+							{"HOST_IP":"128.192.162.30"}
+						]
+					}
+					]
+				
+				
+			},
+			{					
+				"VOL_NAME":"Vol2",
+				"SNAPSHOT_INFO":{
+					"SNAPSHOT_RESERVE_PERCENT":"0",
+					"SNAPSHOT_SCHEDULE_WEEKS":"0",
+					"SNAPSHOT_SCHEDULE_DAYS":"0",
+					"SNAPSHOT_SCHEDULE_HOURS":"0"
+				},
+				"EXPORTFS_INFO":
+				[
+				{
+					"PERSISTENT_FLAG":true,
+					"PATH_NAME":"/vol/Vol1/Qtree1",
+					"RW_HOSTS":[
+						{
+							"HOST_IP":"128.192.162.10"
+						},
+						{
+							"HOST_IP":"128.192.162.20"
+						},
+						{
+							"HOST_IP":"128.192.162.30"
+						}
+					],
+					"ROOT_HOSTS":[
+						{
+							"HOST_IP":"128.192.162.10"
+						},
+						{
+							"HOST_IP":"128.192.162.20"
+						},
+						{
+							"HOST_IP":"128.192.162.30"
+						}
+					]
+				}
+				]
+			}			
+		]
+		
+	}
+}

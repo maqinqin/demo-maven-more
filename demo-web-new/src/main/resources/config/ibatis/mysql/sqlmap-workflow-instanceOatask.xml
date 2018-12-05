@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="workflowInstanceOaTask">
+	<typeAlias alias="BpmInstanceOataskPo" type="com.gitcloud.tankflow.model.po.BpmInstanceOataskPo" />
+	<!-- 根据参数查询列表 -->
+	<select id="findInstanceOataskListByParam" parameterClass="java.util.Map"  resultClass="BpmInstanceOataskPo">
+		<![CDATA[
+			 select 
+				 	OANODE_ID			oanodeId,              
+					OANODE_NAME			oanodeName,
+					OANODE_TYPE			oanodeType,
+					OANODE_STATE		oanodeState,
+					INSTANCE_ID			instanceId,               
+					WF_NODE_ID			wfNodeId,               
+					KEY_WORD			keyWord,                 
+					MSG					msg,                 
+					URL					url        
+			 from  
+			 	BPM_INSTANCE_NODE_OA
+			 where 1 = 1
+		 ]]>
+		 <dynamic prepend=" and " >
+		 	<isNotEmpty prepend=" and " property="oanodeId">
+		 		OANODE_ID= #oanodeId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="instanceId">
+		 		INSTANCE_ID = #instanceId#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend=" and " property="wfNodeId">
+		 		WF_NODE_ID = #wfNodeId#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	<!-- 添加OaTask  -->
+	<insert id="insertBpmInstanceOatask"  parameterClass="BpmInstanceOataskPo">  
+      INSERT INTO BPM_INSTANCE_NODE_OA (
+	      OANODE_ID, OANODE_NAME, OANODE_TYPE, OANODE_STATE,INSTANCE_ID, WF_NODE_ID, KEY_WORD, MSG, URL
+      ) VALUES (
+	     	#oanodeId#,
+			#oanodeName#,
+			#oanodeType#,
+			#oanodeState#,
+			#instanceId#,
+			#wfNodeId#,
+			#keyWord#,
+			#msg#,
+			#url#
+      )
+	</insert>
+	
+	<!-- 批量插入OaTask -->
+	<insert id="batchInsertBpmInstanceOatask" parameterClass="java.util.List">	
+		<![CDATA[   
+			INSERT INTO BPM_INSTANCE_NODE_OA (
+	      		OANODE_ID, OANODE_NAME, OANODE_TYPE, OANODE_STATE,  INSTANCE_ID, WF_NODE_ID, KEY_WORD, MSG, URL
+      		) VALUES
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(
+					#bpmInstanceOataskPo[].oanodeId#,
+					#bpmInstanceOataskPo[].oanodeName#,
+					#bpmInstanceOataskPo[].oanodeType#,
+					#bpmInstanceOataskPo[].oanodeState#,
+					#bpmInstanceOataskPo[].instanceId#,
+					#bpmInstanceOataskPo[].wfNodeId#,
+					#bpmInstanceOataskPo[].keyWord#,
+					#bpmInstanceOataskPo[].msg#,
+					#bpmInstanceOataskPo[].url# 
+				)
+			]]>
+		</iterate>
+	</insert>
+</sqlMap>

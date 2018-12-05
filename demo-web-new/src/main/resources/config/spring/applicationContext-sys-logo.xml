@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<!-- 图片LOGO -->
+	<bean id="updateLogoAction" class="com.git.cloud.sys.action.UpdateLogoAction" scope="prototype">
+		<property name="updateLogoService" ref="updateLogoService" />
+	</bean>
+
+	<bean id="updateLogoService" class="com.git.cloud.sys.service.impl.UpdateLogoServiceImpl">
+		<property name="parameterDaoImpl" ref="parameterDaoImpl" />
+	</bean>
+</beans>

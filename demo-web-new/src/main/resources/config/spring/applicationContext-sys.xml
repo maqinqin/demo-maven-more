@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<!-- 资源维护 -->
+	<bean id="loginAction" class="com.git.cloud.sys.action.LoginAction"
+		scope="prototype">
+		<property name="menuService" ref="menuService" />
+		<!-- <property name="permissionService" ref="permissionService" /> -->
+	</bean>
+
+	<bean id="menuDao" class="com.git.cloud.sys.dao.impl.MenuDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<bean id="menuService" class="com.git.cloud.sys.service.impl.MenuServiceImpl">
+		<property name="menuDao" ref="menuDao" />
+		<property name="userDao" ref="userDaoImpl" />
+	</bean>
+
+	<!-- 角色维护 -->
+	<bean id="sysRoleAction" class="com.git.cloud.sys.action.SysRoleAction" scope="prototype">
+		<property name="sysRoleService" ref="sysRoleService" />
+	</bean>
+	<bean id="sysRoleDAO" class="com.git.cloud.sys.dao.impl.SysRoleDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="sysRoleService" class="com.git.cloud.sys.service.impl.SysRoleServiceImpl">
+		<property name="sysRoleDAO" ref="sysRoleDAO" />
+	</bean>
+	
+	<!-- 用户维护 -->
+	 <bean id="userAction" class="com.git.cloud.sys.action.UserAction" scope="prototype">
+		<property name="userService" ref="userServiceImpl" />
+	</bean>
+	
+	<bean id="userServiceImpl" class="com.git.cloud.sys.service.impl.UserServiceImpl">
+		<property name="userDao" ref="userDaoImpl" />
+	</bean>
+	
+	<bean id="userDaoImpl" class="com.git.cloud.sys.dao.impl.UserDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+
+	<!-- 组织维护 -->
+
+	<bean id="sysOrganizationDao" class="com.git.cloud.sys.dao.impl.SysOrganizationDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="sysOrganizationService"
+		class="com.git.cloud.sys.service.impl.SysOrganizationServiceImpl">
+		<property name="sysOrganizationDao" ref="sysOrganizationDao" />
+	</bean>
+	<bean id="sysOrganizationAction" class="com.git.cloud.sys.action.SysOrganizationAction"
+		scope="prototype">
+		<property name="sysOrganizationService" ref="sysOrganizationService" />
+	</bean>
+	
+	<!-- 菜单维护 开始 -->
+	<bean id="sysMenuDao" class="com.git.cloud.sys.dao.impl.SysMenuDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="sysMenuService" class="com.git.cloud.sys.service.impl.SysMenuServiceImpl">
+		<property name="sysMenuDao" ref="sysMenuDao" />
+	</bean>
+	<bean id="sysMenuAction" class="com.git.cloud.sys.action.SysMenuAction"
+		scope="prototype">
+		<property name="sysMenuService" ref="sysMenuService" />
+		<property name="sysRoleService" ref="sysRoleService" />
+	</bean>
+	<!-- 菜单维护 结束 -->
+	
+	
+	<!--自检测 -->
+	<bean id="selfMonitorAction" class="com.git.cloud.sys.action.SelfMonitorAction"
+		scope="prototype">
+		<property name="iSelfMonitorService" ref="selfMonitorServiceImpl" />
+		<property name="iRmVmManageServerService" ref="rmVmManageServerServiceImpl" />
+		<property name="rmGeneralServerService" ref="rmGeneralServerService"></property>
+	</bean>
+	
+	<bean id="selfMonitorServiceImpl" class="com.git.cloud.sys.service.impl.SelfMonitorServiceImpl"
+		scope="prototype">
+		<property name="iSelfMonitorDaoImpl" ref="SelfMonitorDaoImpl" />
+		<property name="resInvokerFactory" ref="resInvokerFactory"/>
+		<property name="rmDCDAO" ref="rmDatacenterDAO"/> 
+		<property name="iScriptDaoImpl" ref="scriptDao"></property>
+		<property name="connectionFactory" ref="connectionFactory_1" />	
+		<property name="iRmVmManageServerDAO" ref="rmVmManageServerDAO" />
+		<property name="rmGeneralServerService" ref="rmGeneralServerService"></property>
+		 <property name="parameterServiceImpl" ref="parameterServiceImpl"/>
+	</bean>
+	
+	<bean id="SelfMonitorDaoImpl" class="com.git.cloud.cloudservice.dao.impl.ImageDaoImpl" scope="prototype">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- <bean id="connectionFactory_1" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL">
+ 			<value>${amq.url}</value>
+		</property>  
+	</bean> -->
+</beans>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="CloudServiceAttrSel">
+	<resultMap id="BaseResultMap" class="com.git.cloud.cloudservice.model.po.CloudServiceAttrSelPo" >
+		<result column="ATTR_SEL_ID" property="attrSelId" />
+		<result column="ATTR_ID" property="attrId" />
+		<result column="ATTR_KEY" property="attrKey" />
+		<result column="ATTR_VALUE" property="attrValue" />
+		<result column="IS_ACTIVE" property="isActive" />
+	</resultMap>
+	<select id="CloudServiceAttrSel.load" resultMap="BaseResultMap">
+		SELECT * FROM CLOUD_SERVICE_ATTR_SEL where ATTR_SEL_ID =#attrSelId# and  IS_ACTIVE='Y'
+	</select>
+	<select id="CloudServiceAttrSel.file" resultMap="BaseResultMap">
+		SELECT * FROM CLOUD_SERVICE_ATTR_SEL where ATTR_ID =#id# and  IS_ACTIVE='Y'
+	</select>
+
+	<select id="CloudServiceAttrSel.search" parameterClass="java.util.Map" 
+		resultMap="BaseResultMap">
+		SELECT * FROM CLOUD_SERVICE_ATTR_SEL where IS_ACTIVE='Y'
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="attrId">
+				ATTR_ID = #attrId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	<select id="CloudServiceAttrSel.count" parameterClass="java.util.Map"
+		resultClass="java.lang.Integer">
+		SELECT count(*) FROM CLOUD_SERVICE_ATTR_SEL  where IS_ACTIVE='Y'
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="attrId">
+				ATTR_ID = #attrId#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+
+	<insert id="CloudServiceAttrSel.insert"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceAttrSelPo">
+		insert into CLOUD_SERVICE_ATTR_SEL (ATTR_SEL_ID, ATTR_ID, ATTR_KEY, ATTR_VALUE, IS_ACTIVE)
+		values( #attrSelId#, #attrId#, #attrKey#, #attrValue#, #isActive# )
+	</insert>
+
+	<update id="CloudServiceAttrSel.update"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceAttrSelPo">
+		update CLOUD_SERVICE_ATTR_SEL set
+			ATTR_ID= #attrId#,
+			ATTR_KEY= #attrKey#,
+			ATTR_VALUE = #attrValue#,
+			IS_ACTIVE = #isActive#
+		where ATTR_SEL_ID= #attrSelId#
+	</update>
+	<delete id="CloudServiceAttrSel.delete" parameterClass="java.lang.String">
+		delete from CLOUD_SERVICE_ATTR_SEL where ATTR_ID = #attrId#
+	</delete>
+	<!-- 正式环境用
+	<delete id="CloudServiceAttrSel.delete" parameterClass="java.lang.String">
+		update CLOUD_SERVICE_ATTR_SEL set IS_ACTIVE = 'N' where ATTR_ID = #attrId#
+	</delete>
+	 -->
+</sqlMap>

@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="resmgtStorage">
+	<!-- storage service level -->
+	<!-- start -->
+	<typeAlias alias="CmDatastorePo" type="com.git.cloud.resmgt.common.model.po.CmDatastorePo" />
+	<typeAlias alias="SePoolRule"
+		type="com.git.cloud.resmgt.storage.model.po.SePoolLevelRulePo" />
+	<select id="selectSePoolRule" parameterClass="String" resultClass="SePoolRule">
+	select se.id as id,
+		   se.cell_value as cellValue,
+		   se.condition_one as conditionOne,
+		   se.condition_two as conditionTwo,
+		   se.rule_type as ruleType,
+		   se.tr_id as trId,
+		   se.td_id as tdId,
+		   se.cell_id as cellId
+		    from
+	SE_POOL_LEVEL_RULE se where rule_type = #ruleType#
+	order by se.tr_id , se.td_id;
+	</select>
+
+	<update id="updateSePoolRuleCell" parameterClass="java.util.HashMap">
+		update
+			SE_POOL_LEVEL_RULE set cell_value=#cellValue#
+		 where rule_type = #ruleType#
+			 and cell_id= #cellId#
+	</update>
+	
+	<update id="updateSePoolRuleCondition" parameterClass="java.util.HashMap">
+		update
+			SE_POOL_LEVEL_RULE set condition_one=#conditionOne#,condition_two=#conditionTwo#
+		 where rule_type = #ruleType#
+			 and cell_id= #cellId#
+	</update>
+	<!-- end -->
+	
+	<!-- storage pool -->
+	<!-- start -->
+	<typeAlias alias="StoragePool"
+		type="com.git.cloud.resmgt.storage.model.vo.StoragePoolVo" />
+	<typeAlias alias="StorageChildPool"
+		type="com.git.cloud.resmgt.storage.model.vo.StorageChildPoolVo" />
+	<typeAlias alias="StorageDevice"
+		type="com.git.cloud.resmgt.storage.model.vo.StorageDeviceVo" />
+	<typeAlias alias="CmDeviceModel"
+		type="com.git.cloud.resmgt.common.model.po.CmDeviceModelPo" />		
+	
+	<!-- 根据ID获取存储设备，包含CM_DEVICE和CM_STORAGE和CM_DEVICE_MODEL表 -->
+	<select id="selectStorageDeviceById" parameterClass="String" resultClass="StorageDevice">
+		SELECT 
+		  D.ID AS id,
+		  D.DEVICE_NAME AS deviceName,
+		  D.SN AS sn,
+		  M.DEVICE_MODEL AS deviceModel,
+		  M.DEVICE_MANUFACTURER AS deviceManufacturer,
+		  D.SEAT_ID AS seatName,
+		  M.DEVICE_TYPE AS deviceType,
+		  D.RES_POOL_ID AS resPoolId,
+		  D.IS_ACTIVE AS isActive,
+		  D.DESCRIPTION AS description,
+		  S.MICRO_CODE AS microCode,
+		  S.MGR_IP AS mgrIp,
+		  S.CACHE_CAPACITY AS cacheCapacity,
+		  S.DISK_CAPACITY AS diskCapacity,
+		  S.DISK_SIZE AS diskSize,
+		  S.DISK_NUMBER AS diskNumber,
+		  S.DISK_RPM AS diskRpm,
+		  S.PORT_COUNT AS portCount,
+		  S.PORT_SPEED AS portSpeed,
+		  S.APP_TYPE AS appType 
+		FROM
+		  CM_DEVICE D,
+		  CM_STORAGE S,
+		  CM_DEVICE_MODEL M
+		  
+		WHERE 1 = 1 
+		  AND D.ID = S.ID 
+		  AND D.DEVICE_MODEL_ID = M.ID 
+		  AND D.IS_ACTIVE = 'Y' 
+		  AND D.ID = #storageDeviceId#
+	</select>
+	
+	<!-- 根据存储设备名称模糊查询 -->
+	<select id="selectStorageDevByLike" parameterClass="String" resultClass="StorageDevice">
+		SELECT 
+			D.ID AS id, 
+			D.DEVICE_NAME AS deviceName		
+		FROM CM_DEVICE D,CM_STORAGE S
+		WHERE 1 = 1
+		AND D.ID = S.ID	
+		AND D.IS_ACTIVE = 'Y'
+		AND D.DEVICE_NAME LIKE '%$deviceName$%'
+	</select>
+	
+	<!-- 根据STORAGE_ID获取CM_DATASTORE数据 -->
+	<select id="selectStorageDataStoreById" parameterClass="String" resultClass="StorageDevice">
+		SELECT 
+			D.ID AS id,
+			D.STORAGE_ID AS storageId,
+			D.`NAME` AS name,
+			D.PATH AS path,
+			D.ORDER_NUM AS orderNum,
+			D.IS_ACTIVE AS isActive
+		FROM CM_DATASTORE D
+		WHERE 1 = 1 
+		AND D.IS_ACTIVE = 'Y'
+		AND D.STORAGE_ID = #dataStoreId#
+		ORDER BY D.ORDER_NUM ASC
+	</select>
+	
+	<!-- 查询STORAGE下面的DATASTORE数据 lizhizhong -->
+	<select id="queryStorageDataStoresPagination" parameterClass="String" resultClass="CmDatastorePo">
+	SELECT 
+		D.ID AS id,
+		D.STORAGE_ID AS storageId,
+		D.NAME AS name,
+		D.PATH AS path,
+		D.ORDER_NUM AS orderNum,
+		D.IS_ACTIVE AS isActive
+	FROM
+		CM_DATASTORE D
+	WHERE D.IS_ACTIVE = 'Y'
+	AND   D.STORAGE_ID = #storage_id#
+	AND NOT EXISTS(SELECT 1 FROM CM_HOST_DATASTORE_REF E WHERE D.`ID`=E.`DATASTORE_ID`)
+	</select>
+	
+	<sql id="selectStorageDeviceSql">
+		<![CDATA[
+		SELECT 
+			D.ID AS id,
+			D.STORAGE_ID AS storageId,
+			D.`NAME` AS name,
+			D.PATH AS path,
+			D.ORDER_NUM AS orderNum,
+			D.IS_ACTIVE AS isActive
+		FROM CM_DATASTORE D
+		WHERE 1 = 1 
+		AND D.IS_ACTIVE = 'Y'
+		AND D.STORAGE_ID = #storageDeviceId#
+		ORDER BY $sidx$ $sord$
+		]]>
+	</sql>
+	<select id="selectStorageDeviceList" parameterClass="java.util.Map"  resultClass="StorageDevice">
+		<include refid="selectStorageDeviceSql"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="selectStorageDeviceCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="selectStorageDeviceSql"/>
+        ) as recordTable
+	</select>
+	
+	<!-- 更新设备关联 设备表-->
+	<update id="updateRefStorageDeviceInCmDevice" parameterClass="StorageDevice">
+		UPDATE CM_DEVICE D 
+		SET D.RES_POOL_ID = #resPoolId#,
+			   D.UPDATE_USER = #updateUser#,
+			   D.UPDATE_DATETIME = #updateDateTime# 
+		WHERE D.ID = #id#
+	</update>
+	
+	<!-- 更新设备关联 存储表 -->
+	<update id="updateRefStorageDeviceInCmStorage" parameterClass="StorageDevice">
+		UPDATE CM_STORAGE S SET S.STORAGE_CHILD_POOL_ID = #storageChildPoolId# WHERE S.ID = #id#
+	</update>
+	
+	<!-- 根据设备类型查询所有厂商 -->
+	<select id="selectManufacturer" parameterClass="String" resultClass="CmDeviceModel">
+		SELECT DISTINCT 
+		C.DEVICE_MANUFACTURER as deviceManufacturer
+		FROM CM_DEVICE_MODEL C
+		WHERE 1 = 1
+		AND 	C.DEVICE_TYPE = #deviceType# AND C.IS_ACTIVE = 'Y' 
+		ORDER BY C.CREATE_DATETIME ASC
+	</select>
+	
+	<!-- 根据厂商和设备类型获取设备型号集合 map定义 -->
+	<parameterMap class="java.util.HashMap" id="parameterMapForDeviceModel">        
+	    <parameter property="deviceType"/>        
+	    <parameter property="deviceManufacturer"/>   
+	</parameterMap>
+	
+	<!-- 根据厂商和设备类型获取设备型号集合 查询语句-->
+	<select id="selectDeviceModelByManufacturerAndDeviceType" parameterMap="parameterMapForDeviceModel" resultClass="CmDeviceModel">
+		SELECT DISTINCT 
+		C.DEVICE_MODEL as deviceModel,
+		C.ID as id
+		FROM CM_DEVICE_MODEL C
+		WHERE 1 = 1
+		AND 	C.DEVICE_TYPE = ?
+		AND 	C.DEVICE_MANUFACTURER = ? 
+		AND C.IS_ACTIVE = 'Y' 
+		ORDER BY C.CREATE_DATETIME ASC
+	</select>
+	
+	<!-- 根据设备类型和设备型号获取设备厂商 map定义 -->
+	<parameterMap class="java.util.HashMap" id="parameterMapForDeviceManufacturer">        
+		<parameter property="deviceModel"/>   
+	    <parameter property="deviceType"/>        
+	</parameterMap>
+	
+	<!-- 根据厂商和设备类型获取设备型号集合 -->
+	<select id="selectDeviceManufacturerByDeviceModel" parameterMap="parameterMapForDeviceManufacturer" resultClass="CmDeviceModel">
+		SELECT DISTINCT 
+		C.DEVICE_MANUFACTURER as deviceManufacturer
+		FROM CM_DEVICE_MODEL C
+		WHERE 1 = 1
+		AND 	C.DEVICE_MODEL = ? 
+		AND 	C.DEVICE_TYPE = ?
+		AND C.IS_ACTIVE = 'Y' 
+		ORDER BY C.CREATE_DATETIME ASC
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="parameterMapForselectResPoolNameCheck">        
+		<parameter property="poolName"/>   
+	    <parameter property="dataCenterId"/>        
+	</parameterMap>
+	
+	
+	<!-- 判断是否有重复的资源池名 -->
+	<select id="selectResPoolNameCheck" parameterMap="parameterMapForselectResPoolNameCheck" resultClass="StoragePool">
+		 select 
+			 p.POOL_NAME as poolName
+			 from RM_RES_POOL p 
+			 where 1 = 1 
+			 and p.IS_ACTIVE='Y'
+			 and p.POOL_NAME= ? 
+			 and p.DATACENTER_ID = ?
+	</select>
+	
+	<parameterMap class="java.util.HashMap" id="parameterMapForselectResChildPoolNameCheck">        
+		<parameter property="name"/>   
+	    <parameter property="resPoolId"/>        
+	</parameterMap>
+	
+	<sql id="storesList">
+	<![CDATA[
+	SELECT distinct
+	c2.ID AS id,
+	c2.STORAGE_ID AS storageId,
+	c2.`NAME` AS NAME,
+	c2.PATH AS path,
+	c2.ORDER_NUM AS orderNum,
+	c2.IS_ACTIVE AS isActive,
+	c.DEVICE_NAME AS deviceName,
+	(
+		SELECT
+			count(*)
+		FROM
+			CM_HOST cm
+		WHERE
+			cm.ID = #hostId# AND cm.DEFAULT_DATASTORE_ID = c1.DATASTORE_ID
+	)AS flag
+	FROM
+		CM_HOST_DATASTORE_REF c1,
+		CM_DATASTORE c2,
+		CM_DEVICE c
+	WHERE
+		HOST_ID = #hostId#
+	AND c1.DATASTORE_ID = c2.ID
+	AND c2.IS_ACTIVE = 'Y'
+	AND c.ID = c2.STORAGE_ID
+    ORDER BY $sidx$ $sord$
+    ]]>
+	</sql>
+	<select id="getDataStoresList" parameterClass="java.util.Map"  resultClass="StorageDevice">
+		<include refid="storesList"/> limit #startIndex# ,#pageSize#
+	</select>
+	<select id="getLocalDataStore" parameterClass="java.util.Map"  resultClass="StorageDevice">
+		<![CDATA[
+	SELECT
+	c1.ID AS id,
+	c1.`NAME` AS NAME,
+	c1.IS_ACTIVE AS isActive,
+	c.DEVICE_NAME AS deviceName,
+	(
+		SELECT
+			count(*)
+		FROM
+			CM_HOST cm
+		WHERE
+			cm.ID = #hostId# AND cm.DEFAULT_DATASTORE_ID = c1.ID
+	)AS flag
+	FROM
+		CM_LOCAL_DISK c1,
+		CM_DEVICE c
+	WHERE
+		c.ID = #hostId#
+	AND c1.IS_ACTIVE = 'Y'
+	AND c.ID = c1.DEVICE_ID
+    ]]>
+	</select>
+	<select id="getDataStoresListCount"  parameterClass="java.util.Map"  resultClass="java.lang.Integer">
+		select count(1) from (
+       		<include refid="storesList"/>
+        ) as recordTable
+	</select>
+	<!-- end -->
+</sqlMap>

@@ -1,0 +1,287 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="dic">
+	
+	<typeAlias alias="dicTypePo" type="com.git.cloud.dic.model.po.DicTypePo" />
+	<typeAlias alias="dicPo" type="com.git.cloud.dic.model.po.DicPo" />
+	
+	<!-- wmy,验证字典名称不能重复 -->
+	<select id="validateDicTypeName" parameterClass="hashMap"
+		resultClass="dicTypePo">
+		<![CDATA[
+		   select 
+				DIC_TYPE_NAME as dicTypeName
+			from ADMIN_DICTYPE 
+			where DIC_TYPE_NAME = #dicTypeName#
+		]]>
+	</select>
+	<!-- 根据dic_code 查询 dic_name -->
+	<select id="findDicNameByDicCode" parameterClass="hashMap"
+		resultClass="dicPo">
+		<![CDATA[
+		   SELECT
+				d.DIC_NAME AS dicName
+			FROM
+				ADMIN_DIC d
+			WHERE
+				d.DIC_TYPE_CODE = 'OPERATIONTYPE'
+			AND d.DIC_CODE = #dicCode#
+		]]>
+	</select>
+	<!--获取字典类型列表 -->
+	<sql id="queryDicTypeList">
+		<![CDATA[
+		 select 
+		        dt.DIC_TYPE_CODE as dicTypeCode,
+				dt.DIC_TYPE_NAME as dicTypeName,
+				dt.CREATE_USER as createUser,
+				dt.CREATE_DATETIME as createDatetime,
+				dt.UPDATE_USER as updateUser,
+				dt.UPDATE_DATETIME as updateDatetime, 
+				dt.REMARK as remark 
+			from ADMIN_DICTYPE dt where 1=1 
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="dicTypeName" prepend=" and ">
+				dt.DIC_TYPE_NAME like concat('%', #dicTypeName#, '%')
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="queryDicTypeListTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="queryDicTypeList" />
+		) as recordTable
+	</select>
+	<select id="queryDicTypeListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="queryDicTypeList" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+	
+	 <!--添加字典类型 -->
+	<insert id="insertDicType" parameterClass="dicTypePo"> 
+		<![CDATA[ 
+			insert into ADMIN_DICTYPE (
+				DIC_TYPE_CODE,
+				DIC_TYPE_NAME,
+				CREATE_USER,
+				CREATE_DATETIME,
+				UPDATE_USER,
+				UPDATE_DATETIME,
+				REMARK
+			) values (
+				#dicTypeCode#,
+				#dicTypeName#,
+				#createUser#,
+				#createDateTime#,
+				#updateUser#,
+				#updateDateTime#,
+				#remark#
+			)
+		]]>
+	</insert>
+	<!--更新字典类型信息 -->
+	<update id="updateDicType" parameterClass="dicTypePo">
+		<![CDATA[ 
+			update ADMIN_DICTYPE set
+				DIC_TYPE_CODE = #dicTypeCode#,
+				DIC_TYPE_NAME = #dicTypeName#,
+				CREATE_USER = #createUser#,
+				CREATE_DATETIME = #createDateTime#,
+				UPDATE_USER = #updateUser#,
+				UPDATE_DATETIME = #updateDateTime#,
+				REMARK = #remark#
+			where
+				DIC_TYPE_CODE = #dicTypeCode#
+		]]>
+	</update>
+	<!-- 删除字典类型 -->
+	<delete id="deleteDicType" parameterClass="string">
+		<![CDATA[ 
+			delete from ADMIN_DICTYPE  where DIC_TYPE_CODE = #dicTypeCode#
+		]]>
+	</delete>
+	
+	<!--获得字典类型信息 -->
+	<select id="queryDicTypeByParams" parameterClass="hashMap"
+		resultClass="dicTypePo">
+		<![CDATA[
+		   select 
+		        dt.DIC_TYPE_CODE as dicTypeCode,
+				dt.DIC_TYPE_NAME as dicTypeName,
+				dt.CREATE_USER as createUser,
+				dt.CREATE_DATETIME as createDateTime,
+				dt.UPDATE_USER as updateUser,
+				dt.UPDATE_DATETIME as updateDateTime, 
+				dt.REMARK as remark 
+			from ADMIN_DICTYPE dt where 1=1 
+		]]>
+			<isNotEmpty property="dicTypeCode" prepend=" and ">
+				<![CDATA[dt.DIC_TYPE_CODE = #dicTypeCode#]]>
+			</isNotEmpty>
+			<isNotEmpty property="dicTypeName" prepend=" and ">
+				<![CDATA[dt.DIC_TYPE_NAME = #dicTypeName#]]>
+			</isNotEmpty>
+	</select>
+	<!--获得字典类型信息 -->
+	<select id="queryDicTypeByName" parameterClass="hashMap"
+		resultClass="dicTypePo">
+		<![CDATA[
+		   select 
+		        dt.DIC_TYPE_CODE 
+			from ADMIN_DICTYPE dt where 1=1 
+			    and dt.DIC_TYPE_CODE != #dicTypeCode#
+			    and dt.DIC_TYPE_NAME = #dicTypeName#
+		]]>
+	</select>
+	
+	
+	
+	
+	<!--获取字典列表 -->
+	<sql id="queryDicList">
+		<![CDATA[
+		 select 
+		        d.DIC_ID as dicId,
+				d.DIC_CODE as dicCode,
+				d.DIC_NAME as dicName,
+				d.ORDER_NUM as orderNum,
+				d.DIC_TYPE_CODE as dicTypeCode,
+				d.CREATE_USER as createUser,
+				d.CREATE_DATETIME as createDatetime,
+				d.UPDATE_USER as updateUser,
+				d.UPDATE_DATETIME as updateDatetime, 
+				d.REMARK as remark 
+			from ADMIN_DIC d where 1=1 
+		]]>
+		<dynamic prepend=" and ">
+			<isNotEmpty property="dicTypeCode" prepend=" and ">
+				d.DIC_TYPE_CODE like concat('%', #dicTypeCode#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="dicName" prepend=" and ">
+				d.DIC_NAME like concat('%', #dicName#, '%')
+			</isNotEmpty>
+			<isNotEmpty property="dicCode" prepend=" and ">
+				d.DIC_CODE like concat('%', #dicCode#, '%')
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="queryDicListTotal" parameterClass="hashMap"
+		resultClass="java.lang.Integer" remapResults="true">
+		select count(1) from (
+		<include refid="queryDicList" />
+		) as recordTable
+	</select>
+	<select id="queryDicListPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="queryDicList" />
+		$_orderby$ limit #startIndex# ,#pageSize#
+	</select>
+	
+	 <!--添加字典 -->
+	<insert id="insertDic" parameterClass="dicPo"> 
+		<![CDATA[ 
+			insert into ADMIN_DIC (
+				DIC_ID,
+				DIC_NAME,
+				DIC_CODE,
+				DIC_TYPE_CODE,
+				ORDER_NUM,
+				ATTR,
+				CREATE_USER,
+				CREATE_DATETIME,
+				UPDATE_USER,
+				UPDATE_DATETIME,
+				REMARK
+			) values (
+				#dicId#,
+				#dicName#,
+				#dicCode#,
+				#dicTypeCode#,
+				#orderNum#,
+				#attr#,
+				#createUser#,
+				#createDateTime#,
+				#updateUser#,
+				#updateDateTime#,
+				#remark#
+			)
+		]]>
+	</insert>
+	<!--更新字典信息 -->
+	<update id="updateDic" parameterClass="dicPo">
+		<![CDATA[ 
+			update ADMIN_DIC set
+				DIC_ID = #dicId#,
+				DIC_NAME = #dicName#,
+				DIC_CODE = #dicCode#,
+				DIC_TYPE_CODE = #dicTypeCode#,
+				ORDER_NUM = #orderNum#,
+				CREATE_USER = #createUser#,
+				CREATE_DATETIME = #createDateTime#,
+				UPDATE_USER = #updateUser#,
+				UPDATE_DATETIME = #updateDateTime#,
+				REMARK = #remark#
+			where
+				DIC_ID = #dicId#
+		]]>
+	</update>
+	<!-- 删除字典 -->
+	<delete id="deleteDic" parameterClass="string">
+		<![CDATA[ 
+			delete from ADMIN_DIC where DIC_ID = #dicId#
+		]]>
+	</delete>
+	
+	<!--获得字典信息 -->
+	<select id="queryDicByParams" parameterClass="hashMap"
+		resultClass="dicPo">
+		<![CDATA[
+		   select 
+		        d.DIC_ID as dicId,
+				d.DIC_NAME as dicName,
+				d.DIC_CODE as dicCode,
+				d.DIC_TYPE_CODE as dicTypeCode,
+				d.ORDER_NUM as orderNum,
+				d.ATTR as attr,
+				d.CREATE_USER as createUser,
+				d.CREATE_DATETIME as createDateTime,
+				d.UPDATE_USER as updateUser,
+				d.UPDATE_DATETIME as updateDateTime, 
+				d.REMARK as remark 
+			from ADMIN_DIC d where 1=1 
+		]]>
+			<isNotEmpty property="dicId" prepend=" and ">
+				<![CDATA[d.DIC_ID = #dicId#]]>
+			</isNotEmpty>
+			<isNotEmpty property="dicName" prepend=" and ">
+				<![CDATA[d.DIC_NAME = #dicName#]]>
+			</isNotEmpty>
+			<isNotEmpty property="dicTypeCode" prepend=" and ">
+				<![CDATA[d.DIC_TYPE_CODE = #dicTypeCode#]]>
+			</isNotEmpty>
+			<isNotEmpty property="dicTypeCode" prepend=" and ">
+				<![CDATA[d.DIC_CODE = #dicCode#]]>
+			</isNotEmpty>
+	</select>
+	<!--获得字典信息 -->
+	<select id="queryDicByName" parameterClass="hashMap"
+		resultClass="dicPo">
+		<![CDATA[
+		   select 
+		        dt.DIC_ID as dicId  
+			from ADMIN_DIC dt where 1=1 
+			    and dt.DIC_ID != #dicId#
+			    and dt.DIC_TYPE_CODE = #dicTypeCode#
+			    and dt.DIC_CODE = #dicCode#
+		]]>
+	</select>
+	<!-- wmy修改字典类型时，数据字典表中的名称也相应进行更改-->
+	<update id="updateDicTypeCode" parameterClass="dicTypePo" >
+		UPDATE ADMIN_DIC
+		SET DIC_TYPE_CODE=#dicTypeName#
+		WHERE DIC_TYPE_CODE=#beforeUpdateName#
+	</update>
+</sqlMap>

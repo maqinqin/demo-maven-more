@@ -1,0 +1,67 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+<struts>
+	<package name="request-package" extends="icms-package" namespace="/request">
+	</package>
+	
+	<!-- 服务申请公共 -->
+	<package name="request-base" extends="request-package" namespace="/request/base">
+		<action name="*" method="{1}" class="requestBaseAction">
+			<result name="success">/pages/request/{1}.jsp</result>
+		</action>
+		<!-- 我的服务申请2 -->
+		<action name="cloudRequestInfo2" method="cloudRequestInfo2" class="requestBaseAction">
+			<result name="success">/pages/request2/cloudRequestInfo.jsp</result>
+		</action>
+		
+		<action name="getCloudReqeustList" class="requestBaseAction" method="getCloudReqeustList"/>
+		<action name="getCloudReqeustList2" class="requestBaseAction" method="getCloudReqeustList2"/>
+		<action name="findSubInstanceIdBySrId" class="requestBaseAction" method="findSubInstanceIdBySrId"/>
+		
+	    <action name="getCloudReqeust" class="requestBaseAction" method="getCloudReqeust">
+			<result name="cloudRequestApprove">/pages/request/cloudRequestApprove.jsp</result>
+			<result name="cloudRequestIndex">/pages/request/cloudRequestIndex.jsp</result>
+			<result name="cloudRequestAffirm">/pages/request/cloudRequestAffirm.jsp</result>
+			<result name="cloudRequestResource">/pages/request/cloudRequestResource.jsp</result>
+			<result name="cloudRequestWorkflow">/pages/request/cloudRequestWorkflow.jsp</result>
+			<result name="cloudRequestDetail">/pages/request/cloudRequestDetail.jsp</result>
+		</action>
+		
+		<action name="queryBmSrRrinfoList" class="requestBaseAction" method="queryBmSrRrinfoList"/>
+		<action name="saveApprove" class="requestBaseAction" method="saveApprove"/>
+		<action name="deleteRequest" class="requestBaseAction" method="deleteRequest"/>
+		<action name="queryBmSrRrinfoByParam" class="requestBaseAction" method="queryBmSrRrinfoByParam"/>
+		<action name="queryBmSrRrinfoRecycleByParam" class="requestBaseAction" method="queryBmSrRrinfoRecycleByParam"/>
+		<action name="queryBmSrRrinfoExtendByParam" class="requestBaseAction" method="queryBmSrRrinfoExtendByParam"/>
+		<action name="queryBmSrRrinfoAffirmList" class="requestBaseAction" method="queryBmSrRrinfoAffirmList"/>
+		<action name="queryBmSrRrinfoResoureList" class="requestBaseAction" method="queryBmSrRrinfoResoureList"/>
+		<action name="queryWorkflowLinkList" class="requestBaseAction" method="queryWorkflowLinkList"/>
+		<action name="getVmNetIp" class="requestBaseAction" method="getVmNetIp"/>
+		<!-- 获取openstack虚拟机ip -->
+		<action name="getVmNetIpOpenstack" class="requestBaseAction" method="getVmNetIpOpenstack"/>
+		<action name="startInstance" class="requestBaseAction" method="startInstance"/>
+		<action name="resourceSubmit" class="requestBaseAction" method="resourceSubmit"/>
+		<action name="submitSubWorkflow" class="requestBaseAction" method="submitSubWorkflow"/>
+		<action name="todoStartDeal" class="requestBaseAction" method="todoStartDeal"/>
+		<action name="getBmSrVo" class="requestBaseAction" method="getBmSrVo"/>	
+		<action name="getSelfLimit" class="requestBaseAction" method="getSelfLimit"/>
+		<action name="cancelServiceRequest" class="requestBaseAction" method="cancelServiceRequest"/>
+		<action name="backServiceRequest" class="requestBaseAction" method="backServiceRequest"/>
+	</package>
+	<!-- 供给申请 -->
+	<package name="request-supply" extends="request-package" namespace="/request/supply">
+		<action name="findVirtualSupplyById" class="virtualSupplyAction" method="findVirtualSupplyById"/>
+	</package>
+	<!-- 扩容申请 -->
+	<package name="request-extend" extends="request-package" namespace="/request/extend">
+		<action name="findVirtualExtendById" class="virtualExtendAction" method="findVirtualExtendById"/>
+		<action name="queryVEBmSrRrinfoList" class="virtualExtendAction" method="queryVEBmSrRrinfoList"/>
+		<action name="queryVmSrDeviceinfoList" class="virtualExtendAction" method="queryVmSrDeviceinfoList"/>
+		<action name="getHostName" class="virtualExtendAction" method="getHostName"/>
+	</package>
+	<!-- 回收申请 -->
+	<package name="request-recycle" extends="request-package" namespace="/request/recycle">
+		<action name="getVirtualRecycleVoBySrId" class="virtualRecycleAction" method="getVirtualRecycleVoBySrId"/>		
+	</package>
+</struts>

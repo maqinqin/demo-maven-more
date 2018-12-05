@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="general">
+	<typeAlias alias="AdminDic" type="com.git.cloud.common.model.AdminDicPo" />
+	<typeAlias alias="AdminParam" type="com.git.cloud.common.model.AdminParamPo" />
+	
+	<!-- 字典表 -->
+	<select id="getDicByDicTypeCode"  parameterClass="java.util.HashMap"  resultClass="AdminDic">
+		 select DIC_ID dicId, 
+		 		DIC_NAME dicName, 
+		 		DIC_CODE dicCode,
+		 		ATTR attr 
+		 from ADMIN_DIC 
+		 where 1=1
+		 <dynamic prepend="">
+		 	<isNotEmpty prepend="and" property="dicCode">
+		 		DIC_CODE=#dicCode#
+		 	</isNotEmpty>
+		 	<isNotEmpty prepend="and" property="dicTypeCode">
+		 		DIC_TYPE_CODE=#dicTypeCode#
+		 	</isNotEmpty>
+		 </dynamic>
+	</select>
+	<select id="getAllDic" resultClass="AdminDic">
+		 select DIC_ID dicId, 
+		 		DIC_NAME dicName, 
+		 		DIC_CODE dicCode,
+		 		ATTR attr 
+		 from ADMIN_DIC
+	</select>
+	
+	<!-- 参数表 -->
+	<select id="getParams"  parameterClass="java.util.HashMap"  resultClass="AdminParam">
+		select PARAM_ID paramId,
+			   PARAM_NAME paramName,
+			   PARAM_VALUE paramValue,
+			   REMARK remark,
+		       IS_ACTIVE isActive,
+			   IS_ENCRYPTION isEncryption
+		from ADMIN_PARAM
+		where IS_ACTIVE='Y'
+		<dynamic prepend="">
+			<isNotEmpty prepend="and" property="paramId">
+				PARAM_ID = #paramId#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="paramName">
+				PARAM_NAME =#paramName#
+			</isNotEmpty>
+			<isNotEmpty prepend="and" property="paramValue">
+				(PARAM_VALUE = #paramValue# or PARAM_VALUE=#encryptParamValue#)
+			</isNotEmpty>
+		</dynamic>
+	</select>
+</sqlMap>

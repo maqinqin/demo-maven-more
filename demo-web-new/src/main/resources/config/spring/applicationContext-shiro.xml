@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+						http://www.springframework.org/schema/beans/spring-beans-3.0.xsd"
+	default-lazy-init="true">
+
+	<description>Shiro Configuration</description>
+
+	<bean id="permissionDao" class="com.git.cloud.shiro.dao.impl.PermissionDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<bean id="permissionService" class="com.git.cloud.shiro.service.impl.PermissionServiceImpl">
+		<property name="permissionDao" ref="permissionDao" />
+	</bean>
+	<!-- Shiro's main business-tier object for web-enabled applications -->
+	<bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+		<property name="realm" ref="shiroDbRealm" />
+		<property name="cacheManager" ref="shiroEhcacheManager" />
+	</bean>
+	<!-- 項目自定义的Realm -->
+	<bean id="shiroDbRealm" class="com.git.cloud.shiro.realm.ShiroDbRealm">
+		<property name="userService" ref="userServiceImpl" />
+<!-- 		<property name="cacheManager" ref="shiroEhcacheManager" /> -->
+		<property name="permissionService" ref="permissionService" />
+	</bean>
+	<bean id="chainDefinitionSectionMetaSource"
+		class="com.git.cloud.shiro.realm.ChainDefinitionSectionMetaSource"  depends-on="sysMenuDao">
+		<property name="sysMenuDaoImpl" ref="sysMenuDao" />
+		<property name="filterChainDefinitions">
+			<value>
+			    /pages/common/rand.jsp = anon
+				/shiro/login.action = anon
+				/sys/uploadLogo/getLogo.action = anon
+				/shiro/logout.action = logout
+				/services/** = anon
+				/common/** = anon
+				/css/** = anon
+				/images/** = anon
+				/jquery/** = anon
+				/locale/** = anon
+				/plugins/** = anon
+				/scripts/** = anon
+				/themes/** = anon
+				/rest/** = anon
+				/shiro/fileUpload.action = anon
+				/pages/error/** = anon
+				/** = authc
+			</value>
+		</property>
+	</bean>
+
+	<!-- Shiro Filter -->
+	<bean id="shiroFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+		<property name="securityManager" ref="securityManager" />
+		<property name="loginUrl" value="/pages/login.jsp" />
+		<property name="successUrl" value="/pages/success.jsp" />
+		<property name="unauthorizedUrl" value="/pages/error/noperms.jsp" />
+		<!-- shiro连接约束配置,在这里使用自定义的动态获取资源类 -->
+		<property name="filterChainDefinitionMap" ref="chainDefinitionSectionMetaSource" />
+	</bean>
+
+ 	<!-- 用户授权信息Cache -->
+	<bean id="shiroEhcacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">
+		<property name="cacheManagerConfigFile" value="classpath:config/ehcache/ehcache-shiro.xml"/>
+	</bean>
+
+	<!-- 保证实现了Shiro内部lifecycle函数的bean执行 -->
+	<bean id="lifecycleBeanPostProcessor" class="org.apache.shiro.spring.LifecycleBeanPostProcessor" />
+
+	<!-- AOP式方法级权限检查 -->
+	<bean
+		class="org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator"
+		depends-on="lifecycleBeanPostProcessor">
+		<property name="proxyTargetClass" value="true" />
+	</bean>
+
+	<bean
+		class="org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor">
+		<property name="securityManager" ref="securityManager" />
+	</bean>
+	<!-- 登陆前的证书验证 -->
+	 <!-- DAO -->
+	 <bean id="certificateValidateDao" class="com.git.cloud.shiro.dao.impl.ICertificateVlidateDaoImpl" scope="singleton">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- SERVICE -->
+	<bean id="certificateValidateService" class="com.git.cloud.shiro.service.impl.CertificateServiceImpl" scope="singleton">
+		<property name="certificateValidateDao" ref="certificateValidateDao" />
+	</bean>
+	<!-- ACTION -->
+<!-- 	<bean id="shiroLoginAction" class="com.git.cloud.shiro.action.ShiroLoginAction" scope="prototype"> -->
+<!--          <property name="certificateValidateService" ref="certificateValidateService"/> -->
+<!-- 	</bean> -->
+	<!-- 文件上传证书参数赋初值 -->
+	<!-- DAO -->
+	 <bean id="fileUpLoadDao" class="com.git.cloud.shiro.dao.impl.IFileUpLoadDaoImpl" scope="singleton">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	<!-- SERVICE -->
+	<bean id="fileUpLoadService" class="com.git.cloud.shiro.service.impl.IFileUpLoadServiceImpl" scope="singleton">
+		<property name="fileUpLoadDao" ref="fileUpLoadDao" />
+	</bean>
+	<!-- ACTION -->
+	<bean id="fileUpLoadAction" class="com.git.cloud.shiro.action.FileUpLoadAction" scope="prototype">
+         <property name="fileUpLoadService" ref="fileUpLoadService"/>
+	</bean>
+	
+</beans>

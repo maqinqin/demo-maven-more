@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="CloudServiceAttrPo">
+	<resultMap id="BaseResultMap"
+		class="com.git.cloud.cloudservice.model.po.CloudServiceAttrPo">
+		<result column="ATTR_ID" property="attrId" />
+		<result column="SERVICE_ID" property="serviceId" />
+		<result column="ATTR_TYPE" property="attrType" />
+		<result column="ATTR_CLASS" property="attrClass" />
+		<result column="ATTR_NAME" property="attrName" />
+		<result column="ATTR_CNAME" property="attrCname" />
+		<result column="DEF_VAL" property="defVal" />
+		<result column="IS_REQUIRE" property="isRequire" />
+		<result column="IS_ACTIVE" property="isActive" />
+		<result column="REMARK" property="remark" />
+		<result column="IS_VISIBLE" property="isVisible" />
+		<result column="ATTR_LIST_SQL" property="attrListSql" />
+	</resultMap>
+	
+	<resultMap id="cloudServiceAttrVo"
+		class="com.git.cloud.cloudservice.model.vo.CloudServiceAttrVo">
+		<result column="ATTR_ID" property="attrId" />
+		<result column="SERVICE_ID" property="serviceId" />
+		<result column="ATTR_TYPE" property="attrType" />
+		<result column="ATTR_CLASS" property="attrClass" />
+		<result column="ATTR_TYPE_NAME" property="attrTypeName" />
+		<result column="ATTR_CLASS_NAME" property="attrClassName" />
+		<result column="ATTR_NAME" property="attrName" />
+		<result column="ATTR_CNAME" property="attrCname" />
+		<result column="DEF_VAL" property="defVal" />
+		<result column="IS_REQUIRE" property="isRequire" />
+		<result column="IS_ACTIVE" property="isActive" />
+		<result column="REMARK" property="remark" />
+		<result column="IS_VISIBLE" property="isVisible" />
+		<result column="ATTR_LIST_SQL" property="attrListSql" />
+		<result property="attrSelList" select="CloudServiceAttrPo.getAttrSelList"  
+        column="ATTR_ID" />
+	</resultMap>
+	
+	<resultMap id="cloudServiceAttrResultSelMap" class="com.git.cloud.cloudservice.model.po.CloudServiceAttrSelPo" >  
+	    <result column="ATTR_SEL_ID"  property="attrSelId" />  
+	    <result column="ATTR_ID" property="attrId" />  
+	    <result column="ATTR_KEY" property="attrKey" />  
+	    <result column="ATTR_VALUE" property="attrValue"  />  
+	    <result column="IS_ACTIVE" property="isActive" />  
+    </resultMap>  
+    
+    <resultMap id="queryDataVoMap" class="com.git.cloud.cloudservice.model.vo.QueryDataVo" >  
+	    <result column="keyParam"  property="keyParam" />  
+	    <result column="valueParam" property="valueParam" />  
+    </resultMap> 
+	
+	<select id="CloudServiceAttrPo.getAttrSelList" resultMap="cloudServiceAttrResultSelMap">  
+	    select  
+	        ATTR_SEL_ID,  
+	        ATTR_ID,  
+	        ATTR_KEY,
+	        ATTR_VALUE,
+	        IS_ACTIVE 
+	    from  
+	        CLOUD_SERVICE_ATTR_SEL  
+	    where  
+	        ATTR_ID = #ATTR_ID#  
+	</select>  
+	
+	<select id="CloudServiceAttrPo.search" parameterClass="java.util.Map"
+		resultMap="cloudServiceAttrVo">
+		SELECT ATTR.ATTR_ID AS ATTR_ID,ATTR.SERVICE_ID AS SERVICE_ID,ATTR.ATTR_TYPE AS ATTR_TYPE,ATTR.ATTR_CLASS AS ATTR_CLASS,
+		ATTR.ATTR_NAME AS ATTR_NAME,ATTR.ATTR_CNAME AS ATTR_CNAME,ATTR.DEF_VAL AS DEF_VAL,ATTR.IS_REQUIRE AS IS_REQUIRE,ATTR.IS_ACTIVE AS IS_ACTIVE,
+		ATTR.REMARK AS REMARK,ATTR.IS_VISIBLE AS IS_VISIBLE,ATTR.ATTR_LIST_SQL AS ATTR_LIST_SQL,dic.DIC_NAME as ATTR_TYPE_NAME,dic1.DIC_NAME as ATTR_CLASS_NAME FROM CLOUD_SERVICE_ATTR ATTR LEFT JOIN ADMIN_DIC dic on dic.DIC_TYPE_CODE='ATTR_TYPE' and dic.DIC_CODE=ATTR.ATTR_TYPE LEFT JOIN ADMIN_DIC dic1 on dic1.DIC_TYPE_CODE='ATTR_CLASS' and dic1.DIC_CODE=ATTR.ATTR_CLASS where ATTR.IS_ACTIVE='Y'
+		
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="SERVICE_ID">
+				SERVICE_ID = #SERVICE_ID#
+			</isNotEmpty>
+		</dynamic> 
+		order by ATTR.ATTR_CNAME 
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="CloudServiceAttrPo.count" parameterClass="java.util.Map"
+		resultClass="java.lang.Integer">
+		SELECT count(*) FROM CLOUD_SERVICE_ATTR  where IS_ACTIVE='Y' 
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="SERVICE_ID">
+				SERVICE_ID = #SERVICE_ID#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<select id="CloudServiceAttrPo.file" resultMap="BaseResultMap">
+		SELECT *  FROM
+		CLOUD_SERVICE_ATTR where  IS_ACTIVE='Y' and  SERVICE_ID =#serviceId#
+	</select>
+	
+	<select id="CloudServiceAttrPo.load" resultMap="BaseResultMap">
+		SELECT *  FROM
+		CLOUD_SERVICE_ATTR where  IS_ACTIVE='Y' and  ATTR_ID =#attrId#
+	</select>
+
+	<select id="CloudServiceAttrPo.search1" parameterClass="java.util.Map"
+		resultMap="cloudServiceAttrVo">
+		<!-- 
+		SELECT ATTR.*,dic.DIC_NAME as ATTR_TYPE_NAME,dic1.DIC_NAME as ATTR_CLASS_NAME FROM CLOUD_SERVICE_ATTR ATTR ,ADMIN_DIC dic ,ADMIN_DIC dic1  where IS_ACTIVE='Y' and dic.DIC_TYPE_CODE='ATTR_TYPE' and dic.DIC_CODE=ATTR.ATTR_TYPE  and dic1.DIC_TYPE_CODE='ATTR_CLASS' and dic1.DIC_CODE=ATTR.ATTR_CLASS
+		 -->
+		SELECT ATTR.*,dic.DIC_NAME as ATTR_TYPE_NAME,dic1.DIC_NAME as ATTR_CLASS_NAME FROM CLOUD_SERVICE_ATTR ATTR LEFT JOIN ADMIN_DIC dic on dic.DIC_TYPE_CODE='ATTR_TYPE' and dic.DIC_CODE=ATTR.ATTR_TYPE LEFT JOIN ADMIN_DIC dic1 on dic1.DIC_TYPE_CODE='ATTR_CLASS' and dic1.DIC_CODE=ATTR.ATTR_CLASS where ATTR.IS_ACTIVE='Y'
+		
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="SERVICE_ID">
+				SERVICE_ID =
+				#SERVICE_ID#
+			</isNotEmpty>
+		</dynamic>
+		order by ATTR.ATTR_CNAME 
+		limit #startIndex# ,#pageSize#
+	</select>
+	<select id="CloudServiceAttrPo.count1" parameterClass="java.util.Map"
+		resultClass="java.lang.Integer">
+		SELECT count(*) FROM CLOUD_SERVICE_ATTR  where IS_ACTIVE='Y' 
+		<dynamic prepend="and">
+			<isNotEmpty prepend="and" property="SERVICE_ID">
+				SERVICE_ID =
+				#SERVICE_ID#
+			</isNotEmpty>
+		</dynamic>
+	</select>
+	
+	<!--查询ListSQL  -->
+	<select id="queryDynamicSQL" parameterClass="java.lang.String"
+		resultMap="queryDataVoMap">
+		$querySQL$
+	</select>
+	<select id="QueryForListSql" parameterClass="java.lang.String" resultClass="java.lang.String">
+		select ATTR_LIST_SQL from CLOUD_SERVICE_ATTR where ATTR_ID=#listSqlId#
+	</select>
+
+	<insert id="CloudServiceAttrPo.insert"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceAttrPo">
+		insert into CLOUD_SERVICE_ATTR (ATTR_ID, SERVICE_ID,
+		ATTR_TYPE, ATTR_CLASS, ATTR_NAME,
+		ATTR_CNAME, DEF_VAL, IS_REQUIRE, IS_ACTIVE,
+		REMARK,IS_VISIBLE,ATTR_LIST_SQL)values(
+		#attrId#,
+		#serviceId#,
+		#attrType#,
+		#attrClass#,
+		#attrName#,
+		#attrCname#,
+		#defVal#,
+		#isRequire#,
+		'Y',
+		#remark#,
+		#isVisible#,
+		#attrListSql#)
+	</insert>
+
+	<update id="CloudServiceAttrPo.update"
+		parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceAttrPo">
+		update CLOUD_SERVICE_ATTR set
+		SERVICE_ID= #serviceId#,
+		ATTR_TYPE= #attrType#,
+		ATTR_CLASS =#attrClass#,
+		ATTR_NAME = #attrName#,
+		ATTR_CNAME = #attrCname#,
+		DEF_VAL = #defVal#,
+		IS_REQUIRE = #isRequire#,
+		IS_ACTIVE = #isActive#,
+		REMARK = #remark#,
+		IS_VISIBLE = #isVisible#,
+		ATTR_LIST_SQL = #attrListSql#
+		where
+		ATTR_ID= #attrId#
+	</update>
+	<delete id="CloudServiceAttrPo.delete" parameterClass="java.lang.String">
+		update CLOUD_SERVICE_ATTR set IS_ACTIVE = 'N' WHERE ATTR_ID = #attrId#
+	</delete>
+	
+	<select id="findCloudServiceAttrPosByparam" parameterClass="com.git.cloud.cloudservice.model.po.CloudServiceAttrPo" resultClass="java.lang.Integer">
+		SELECT COUNT(1) FROM  CLOUD_SERVICE_ATTR WHERE  IS_ACTIVE ='Y' AND SERVICE_ID= #serviceId# AND ATTR_NAME = #attrName#
+		<isNotEmpty prepend="and" property="attrId">
+			ATTR_ID != #attrId#
+		</isNotEmpty>
+	</select>
+</sqlMap>

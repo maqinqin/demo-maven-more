@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="taglib">
+    <typeAlias alias="dictionaryTag" type="com.git.cloud.taglib.dic.DictionaryTag" />
+	<select id="getDicList" parameterClass="dictionaryTag" resultClass="dictionaryTag">
+		select DIC_ID id,DIC_NAME name,DIC_CODE value,DIC_TYPE_CODE kind from ADMIN_DIC where dic_type_code=#kind# order by order_num
+	</select>
+	<select id="execSql" parameterClass="java.lang.String" resultClass="dictionaryTag" remapResults="true">
+		$sql$
+	</select>
+</sqlMap>

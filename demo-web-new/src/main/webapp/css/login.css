@@ -1,0 +1,116 @@
+@charset "utf-8";
+/* CSS Document */
+
+body{
+	height:100%;
+	padding:0;
+	margin:0;
+	font-size:12px;
+	font-family:"微软雅黑",arial, serif;
+	color:#fff;
+	background-color:#b3c0d4;
+	position:relative;
+	}
+h1,h2,h3,ul,li,dl,dt,dd,p,img,input,button,table{
+	padding:0;
+	margin:0;
+	border:0;
+	font-weight:normal;
+	list-style:none;
+	outline:none;
+	}
+	
+/*---------------------------全局样式-----------------------------------*/
+::-moz-selection{background:#b3c0d4;color:#b3c0d4} 
+.logoIn_wrap{
+	width:1028px;
+	height:559px;
+	margin:0 auto;
+	background:url(../images/logoIn_wrap.png) no-repeat;
+	}
+	
+.logoIn_Bt{
+	width:342px;
+	height:108px;
+	margin:0 auto;
+	padding-top:150px;
+	}
+	
+.logoIn_TxtW{
+	height:42px;
+	padding:92px 0 0 70px;
+	}	
+
+.logoIn_TxtW li{
+	width:250px;
+	height:42px;
+	float:left;
+	margin-right:23px;
+	_display:inline;
+	zoom:1;
+	}
+	
+.logoIn_TxtW .short{
+	width:105px;
+	margin-right:30px;
+	}
+	
+.logoIn_TxtW input{
+	float:left;
+	width:198px;
+	height:18px;
+	line-height:18px;
+	padding:12px 12px 12px 40px;
+	font-size:14px;
+	letter-spacing:1px;
+	color:#3d90de;
+	background:none;
+	}	
+	
+.logoIn_TxtW .short input{
+	float:left;
+	width:102px;
+	height:18px;
+	line-height:18px;
+	padding:12px 12px 12px 12px;
+	font-size:14px;
+	color:#3d90de;
+	background:none;
+	}	
+	
+.logoIn_TxtBot{
+	padding-top:0;
+	height:20px;
+	line-height:20px;
+	text-align:right;
+	padding-top:4px;
+	font-size:14px;
+	}	
+	
+.logoIn_TxtBot a:link,.logoIn_TxtBot a:visited{
+	color:#F90;
+	font-weight:bold;
+	}	
+	
+.logoIn_TxtBot a:hover{
+	color:F90;
+	font-weight:bold;
+	}
+	
+.logoIn_btW{
+	width:98px;
+	height:44px;
+	margin:40px auto 0;
+	}
+
+.logoIn_footer{
+	width:100%;
+	height:20px;
+	text-align:center;
+	font-size:12px;
+	color:#282a3d; 
+	position:absolute;
+	bottom:3px;
+	text-align: center;
+	margin-bottom: 170px;
+	}				

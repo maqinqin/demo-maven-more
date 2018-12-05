@@ -1,0 +1,7 @@
+<ehcache>
+	<diskStore path="java.io.tmpdir" />
+	<defaultCache maxElementsInMemory="10000" eternal="false"
+		timeToIdleSeconds="120" timeToLiveSeconds="120" overflowToDisk="true" />
+	<cache name="sysMenuCache" maxElementsInMemory="5000"
+		eternal="true" overflowToDisk="true" />
+</ehcache>

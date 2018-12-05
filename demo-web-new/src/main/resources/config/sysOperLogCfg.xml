@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	配置说明：
+	module标签描述：一个module标签作为一个业务模块。
+	module属性描述：
+		class：业务模块对应的业务实现类路径。
+		moduleCode：业务模块编码。
+		moduleName：业务模块名字，以供【系统操作日志】功能显示所用。
+	module子标签operate描述：一个operate标签是作为module模块要记录的操作。
+	operate属性描述：
+		operateType：操作类型，目前支持INSERT、UPDATE、DELETE、SPECIAL这四种操作。
+					 其中INSERT、UPDATE、DELETE显而易见为新增、修改和删除。
+					 SPECIAL是特殊的操作类型，需要定义拦截的方法名（interceptMethod属性）和获取日志的方法名（recordLog属性）。
+		operateName：操作名称，以供【系统操作日志】功能显示所用。
+		startsWith：拦截业务方法开头的字母。
+		interceptMethod：拦截的方法名称，当operateType为SPECIAL时，这个属性不能为空。
+		logMethod：获取日志的方法名称，当operateType为SPECIAL时，这个属性不能为空。
+		paramOrder：此属性代表拦截的方法的【第几个】参数传递给获取日志的方法，从0开始数第几个。
+					如果此属性不设置，则将拦截的方法所有参数都传递给获取日志的方法。
+		pkId：是业务对象的主键Id，是提供给业务方法method的参数。此属性对【修改】和【删除】操作有效。
+		getBeanMethod：对业务实现类class的业务方法，此方法功能是根据业务对象的主键Id获取业务对象的方法。此属性对【修改】和【删除】操作有效。
+		businessName：是业务对象中的业务名称属性名。此属性对【删除】操作有效。
+ -->
+<modules>
+	<!-- 服务申请-start -->
+	<module class="com.git.cloud.request.service.impl.VirtualSupplyServiceImpl" moduleCode="REQUEST" moduleName="服务申请">
+		<operate operateType="INSERT" operateName="提交供给服务申请" interceptMethod="saveVirtualSupply"/>
+	</module>
+	<module class="com.git.cloud.request.service.impl.VirtualExtendServiceImpl" moduleCode="REQUEST" moduleName="服务申请">
+		<operate operateType="INSERT" operateName="提交扩容服务申请" interceptMethod="saveVirtualExtend"/>
+	</module>
+	<module class="com.git.cloud.request.service.impl.VirtualRecycleServiceImpl" moduleCode="REQUEST" moduleName="服务申请">
+		<operate operateType="INSERT" operateName="提交回收服务申请" interceptMethod="saveVirtualRecycle"/>
+	</module>
+	<module class="com.git.cloud.request.service.impl.RequestBaseServiceImpl" moduleCode="REQUEST" moduleName="服务申请">
+		<operate operateType="SPECIAL" operateName="管理员审批" interceptMethod="saveApprove" logMethod="saveApproveLog"/>
+		<operate operateType="SPECIAL" operateName="资源管理员确认开始实施" interceptMethod="saveOperateBegin" logMethod="recordLog" paramOrder="0"/>
+		<operate operateType="SPECIAL" operateName="资源管理员确认实施成功" interceptMethod="saveOperateEnd" logMethod="recordLog" paramOrder="0"/>
+		<operate operateType="SPECIAL" operateName="申请人作废申请单" interceptMethod="deleteApprove" logMethod="recordLog" paramOrder="0"/>
+		<operate operateType="SPECIAL" operateName="申请人验证关单" interceptMethod="closeRequestSr" logMethod="recordLog" paramOrder="0"/>
+	</module>
+	<!-- 服务申请-end -->
+
+	<!-- 系统管理-start -->
+	<!-- 用户管理-start -->
+	<module class="com.git.cloud.sys.service.impl.UserServiceImpl" moduleCode="SYS_USER" moduleName="用户管理">
+		<operate operateType="INSERT" operateName="用户新增" interceptMethod="saveUser"/>
+		<operate operateType="UPDATE" operateName="用户修改" interceptMethod="updateUser" pkId="userId" getBeanMethod="findUserPoById"/>
+		<operate operateType="DELETE" operateName="用户删除" interceptMethod="deleteUser" pkId="userId" getBeanMethod="findUserPoById" businessName="loginName"/>
+	</module>
+	<!-- 用户管理-end -->
+	<!-- 机构管理-start -->
+	<module class="com.git.cloud.sys.service.impl.SysOrganizationServiceImpl" moduleCode="SYS_ORG" moduleName="机构管理">
+		<operate operateType="INSERT" operateName="机构新增" interceptMethod="insert"/>
+		<operate operateType="UPDATE" operateName="机构修改" interceptMethod="update" pkId="orgId" getBeanMethod="load"/>
+		<operate operateType="DELETE" operateName="机构删除" interceptMethod="delete" pkId="orgId" getBeanMethod="load" businessName="orgName"/>
+	</module>
+	<!-- 机构管理-end -->
+	<!-- 角色管理-start -->
+	<module class="com.git.cloud.sys.service.impl.SysRoleServiceImpl" moduleCode="SYS_ROLE" moduleName="角色管理">
+		<operate operateType="INSERT" operateName="角色新增" interceptMethod="saveSysRolePo"/>
+		<operate operateType="UPDATE" operateName="角色修改" interceptMethod="updateSysRolePo" pkId="roleId" getBeanMethod="findSysRoleByRoleId"/>
+		<operate operateType="DELETE" operateName="角色删除" interceptMethod="deleteSysRolePoByRoleId" pkId="roleId" getBeanMethod="findSysRoleByRoleId" businessName="roleName"/>
+	</module>
+	<!-- 角色管理-end -->
+	<!-- 菜单管理-start -->
+	<module class="com.git.cloud.sys.service.impl.SysMenuServiceImpl" moduleCode="SYS_MENU" moduleName="菜单管理">
+		<operate operateType="INSERT" operateName="菜单新增" interceptMethod="insert"/>
+		<operate operateType="UPDATE" operateName="菜单修改" interceptMethod="update" pkId="id" getBeanMethod="load"/>
+		<operate operateType="DELETE" operateName="菜单删除" interceptMethod="delete" pkId="id" getBeanMethod="load" businessName="menuName"/>
+	</module>
+	<!-- 菜单管理-end -->
+	<!-- 字典管理-start -->
+	<module class="com.git.cloud.dic.service.impl.DicServiceImpl" moduleCode="SYS_DIC" moduleName="数据字典管理">
+		<operate operateType="INSERT" operateName="数据字典新增" interceptMethod="insertDic"/>
+		<operate operateType="UPDATE" operateName="数据字典修改" interceptMethod="updateDic" pkId="dicId" getBeanMethod="findDicById"/>
+		<operate operateType="DELETE" operateName="数据字典删除" interceptMethod="deleteDic" pkId="dicId" getBeanMethod="findDicById" businessName="dicName"/>
+		<operate operateType="INSERT" operateName="数据类型字典新增" interceptMethod="insertDicType"/>
+		<operate operateType="UPDATE" operateName="数据类型字典修改" interceptMethod="updateDicType" pkId="dicTypeCode" getBeanMethod="findDicTypeByCode"/>
+		<operate operateType="DELETE" operateName="数据类型字典删除" interceptMethod="deleteDicType" pkId="dicTypeCode" getBeanMethod="findDicTypeByCode" businessName="dicTypeName"/>
+	</module>
+	<!-- 字典管理-end -->
+	<!-- 系统参数配置-start -->
+	<module class="com.git.cloud.parame.service.Impl.ParameterServiceImpl" moduleCode="SYS_PARAM" moduleName="系统参数管理">
+		<operate operateType="INSERT" operateName="系统参数新增" interceptMethod="save"/>
+		<operate operateType="SPECIAL" operateName="系统参数修改" interceptMethod="update" logMethod="updateLog"/>
+		<operate operateType="DELETE" operateName="系统参数删除" interceptMethod="delete" pkId="paramId" getBeanMethod="view" businessName="paramName"/>
+	</module>
+	<!-- 系统参数配置-end -->
+	<!-- 系统管理-end -->
+		
+	<!-- 应用系统-start -->
+	<module class="com.git.cloud.appmgt.service.impl.DeployunitServiceImpl" moduleCode="APP_DU" moduleName="服务器角色管理">
+		<operate operateType="INSERT" operateName="服务器角色新增" interceptMethod="saveDeployunit"/>
+		<operate operateType="UPDATE" operateName="服务器角色修改" interceptMethod="updateDeployunit" pkId="duId" getBeanMethod="getDeployUnitById"/>
+		<operate operateType="DELETE" operateName="服务器角色删除" interceptMethod="removeDeployunit" pkId="duId" getBeanMethod="getDeployUnitById" businessName="cname"/>
+	</module>
+	<!-- 应用系统-end -->
+	
+	<!-- 云服务定义-start -->
+	<module class="com.git.cloud.cloudservice.service.impl.CloudServiceServiceImpl" moduleCode="CLOUD_SERVICE" moduleName="云服务定义">
+		<operate operateType="INSERT" operateName="云服务定义新增" interceptMethod="save"/>
+		<operate operateType="UPDATE" operateName="云服务定义修改" interceptMethod="update" pkId="serviceId" getBeanMethod="findById"/>
+		<operate operateType="DELETE" operateName="云服务定义删除" interceptMethod="deleteById" pkId="serviceId" getBeanMethod="findById" businessName="serviceName"/>
+	</module>
+	<module class="com.git.cloud.cloudservice.service.impl.CloudServiceAttrServiceImpl" moduleCode="CLOUD_SERVICE" moduleName="云服务定义">
+		<operate operateType="INSERT" operateName="云服务属性新增" interceptMethod="save"/>
+		<operate operateType="UPDATE" operateName="云服务属性修改" interceptMethod="update" pkId="attrId" getBeanMethod="findById"/>
+		<operate operateType="DELETE" operateName="云服务属性删除" interceptMethod="deleteById" pkId="attrId" getBeanMethod="findById" businessName="attrName"/>
+	</module>
+	<module class="com.git.cloud.cloudservice.service.impl.CloudServiceFlowRefServiceImpl" moduleCode="CLOUD_SERVICE" moduleName="云服务定义">
+		<operate operateType="INSERT" operateName="云服务操作模型新增" interceptMethod="save"/>
+		<operate operateType="UPDATE" operateName="云服务操作模型修改" interceptMethod="update" pkId="serviceFlowId" getBeanMethod="findById"/>
+		<operate operateType="DELETE" operateName="云服务操作模型删除" interceptMethod="deleteById" pkId="serviceFlowId" getBeanMethod="findById" businessName="operModelType"/>
+	</module>
+	<module class="com.git.cloud.cloudservice.service.impl.ImageServiceImpl" moduleCode="CLOUD_IMAGE" moduleName="云服务镜像">
+		<operate operateType="INSERT" operateName="云服务镜像新增" interceptMethod="insertImage"/>
+		<operate operateType="UPDATE" operateName="云服务镜像修改" interceptMethod="updateImage" pkId="imageId" getBeanMethod="findImageById"/>
+		<operate operateType="DELETE" operateName="云服务镜像删除" interceptMethod="deleteImage" pkId="imageId" getBeanMethod="findImageById" businessName="imageName"/>
+		<operate operateType="INSERT" operateName="云服务镜像软件新增" interceptMethod="saveCloudImageSoftWareRef"/>
+		<operate operateType="UPDATE" operateName="云服务镜像软件修改" interceptMethod="updateCloudImageSoftWareRef" pkId="imageSoftwareId" getBeanMethod="findCloudImageSoftWareRef"/>
+		<operate operateType="DELETE" operateName="云服务镜像软件删除" interceptMethod="deleteCloudImageSoftWareRefById" pkId="imageSoftwareId" getBeanMethod="findCloudImageSoftWareRef" businessName="softWareVerId"/>
+	</module>
+	<module class="com.git.cloud.cloudservice.service.impl.SoftWareServiceImpl" moduleCode="CLOUD_SOFT" moduleName="软件信息管理">
+		<operate operateType="INSERT" operateName="云服务软件新增" interceptMethod="insertCloudSoftware"/>
+		<operate operateType="UPDATE" operateName="云服务软件修改" interceptMethod="updateCloudSoftware" pkId="softwareId" getBeanMethod="showSoftWareBysoftWareId"/>
+		<operate operateType="DELETE" operateName="云服务软件删除" interceptMethod="deleteCloudSoftware" pkId="softwareId" getBeanMethod="showSoftWareBysoftWareId" businessName="softwareName"/>
+		<operate operateType="INSERT" operateName="云服务软件版本新增" interceptMethod="insertSoftWareVer"/>
+		<operate operateType="UPDATE" operateName="云服务软件版本修改" interceptMethod="updateSoftWareVer" pkId="softwareVerId" getBeanMethod="findSoftWareVerByVerId"/>
+		<operate operateType="DELETE" operateName="云服务软件版本删除" interceptMethod="deleteSoftWareVer" pkId="softwareVerId" getBeanMethod="findSoftWareVerByVerId" businessName="verName"/>
+	</module>
+	<!-- 云服务定义-end -->
+	<!-- 脚本-start -->
+	<module class="com.git.cloud.cloudservice.service.impl.PackageDefServiceImpl" moduleCode="CLOUD_SCRIPT" moduleName="脚本管理">
+		<operate operateType="INSERT" operateName="脚本包新增" interceptMethod="savePackageForLog"/>
+		<operate operateType="UPDATE" operateName="脚本包修改" interceptMethod="updatePackageForLog" pkId="id" getBeanMethod="loadPackageForLog"/>
+		<operate operateType="DELETE" operateName="脚本包删除" interceptMethod="deletePackageForLog" pkId="id" getBeanMethod="loadPackageForLog" businessName="name"/>
+		<operate operateType="INSERT" operateName="脚本模块新增" interceptMethod="saveModelForLog"/>
+		<operate operateType="UPDATE" operateName="脚本模块修改" interceptMethod="updateModelForLog" pkId="id" getBeanMethod="loadModelForLog"/>
+		<operate operateType="DELETE" operateName="脚本模块删除" interceptMethod="deleteModelForLog" pkId="id" getBeanMethod="loadModelForLog" businessName="name"/>
+		<operate operateType="INSERT" operateName="脚本新增" interceptMethod="saveScriptForLog"/>
+		<operate operateType="UPDATE" operateName="脚本修改" interceptMethod="updateScriptForLog" pkId="id" getBeanMethod="loadScriptForLog"/>
+		<operate operateType="DELETE" operateName="脚本删除" interceptMethod="deleteScriptForLog" pkId="id" getBeanMethod="loadScriptForLog" businessName="name"/>
+		<operate operateType="INSERT" operateName="脚本参数新增" interceptMethod="savescriptParamForLog"/>
+		<operate operateType="UPDATE" operateName="脚本参数修改" interceptMethod="updateScriptParamForLog" pkId="id" getBeanMethod="loadScriptParamForLog"/>
+		<operate operateType="DELETE" operateName="脚本参数删除" interceptMethod="deleteScriptParamForLog" pkId="id" getBeanMethod="loadScriptParamForLog" businessName="name"/>
+	</module>
+	
+	<!-- 脚本-end -->
+	
+	<!-- 计算资源池-start -->
+	<module class="com.git.cloud.resmgt.common.service.impl.RmResPoolServiceImpl" moduleCode="RES_POOL" moduleName="计算资源池">
+		<operate operateType="INSERT" operateName="资源池新增" interceptMethod="saveRmResPoolVo"/>
+		<operate operateType="UPDATE" operateName="资源池修改" interceptMethod="updateRmResPoolVo" pkId="id" getBeanMethod="findRmResPoolVoById"/>
+		<operate operateType="DELETE" operateName="资源池删除" interceptMethod="deleteRmResPoolVoById" pkId="id" getBeanMethod="findRmResPoolVoById" businessName="poolName"/>
+	</module>
+	<module class="com.git.cloud.resmgt.compute.service.impl.RmClusterServiceImpl" moduleCode="RES_POOL" moduleName="计算资源池">
+		<operate operateType="INSERT" operateName="集群新增" interceptMethod="saveCluster"/>
+		<operate operateType="UPDATE" operateName="集群修改" interceptMethod="updateCluster" pkId="id" getBeanMethod="findClusterById"/>
+		<operate operateType="DELETE" operateName="集群删除" interceptMethod="deleteCluster" pkId="id" getBeanMethod="findClusterById" businessName="clusterName"/>
+	</module>
+	<module class="com.git.cloud.resmgt.common.service.impl.CmDeviceServiceImpl" moduleCode="DEVICE_MANAGER" moduleName="设备管理">
+		<operate operateType="SPECIAL" operateName="物理机新增" interceptMethod="saveCmHost" logMethod="saveCmHostLog"/>
+		<operate operateType="SPECIAL" operateName="物理机修改" interceptMethod="updateCmDeviceHost" logMethod="updateCmDeviceHostLog"/>
+		<operate operateType="SPECIAL" operateName="设备删除" interceptMethod="deleteCmDeviceList" logMethod="deleteCmDeviceListLog"/>
+		<operate operateType="SPECIAL" operateName="存储新增" interceptMethod="saveCmDeviceStorage" logMethod="saveCmDeviceStorageLog"/>
+		<operate operateType="SPECIAL" operateName="存储修改" interceptMethod="updateCmDeviceStorage" logMethod="updateCmDeviceStorageLog"/>
+		<operate operateType="SPECIAL" operateName="设备入池" interceptMethod="deviceInPool" logMethod="deviceInPoolLog"/>
+	</module>
+	<!-- 计算资源池-end -->
+	
+	<!-- 网络资源池-end -->
+	<!-- IP分配规则管理-start -->
+	<module class="com.git.cloud.resmgt.network.service.impl.RmNwRuleServiceImpl" moduleCode="RMNWRULE_PARAM" moduleName="IP分配规则管理">
+		<operate operateType="INSERT" operateName="IP规则新增" interceptMethod="saveRmNwRule"/>
+		<operate operateType="UPDATE" operateName="IP规则修改" interceptMethod="updateRmNwRule" pkId="rmNwRuleId" getBeanMethod="selectRmNwRuleById"/>
+		<operate operateType="DELETE" operateName="IP规则删除" interceptMethod="deleteRmNwRule" pkId="rmNwRuleId" getBeanMethod="selectRmNwRuleById" businessName="ruleName"/>
+		<operate operateType="INSERT" operateName="IP类型新增" interceptMethod="saveRmNwRuleList"/>
+		<operate operateType="UPDATE" operateName="IP类型修改" interceptMethod="updateRmNwRuleList" pkId="rmNwRuleListId" getBeanMethod="selectRmNwRuleListById"/>
+		<operate operateType="DELETE" operateName="IP类型删除" interceptMethod="deleteRmNwRuleList" pkId="rmNwRuleListId" getBeanMethod="selectRmNwRuleListById" businessName="rmIpTypeName"/>
+	</module>
+	<!-- 分配规则管理-end -->
+	<!-- IP用途管理 -start -->
+	<module class="com.git.cloud.resmgt.network.service.impl.RmNwUseServiceImpl" moduleCode="NW_USE" moduleName="IP用途管理">
+		<operate operateType="INSERT" operateName="IP用途新增" interceptMethod="saveRmNwUsePo"/>
+		<operate operateType="UPDATE" operateName="IP用途修改" interceptMethod="updateRmNwUsePo" pkId="useId" getBeanMethod="findRmNwUsePoById"/>
+		<operate operateType="DELETE" operateName="IP用途删除" interceptMethod="deleteRmNwUsePoById" pkId="useId" getBeanMethod="findRmNwUsePoById" businessName="useName"/>
+		<operate operateType="INSERT" operateName="IP用途关系新增" interceptMethod="saveRmNwUseRelPo"/>
+		<operate operateType="UPDATE" operateName="IP用途关系修改" interceptMethod="updateRmNwUseRelPo" pkId="useRelId" getBeanMethod="findRmNwUseRelPoById"/>
+		<operate operateType="DELETE" operateName="IP用途关系删除" interceptMethod="deleteRmNwUseRelPoById" pkId="useRelId" getBeanMethod="findRmNwUseRelPoById" businessName="useRelCode"/>
+	</module>
+	<!-- IP用途管理-end -->
+	<!-- IP用途管理-end -->
+	
+	<!-- 数据中心-start -->
+	<module class="com.git.cloud.resmgt.common.service.impl.RmDatacenterServiceImpl" moduleCode="DATACENTER_PARAM" moduleName="数据中心维护">
+		<operate operateType="INSERT" operateName="数据中心新增" interceptMethod="saveRmDatacenter"/>
+		<operate operateType="UPDATE" operateName="数据中心修改" interceptMethod="updateRmDatacenter" pkId="id" getBeanMethod="getDataCenterById"/>
+		<operate operateType="DELETE" operateName="数据中心删除" interceptMethod="deleteDatacenter" pkId="id" getBeanMethod="getDataCenterById" businessName="datacenterCname"/>
+	</module>
+	<!-- 数据中心-end -->
+	<!-- 平台类型-start -->
+	<module class="com.git.cloud.resmgt.common.service.impl.RmPlatformServiceImpl" moduleCode="RMPLATFORM_PARAM" moduleName="平台类型">
+		<operate operateType="INSERT" operateName="虚机类型新增" interceptMethod="savaVirtualType"/>
+		<operate operateType="UPDATE" operateName="虚机类型修改" interceptMethod="updateRmVirtualType" pkId="virtualTypeId" getBeanMethod="selectRmVirtualType"/>
+		<operate operateType="DELETE" operateName="虚机类型删除" interceptMethod="deleteVirtualType" pkId="virtualTypeId" getBeanMethod="selectRmVirtualType" businessName="virtualTypeName"/>
+		<operate operateType="INSERT" operateName="平台类型新增" interceptMethod="savaRmPlatform"/>
+		<operate operateType="UPDATE" operateName="平台类型修改" interceptMethod="updateRmPlatform" pkId="platformId" getBeanMethod="selectRmPlatform"/>
+		<operate operateType="DELETE" operateName="平台类型删除" interceptMethod="deleteRmPlatform" pkId="platformId" getBeanMethod="selectRmPlatform" businessName="platformName"/>
+	</module>
+	<!-- 平台类型-end -->
+	<!-- 服务自动化-start -->
+	<!-- 虚机分配参数管理-start -->
+	<module class="com.git.cloud.policy.service.impl.RmVmParamServiceImpl" moduleCode="VM_PARAM" moduleName="虚机分配参数管理">
+		<operate operateType="INSERT" operateName="参数新增" interceptMethod="saveRmVmParamPo"/>
+		<operate operateType="UPDATE" operateName="参数修改" interceptMethod="updateRmVmParamPo" pkId="paramId" getBeanMethod="findRmVmParamPoById"/>
+		<operate operateType="DELETE" operateName="参数删除" interceptMethod="deleteRmVmParamPoById" pkId="paramId" getBeanMethod="findRmVmParamPoById" businessName="objectType"/>
+	</module>
+	<!-- 虚机分配参数管理-end -->
+	<!-- 虚机分配规则管理-start -->
+	<module class="com.git.cloud.policy.service.impl.RmVmRulesServiceImpl" moduleCode="VM_RULE" moduleName="虚机分配规则管理">
+		<operate operateType="UPDATE" operateName="参数修改" interceptMethod="updateRmVmRulesPo" pkId="rulesId" getBeanMethod="findRmVmRulesPoById"/>
+	</module>
+	<!-- 虚机分配规则管理-end -->
+	<!-- 虚机管理服务-start -->
+	<module class="com.git.cloud.resmgt.common.service.impl.RmVmManageServerServiceImpl" moduleCode="VM_SERVER" moduleName="虚机管理服务">
+		<operate operateType="INSERT" operateName="虚拟机管理机新增" interceptMethod="insertOfvmManageServer"/>
+		<operate operateType="UPDATE" operateName="虚拟机管理机修改" interceptMethod="updatevmManageServer" pkId="id" getBeanMethod="getvmManageServerInfo"/>
+		<operate operateType="DELETE" operateName="虚拟机管理机删除" interceptMethod="deleteVMServerList" pkId="id" getBeanMethod="getvmManageServerInfo" businessName="serverName"/>
+	</module>
+	<!-- 虚机管理服务-end -->
+	<!-- 服务自动化-end -->
+	
+	<!-- 流程管理-start -->
+	<!-- 流程设计器-start -->
+	<module class="com.git.cloud.workflow.service.impl.DesignerServiceImpl" moduleCode="WF_TEMPLATE" moduleName="流程模版">
+		<operate operateType="SPECIAL" operateName="保存模版" interceptMethod="saveTemplateDiagram" logMethod="saveTemplateDiagramLog"/>
+		<operate operateType="SPECIAL" operateName="发布模版" interceptMethod="publishTemplate" logMethod="publishTemplateLog"/>
+	</module>
+	<!-- 流程设计器-end -->
+	<!-- 服务策略-start -->
+	<module class="com.git.cloud.workflow.service.impl.ServiceStrategyServiceImpl" moduleCode="WF_SERVICE" moduleName="服务策略">
+		<operate operateType="INSERT" operateName="服务策略新增" interceptMethod="saveService"/>
+		<operate operateType="UPDATE" operateName="服务策略修改" interceptMethod="updateService" pkId="moduleId" getBeanMethod="queryServiceModulePo"/>
+		<operate operateType="DELETE" operateName="服务策略删除" interceptMethod="deleteServiceModule" pkId="moduleId" getBeanMethod="queryServiceModulePo" businessName="moduleName"/>
+	</module>
+	<!-- 服务策略-end -->
+	<!-- 流程管理-end -->
+	<!-- 基础信息维护  start-->
+	<!-- 通用服务器信息管理 start-->
+	<module class="com.git.cloud.resmgt.common.service.impl.RmGeneralServerServiceImpl" moduleCode="GENERAL_SERVER" moduleName="通用服务器管理">
+		<operate operateType="INSERT" operateName="新增通用服务器" interceptMethod="saveRmGeneralServer"></operate>
+		<operate operateType="UPDATE" operateName="修改通用服务器" interceptMethod="updateRmGeneralServer" pkId="id" getBeanMethod="queryRmGeneralServerById"></operate>
+		<operate operateType="DELETE" operateName="删除通用服务器" interceptMethod="deleteRmGeneralServer" pkId="id" getBeanMethod="queryRmGeneralServerById" businessName="serverName"></operate>
+	</module>	
+	<!-- 通用服务器信息管理 end-->
+	<!-- 基础信息维护  end-->
+	<!-- 安全层安全区域信息管理 -->
+	<module class="com.git.cloud.resmgt.network.service.impl.RmNwSecureServiceImpl" moduleCode="SECURE_SERVER" moduleName="安全区域信息管理 ">
+		<operate operateType="INSERT" operateName="新增安全区域" interceptMethod="saveSecureArea"></operate>
+		<operate operateType="UPDATE" operateName="修改安全区域" interceptMethod="updateSecureArea" pkId="secureAreaId" getBeanMethod="getSecureAreaById"></operate>
+		<operate operateType="DELETE" operateName="删除安全区域" interceptMethod="deleteSecureArea" pkId="secureAreaId" getBeanMethod="getSecureAreaById" businessName="secureAreaName"></operate>
+		<operate operateType="INSERT" operateName="新增安全层" interceptMethod="saveSecureTier"></operate>
+		<operate operateType="UPDATE" operateName="修改安全层" interceptMethod="updateSecureTier" pkId="secureTierId" getBeanMethod="getSecureTierById"></operate>
+		<operate operateType="DELETE" operateName="删除安全层" interceptMethod="deleteSecureTier" pkId="secureTierId" getBeanMethod="getSecureTierById" businessName="secureTierName"></operate>
+	</module>
+	<!-- 路由信息维护 -->
+	<module class="com.git.cloud.resmgt.common.service.impl.CmRouteServiceImpl" moduleCode="CMROUTE_SERVER" moduleName="路由信息管理">
+		<operate operateType="INSERT" operateName="新增路由信息" interceptMethod="saveCmRoute"></operate>
+		<operate operateType="UPDATE" operateName="修改路由信息" interceptMethod="updateCmRoute" pkId="id" getBeanMethod="getCmRouteById"></operate>
+		<operate operateType="DELETE" operateName="删除路由信息" interceptMethod="deleteCmRoute" pkId="id" getBeanMethod="getCmRouteById" businessName="name2"></operate>
+	</module>	
+</modules>

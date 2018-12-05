@@ -1,0 +1,9 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>	
+	<!-- 网络资源池管理 -->
+	<package name="netWork-converge-package" extends="netWork-NwResPool-package" namespace="/network/converge">
+	</package>
+</struts>

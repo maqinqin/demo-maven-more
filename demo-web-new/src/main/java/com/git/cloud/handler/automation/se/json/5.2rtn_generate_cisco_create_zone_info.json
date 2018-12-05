@@ -1,0 +1,10 @@
+HashMap
+
+key                  vaule
+
+HBA_Vsan             hashMap of hbawwn -> vsan ID
+HBA_SwithName        hashMap of hbawwn -> switchName
+HBA_FbcName          hashMap of hbawwn -> fabricName
+FAPort_Alias         hashMap of fawwn  -> alias
+FAPort_Vsan          hashMap of FAwwn  -> vsan ID
+FAPort__FbcName      hashMap of FAwwn  -> fabricName

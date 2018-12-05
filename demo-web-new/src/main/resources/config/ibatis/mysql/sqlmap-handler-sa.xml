@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//ibatis.apache.org//DTD SQL Map 2.0//EN"
+	"http://ibatis.apache.org/dtd/sql-map-2.dtd">
+<sqlMap namespace="handler-sa">
+	<typeAlias alias="bizParamInstPo" type="com.git.cloud.handler.po.BizParamInstPo" />
+	<typeAlias alias="srPo" type="com.git.cloud.request.model.po.BmSrPo" />
+	<typeAlias alias="cloudServiceAttrSelPo" type="com.git.cloud.cloudservice.model.po.CloudServiceAttrSelPo" />
+	<typeAlias alias="adminParamPo" type="com.git.cloud.common.model.AdminParamPo" />
+	<typeAlias alias="rmDatacenterPo" type="com.git.cloud.resmgt.common.model.po.RmDatacenterPo" />
+	<typeAlias alias="cmVmPo" type="com.git.cloud.resmgt.common.model.po.CmVmPo" />
+	<typeAlias alias="bmSrRrinfoPo" type="com.git.cloud.request.model.po.BmSrRrinfoPo" />
+	<typeAlias alias="rmVmManageServerPo" type="com.git.cloud.resmgt.common.model.po.RmVmManageServerPo" />
+	<typeAlias alias="cmDatastorePo" type="com.git.cloud.resmgt.common.model.po.CmDatastorePo" />
+	<typeAlias alias="cmDevicePo" type="com.git.cloud.resmgt.common.model.po.CmDevicePo" />
+	<typeAlias alias="cmSeat" type="com.git.cloud.resmgt.common.model.po.CmSeatPo" />
+	<typeAlias alias="nasInfo" type="com.git.cloud.handler.vo.NasInfoVo" />
+	<typeAlias alias="generalServer" type="com.git.cloud.resmgt.common.model.vo.RmGeneralServerVo" />
+	<typeAlias alias="appSys" type="com.git.cloud.appmgt.model.po.AppSysPO" />
+	<typeAlias alias="openstackVmParamVo" type="com.git.cloud.handler.vo.OpenstackVmParamVo" />
+	<insert id="bizParamBatchInsert" parameterClass="java.util.List">	
+		<![CDATA[   
+			insert into BIZ_PARAM_INST(ID,DEVICE_ID,FLOW_INST_ID,NODE_ID,PARAM_KEY,PARAM_VALUE) values 
+		]]>
+		<iterate conjunction=",">
+			<![CDATA[
+				(#boList[].id#,#boList[].deviceId#,#boList[].flowInstId#,#boList[].nodeId#,#boList[].paramKey#,#boList[].paramValue#)
+			]]>
+		</iterate>
+	</insert>
+	
+	<insert id="bizParamInsert" parameterClass="bizParamInstPo">
+		<![CDATA[
+			insert into BIZ_PARAM_INST(ID,DEVICE_ID,FLOW_INST_ID,NODE_ID,PARAM_KEY,PARAM_VALUE)
+				 values (#id#,#deviceId#,#flowInstId#,#nodeId#,#paramKey#,#paramValue#)
+		]]>
+	</insert>
+	
+	<delete id="deleteParamInstsOfFlow" parameterClass="hashMap">
+		<![CDATA[
+			delete from BIZ_PARAM_INST WHERE FLOW_INST_ID = #instanceId#
+		]]>
+	</delete>
+	
+	<delete id="deleteParamInstPo" parameterClass="hashMap">
+		<![CDATA[
+			delete from BIZ_PARAM_INST WHERE DEVICE_ID = #deviceId# AND FLOW_INST_ID = #flowInstId# AND NODE_ID = #nodeId# AND  PARAM_KEY = #paramKey#
+		]]>
+	</delete>
+	<delete id="deleteParamInstForSameKey" parameterClass="hashMap">
+		<![CDATA[
+			delete from BIZ_PARAM_INST WHERE DEVICE_ID = #deviceId# AND FLOW_INST_ID = #flowInstId# AND PARAM_KEY = #paramKey#
+		]]>
+	</delete>
+	<select id="getInstanceParasByInstanceId"  parameterClass="hashMap" resultClass="bizParamInstPo" remapResults="true">
+		<![CDATA[
+			select ID as id,
+				   DEVICE_ID as deviceId,
+				   FLOW_INST_ID as flowInstId,
+				   NODE_ID as nodeId,
+				   PARAM_KEY as paramKey,
+				   PARAM_VALUE as paramValue
+			  from BIZ_PARAM_INST
+			 where FLOW_INST_ID = #instanceId#
+		]]>
+    </select>
+    
+    <select id="getInstanceParasByDeviceId"  parameterClass="hashMap" resultClass="bizParamInstPo" remapResults="true">
+		<![CDATA[
+			select ID as id,
+				   DEVICE_ID as deviceId,
+				   FLOW_INST_ID as flowInstId,
+				   NODE_ID as nodeId,
+				   PARAM_KEY as paramKey,
+				   PARAM_VALUE as paramValue
+			  from BIZ_PARAM_INST
+			 where FLOW_INST_ID = #instanceId#
+			   and DEVICE_ID = #deviceId#
+		]]>
+    </select>
+    
+    <select id="getInstanceParasMapByDevice"  parameterClass="hashMap" resultClass="bizParamInstPo" remapResults="true">
+		<![CDATA[
+			SELECT
+				p.ID id,
+				p.FLOW_INST_ID flowInstId,
+				p.NODE_ID nodeId,
+				p.DEVICE_ID deviceId,
+				p.PARAM_KEY paramKey,
+				p.PARAM_VALUE paramValue
+			FROM
+				bpm_instance i,
+				biz_param_inst p
+			WHERE
+				i.INSTANCE_ID = p.FLOW_INST_ID
+			AND i.SERVICE_REQ_ID = #srId#
+			AND i.SERVICE_RES_REQ_ID = #rrinfoId#
+			AND p.DEVICE_ID = #deviceId#
+		]]>
+    </select>
+    
+    <select id="getBizParamInst"  parameterClass="hashMap" resultClass="bizParamInstPo">
+		<![CDATA[
+			SELECT 
+			       ID AS id,
+				   DEVICE_ID AS deviceId,
+				   FLOW_INST_ID AS flowInstId,
+				   NODE_ID AS nodeId,
+				   PARAM_KEY AS paramKey,
+				   PARAM_VALUE AS paramValue
+			  FROM 
+			  	   BIZ_PARAM_INST
+			 WHERE 
+			 	   FLOW_INST_ID = #flowInstId#
+			       AND DEVICE_ID = #deviceId#
+			       AND PARAM_KEY = #paramKey#
+		]]>
+    </select>
+	<!-- //////////////////////////////////////////AutomationServiceImpl//////////////////////////////// -->
+	<!--读取资源请求对应的数据中心 -->
+	<select id="handler_getDatacenter" parameterClass="java.lang.String" resultClass="rmDatacenterPo">
+		<![CDATA[
+		   SELECT 
+			   RM.ID id,
+			   RM.DATACENTER_CODE datacenterCode,
+			   RM.DATACENTER_CNAME datacenterCname,
+			   RM.ENAME ename,
+			   RM.ADDRESS address,
+			   RM.STATUS status,
+			   RM.IS_ACTIVE isActive,
+			   RM.REMARK remark,
+			   RM.QUEUE_IDEN queueIden
+			   FROM BM_SR_RRINFO RRINFO,RM_DATACENTER RM
+		   WHERE
+			   RRINFO.DATA_CENTER_ID = RM.ID AND
+		       RRINFO.RRINFO_ID = #rrInfoId#
+		]]>
+	</select>
+	
+	<select id="getForDataCenterID" parameterClass="java.lang.String" resultClass="bmSrRrinfoPo">
+		<![CDATA[
+		   SELECT 
+		   		RRINFO.DATA_CENTER_ID AS dataCenterId
+		   FROM
+		   		BM_SR_RRINFO RRINFO
+		   WHERE 
+		   		RRINFO.RRINFO_ID = #rrInfoId#
+		]]>
+	</select>
+	
+	<!-- 读取device所在数据中心，deviceid可能为物理机或虚拟机 -->
+	<select id="handler_getDatacenterByDeviceId" parameterClass="java.lang.String"
+		resultClass="rmDatacenterPo">
+		<![CDATA[
+		   select distinct
+		   dc.ID id,
+		   dc.DATACENTER_CODE datacenterCode,
+		   dc.DATACENTER_CNAME datacenterCname,
+		   dc.ENAME ename,
+		   dc.ADDRESS address,
+		   dc.STATUS status,
+		   dc.IS_ACTIVE isActive,
+		   dc.REMARK remark,
+		   dc.QUEUE_IDEN queueIden
+		   
+		   from  BM_SR sr , RM_DATACENTER dc ,BM_SR_RR_VM_REF ref
+		   where sr.DATACENTER_ID = dc.ID 
+		   and sr.SR_ID = ref.SR_ID
+		   and ref.DEVICE_ID = #deviceId#
+		]]>
+	</select>
+	<!-- 读取虚拟机的datastore -->
+	<select id="handler_getDatastoreName" parameterClass="java.lang.String"
+		resultClass="com.git.cloud.resmgt.common.model.po.CmLocalDiskPo">
+		<![CDATA[
+		   select ld.id, ld.device_id as deviceId, ld.name, ld.size
+			from  CM_LOCAL_DISK ld , CM_VM vm
+		   where ld.ID = vm.DATASTORE_ID 
+		   and vm.ID = #vmId#
+		]]>
+	</select>
+	<!--读取device -->
+	<select id="handler_getDevice" parameterClass="java.lang.String"
+		resultClass="cmDevicePo">
+		<![CDATA[
+		    select  
+			   d.ID id,
+			   d.SEAT_ID seatId,
+			   d.DEVICE_NAME deviceName,
+			   d.SN sn,
+			   d.DEVICE_MODEL_ID deviceModelId,
+			   d.RES_POOL_ID resPoolId,
+			   d.IS_ACTIVE isActive,
+			   d.DESCRIPTION description,
+			   d.DEVICE_STATUS deviceStatus,
+			   d.SEAT_ID seatCode 
+			from CM_DEVICE d 
+		    where d.ID = #devId#
+		]]>
+	</select>
+	
+	<!--获得服务[供给]申请主数据PO -->
+	<select id="handler_getBmSrPo" parameterClass="java.lang.String"
+		resultClass="srPo">
+		<![CDATA[
+		   select 
+				sr.sr_id as srId,
+				sr.sr_code as srCode,
+				sr.app_id as appId,
+				sr.datacenter_id as datacenterId,
+				sr.sr_type_mark as srTypeMark,
+				sr.sr_start_time as srStartTime,
+				sr.sr_end_time as srEndTime,
+				sr.sr_status_code as srStatusCode,
+				sr.urgency_code as urgencyCode,
+				sr.summary as summary,
+				sr.remark as remark,
+				sr.creator_id as creatorId,
+				sr.CREATE_TIME as createTime,
+				sr.CLOSE_TIME as closeTime,
+				sr.APPROVE_MARK as approveMark,
+				sr.CREATE_USER as createUser,
+				sr.TENANT_ID as tenantId
+				
+			from BM_SR sr 
+				left join APP_INFO ap on sr.app_id = ap.app_id
+				left join RM_DATACENTER dc on sr.datacenter_id = dc.id
+			where
+				sr.sr_id = #srId#
+		]]>
+	</select>
+	
+	<!--获得服务[供给]申请主数据PO -->
+	<select id="handler_getRoutesByDcId" parameterClass="hashMap" resultClass="com.git.cloud.handler.po.CmRoutePo">
+		<![CDATA[
+		   SELECT
+				ID, DATACENTER_ID as datacenterId, `NAME`, IP, MASK, GATEWAY, REMARK
+			FROM
+				CM_ROUTE
+			WHERE
+				DATACENTER_ID = #datacenterId#
+				 and IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	
+	<!--读取云服务信息 -->
+	<select id="handler_getServiceAttr" parameterClass="java.lang.String"
+		resultClass="cloudServiceAttrSelPo">
+		<![CDATA[
+		    SELECT  
+			attrSel.ATTR_KEY attrKey ,attrSel.ATTR_VALUE attrValue 
+			FROM BM_SR_RRINFO srinfo ,CLOUD_SERVICE_ATTR attr ,CLOUD_SERVICE_ATTR_SEL attrSel
+			WHERE
+			    srinfo.SERVICE_ID = attr.SERVICE_ID
+			AND attr.ATTR_ID = attrSel.ATTR_ID
+		    AND srinfo.RRINFO_ID = #rrinfoId#
+		]]>
+	</select>
+	<!-- 读取资源管理机信息 -->
+	<select id="handler_getVmManagementServers" parameterClass="hashMap" resultClass="rmVmManageServerPo">
+		<![CDATA[
+		    select id,
+		    	   user_name as userName,
+		    	   server_name as serverName,
+		    	   platform_type as platformType,
+		    	   vm_type as vmType,
+		    	   manage_ip as manageIp,
+		    	   datacenter_id as datacenterId,
+		    	   sub_mask as subMask
+			  from RM_VM_MANAGE_SERVER
+			 where datacenter_id = #datacenterId#
+			   and vm_type = #vmType#
+		]]>
+	</select>
+	<!-- 读取虚拟机列表 -->
+	<select id="handler_getVms" parameterClass="hashMap" resultClass="cmVmPo">
+		<![CDATA[
+		    SELECT
+				v.id,
+				v.host_id AS hostId,
+				v.cpu,
+				v.mem,
+				v.disk,
+				v.datastore_id AS datastoreId,
+				v.du_id AS duId
+			FROM
+				CM_VM v, CM_DEVICE d
+			WHERE v.ID = d.ID 
+			  AND v.id IN $deviceIds$
+			ORDER BY d.DEVICE_NAME
+		]]>
+	</select>
+	<select id="handler_getGeneralServers" parameterClass="hashMap" resultClass="com.git.cloud.resmgt.common.model.po.RmGeneralServerPo">
+		<![CDATA[
+		    select id,
+		    	   server_name as serverName,
+		    	   type,
+		    	   server_ip as serverIp,
+		    	   sub_mask as subMask,
+		    	   gateway,
+		    	   datacenter_id as datacenterId,
+		    	   user_name as userName
+		      from RM_GANERAL_SERVER
+		     where datacenter_id = #datacenterId#
+		       and type = #type#
+		       and IS_ACTIVE = 'Y'
+		]]>
+	</select>
+	<select id="handler_getVmVcenter" parameterClass="hashMap" resultClass="com.git.cloud.handler.vo.VmDeviceVo">
+		<![CDATA[
+			SELECT
+				hd.ID AS hostId,
+				hd.DEVICE_NAME AS esxiName,
+				vd.ID AS deviceId,
+				vd.DEVICE_NAME AS vmName,
+				vms.MANAGE_IP AS vcenterUrl,
+				cp.USER_NAME AS vcenterName,
+				cp.`PASSWORD` AS vcenterPwd,
+				vms.DATACENTER_ID AS datacenterId
+			FROM
+				BM_SR_RR_VM_REF vr,
+				CM_VM cv,
+				CM_DEVICE vd,
+				CM_HOST ch,
+				CM_DEVICE hd,
+				RM_CLUSTER cl,
+				RM_VM_MANAGE_SERVER vms,
+				CM_PASSWORD cp
+			WHERE
+				vr.DEVICE_ID = cv.ID
+			AND cv.ID = vd.ID
+			AND cv.HOST_ID = ch.ID
+			AND ch.ID = hd.ID
+			AND ch.CLUSTER_ID = cl.ID
+			AND cl.MANAGE_SERVER = vms.ID
+			AND vms.ID = cp.RESOURCE_ID
+			AND hd.IS_ACTIVE = 'Y'
+			AND vr.RRINFO_ID = #rrinfoId#
+		]]>
+	</select>
+	<select id="handler_getDatacenterByDeviceIdByResPool" parameterClass="java.lang.String" resultClass="com.git.cloud.resmgt.common.model.po.RmDatacenterPo">
+		<![CDATA[
+			select dc.id as id, dc.DATACENTER_CODE as datacenterCode, dc.QUEUE_IDEN as queueIden 
+				from CM_DEVICE d, RM_RES_POOL p, RM_DATACENTER dc 
+				where d.RES_POOL_ID = p.ID and p.DATACENTER_ID = dc.ID and dc.IS_ACTIVE = 'Y' and d.ID = #deviceId#
+		]]>
+	</select>
+	<select id="general_query_for_one_return" parameterClass="java.lang.String" resultClass="hashMap"  remapResults="true">
+		<![CDATA[
+			$sql$
+		]]>
+	</select>
+	<select id="general_query_for_xml_return" parameterClass="java.lang.String" resultClass="xml" xmlResultName="resultQueryForXMlStr" remapResults="true">
+		<![CDATA[
+			$sql$
+		]]>
+	</select>
+	<select id="handler_getSeatCodeByVmId" parameterClass="hashMap" resultClass="cmSeat">
+		<![CDATA[
+			SELECT s.SEAT_CODE seatCode FROM CM_VM v, CM_DEVICE hd, CM_SEAT s WHERE v.HOST_ID = hd.ID and hd.SEAT_ID = s.ID and v.ID = #deviceId#
+		]]>
+	</select>
+	<select id="handler_getSeatCodeByHostId" parameterClass="hashMap" resultClass="cmSeat">
+		<![CDATA[
+			SELECT s.SEAT_CODE seatCode FROM CM_DEVICE hd, CM_SEAT s WHERE hd.SEAT_ID = s.ID and hd.ID = #deviceId#
+		]]>
+	</select>
+	<select id="handler_getParentSeatCodeByCode" parameterClass="hashMap" resultClass="cmSeat">
+		<![CDATA[
+			SELECT s.PARENT_CODE parentCode FROM CM_SEAT s WHERE s.SEAT_CODE = #seatCode#
+		]]>
+	</select>
+	<!--biz_param_inst  -->
+	<sql id="bizParamInstList">
+			SELECT
+				b.ID AS id,
+				b.DEVICE_ID AS deviceId,
+				c.DEVICE_NAME AS deviceName,
+				b.FLOW_INST_ID AS flowInstId,
+				b.NODE_ID nodeId,
+				b.PARAM_KEY paramKey,
+				b.PARAM_VALUE paramValue,
+				m.INSTANCE_NAME AS instanceName,
+				m.START_DATE startDate
+			FROM
+				BIZ_PARAM_INST b
+			LEFT JOIN CM_DEVICE c ON c.ID = b.DEVICE_ID
+			LEFT JOIN BPM_INSTANCE m ON m.INSTANCE_ID = b.FLOW_INST_ID
+			WHERE
+				c.IS_ACTIVE = 'Y'
+			AND m.IS_ACTIVE = 'Y'
+			<dynamic prepend=" and ">
+			<isNotEmpty property="flowInstId" prepend=" and ">
+		     b.FLOW_INST_ID like concat('%',#flowInstId#,'%')
+			</isNotEmpty>
+			<isNotEmpty property="paramKey" prepend=" and ">
+		     b.PARAM_KEY like concat('%',#paramKey#,'%')
+			</isNotEmpty>
+			<isNotEmpty property="deviceName" prepend=" and ">
+		    c.DEVICE_NAME like concat ('%',#deviceName#,'%')
+			</isNotEmpty>
+			<isNotEmpty property="instanceName" prepend=" and ">
+		   	m.INSTANCE_NAME like concat ('%',#instanceName#,'%')
+			</isNotEmpty>
+		</dynamic>
+	</sql>
+	<select id="bizParamInstTotal" parameterClass="hashMap"
+		resultClass="Integer">
+		select count(1) from (
+		<include refid="bizParamInstList" />
+		) as recordTable
+	</select>
+	<select id="bizParamInstPage" parameterClass="hashMap"
+		resultClass="hashMap" remapResults="true">
+		<include refid="bizParamInstList" />
+		$_orderby$ 
+		limit #startIndex# ,#pageSize#
+	</select>
+	<!--修改流程实例参数  -->
+	<update id="updateParamValue" parameterClass="bizParamInstPo">
+	  UPDATE  BIZ_PARAM_INST b
+	  SET
+	   b.PARAM_VALUE = #paramValue#
+       WHERE  b.ID=#id#
+	</update>
+	
+	<select id="getBizParamInstById" parameterClass="hashMap" resultClass="bizParamInstPo">
+		SELECT
+			b.ID AS id,
+			b.DEVICE_ID AS deviceId,
+			c.DEVICE_NAME AS deviceName,
+			b.FLOW_INST_ID AS flowInstId,
+			b.NODE_ID nodeId,
+			b.PARAM_KEY paramKey,
+			b.PARAM_VALUE paramValue
+		FROM
+			BIZ_PARAM_INST b
+		LEFT JOIN CM_DEVICE c ON c.ID = b.DEVICE_ID
+		WHERE b.ID=#id# 
+	</select>
+	<select id="handler_findDeviceServerInfo" parameterClass="hashMap" resultClass="generalServer">
+		<![CDATA[
+			SELECT
+		    ip.IP serverIp,
+		    p.USER_NAME userName,
+		    p.`PASSWORD` PASSWORD
+		FROM
+		    CM_DEVICE d,
+		    CM_PASSWORD p,
+		    rm_nw_openstack_ip_address ip,
+		    rm_nw_openstack_virtual_network nrp
+		WHERE
+		    d.ID = p.RESOURCE_ID
+		AND d.ID = ip.INSTANCE_ID
+		AND ip.NETWORK_ID = nrp.ID
+		AND d.ID = #deviceId#
+		]]>
+	</select>
+
+	<select id="handler_findAppInfoBySrId" parameterClass="hashMap" resultClass="appSys">
+		<![CDATA[
+			SELECT
+				a.ENAME ename
+			FROM
+				BM_SR s, APP_INFO a
+			WHERE
+				s.APP_ID = a.APP_ID
+			AND s.SR_ID = #srId#
+		]]>
+	</select>
+	<select id="handler_findOpenstackVmParamByVmId" parameterClass="hashMap" resultClass="openstackVmParamVo">
+		<![CDATA[
+			SELECT
+                vd.DEVICE_NAME vmName,
+                pw.USER_NAME userName,
+                pw. PASSWORD PASSWORD,
+                hd.DEVICE_NAME hostName,
+                hrp.az_name azName,
+                IFNULL(p.ID,v.PROJECT_ID) projectId,
+                p.`NAME` projectName,
+                vms.MANAGE_IP openstackIp,
+                vms.DOMAIN_NAME domainName,
+                vms.ID openstackId,
+                vms.version version,
+                vms.manage_one_ip manageOneIp,
+                pn.ID networkId,
+                pn.IAAS_UUID  as networkIaasUuid,
+                ip.IP serverIp,
+                v.vm_group_id vmGroupId,
+                sub.ID subnetId,
+                pn.VROUTER_ID routerId
+            FROM
+                CM_DEVICE vd,
+                CM_VM v 
+                    LEFT JOIN CM_HOST h ON v.HOST_ID = h.ID
+                LEFT JOIN CM_DEVICE hd ON h.ID = hd.ID,
+                CM_PASSWORD pw,
+                RM_HOST_RES_POOL hrp,
+                RM_NW_OPENSTACK_IP_ADDRESS ip,
+                RM_NW_OPENSTACK_VIRTUAL_NETWORK pn LEFT JOIN  CLOUD_PROJECT p on pn.PROJECT_ID = p.ID,
+                RM_VM_MANAGE_SERVER vms,
+                rm_nw_openstack_virtual_subnet sub
+            WHERE
+                vd.ID = v.ID
+            AND v.ID = pw.RESOURCE_ID
+            AND vd.RES_POOL_ID = hrp.ID
+            AND vd.ID = ip.INSTANCE_ID
+            AND IP.NETWORK_ID = pn.ID
+            AND pn.VM_MS_ID = vms.ID
+            AND sub.VIRTUAL_NETWORK_ID = pn.ID
+            AND vd.ID = #vmId#
+		]]>
+	</select>
+	
+</sqlMap>

@@ -1,0 +1,45 @@
+{
+	"HEADER":{
+		"RESOURCE_CLASS": "SE",
+		"RESOURCE_TYPE": "NETAPP",
+		"OPERATION": 3011
+	},
+	"BODY" :{
+		"DATACENTER_ENAME":"NH/YQ",		
+		"NAS_AVAILABLE_RATE_THRESHOLD":"30.0",
+		"CHOOSE_TYPE":"DB/FILE"
+		"DATA_TYPE":{
+			[	
+				"vol_name":"vol1",
+				"size":"8",
+			],
+			[
+				"vol_name":"vol2",
+				"size":"8",
+			]
+		},
+		"NAS_SN":[
+				{
+					"SN":["000292603714"],
+					"STORAGE_MGR":{
+						"SERVICE_IP": "128.192.162.48",
+						"USER_NAME":"admin",
+						"USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+						"NAME_SPACE":"interop"
+						},
+					"IS_PRIOR":"Y", //是否优先分配
+				},
+				{
+					"SN":["000292603715"],
+					"STORAGE_MGR":{
+						"SERVICE_IP": "128.192.162.48",
+						"USER_NAME":"admin",
+						"USER_PASSWD":"n8RFzGKUXeLX4X6qBNJYCkWytJQ%2BRxc5",
+						"NAME_SPACE":"interop"
+						},
+					"IS_PRIOR":"N"//是否优先分配
+				}
+			]
+		
+	}
+}

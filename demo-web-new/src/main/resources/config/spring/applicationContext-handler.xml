@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- START SNIPPET: beans -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws"
+    xsi:schemaLocation="
+	http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+	<bean id="bizParamInstServiceImpl" class="com.git.cloud.handler.service.BizParamInstServiceImpl">
+		<property name="bizParamInstDAOImpl" ref="bizParamInstDAOImpl" />
+	</bean>
+	
+	<bean id="bizParamInstDAOImpl" class="com.git.cloud.handler.dao.BizParamInstDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="AutomationDaoImpl" class="com.git.cloud.handler.dao.AutomationDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="storageDAO" class="com.git.cloud.handler.automation.se.dao.StorageDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="automationServiceImpl" class="com.git.cloud.handler.service.AutomationServiceImpl">
+		<property name="ipAllocToDevice" ref="ipAllocToDeviceImpl" />
+		<!-- <property name="paramService" ref="paramService" /> -->
+		<property name="parameterServiceImpl" ref="parameterServiceImpl"/>
+		<property name="AutomationDao" ref="AutomationDaoImpl" />
+		<property name="cmVmDao" ref="cmVmDAO" />
+		<property name="bmSrRrinfoDao" ref="bmSrRrinfoDaoImpl" />
+		<property name="bmSrRrVmRefDao" ref="bmSrRrVmRefDaoImpl" />
+		<property name="bmSrAttrValDao" ref="bmSrAttrValDaoImpl" />
+		<property name="cloudServiceDao" ref="cloudServiceDao" />
+		<property name="packageDefDao" ref="packageDefDao" />
+		<property name="imageDao" ref="imageDao" />
+		<property name="scriptDao" ref="scriptDao" />
+		<property name="scriptParamDao" ref="scriptParamDao" />
+		<property name="cmPasswordDao" ref="cmPasswordDAO" />
+		<property name="cmDeviceDao" ref="cmDeviceDAO" />
+		<property name="deployunitDao" ref="deployunitDaoImpl" />
+		<property name="rmClusterDao" ref="rmClusterDAO" />
+		<property name="cmHostDao" ref="cmHostDAO" />
+		<property name="rmVmManageServerDAO" ref="rmVmManageServerDAO" />
+		<property name="rmDatacenterDAO" ref="rmDatacenterDAO" />
+	</bean>
+	
+	<bean id="firewallAutomationServiceImpl" class="com.git.cloud.handler.service.FirewallAutomationServiceImpl">
+		<property name="firewallAutomationDAOImpl" ref="firewallAutomationDAOImpl" />
+		<property name="bmSrDaoImpl" ref="bmSrDaoImpl" />
+	</bean>
+	
+	<bean id="firewallAutomationDAOImpl" class="com.git.cloud.handler.dao.FirewallAutomationDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="automationStorageDAOImpl" class="com.git.cloud.handler.dao.AutomationStorageDAOImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id = "storageDAOImpl" class="com.git.cloud.handler.automation.se.dao.StorageDaoImpl">
+		<property name="dataSource" ref="jndiDataSource" />
+		<property name="sqlMapClient" ref="sqlMapClient" />
+	</bean>
+	
+	<bean id="storageService" class="com.git.cloud.handler.service.StorageServiceImpl">
+		<property name="autoSeDAOImpl" ref="automationStorageDAOImpl"/>
+		<property name="storageDAOImpl" ref = "storageDAOImpl"/>
+	</bean>
+	
+</beans>

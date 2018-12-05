@@ -1,0 +1,14 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+
+<struts>
+	<package name="tankflow-package" extends="icms-package"
+		namespace="/tankflow">
+	</package>
+	<package name="tankflow-designer" extends="tankflow-package"
+		namespace="/tankflow/designer">
+		<action name="getTemplateTree" class="businessDesignerAction" method="getTemplateTree" />
+		<action name="getTemplateByType" class="businessDesignerAction" method="getTemplateByType" />
+	</package>
+</struts>

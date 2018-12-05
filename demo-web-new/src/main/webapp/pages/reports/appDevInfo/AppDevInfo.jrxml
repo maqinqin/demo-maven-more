@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="AppDevInfo" language="groovy" pageWidth="746" pageHeight="842" columnWidth="706" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="530ed28c-2674-49e9-996a-37c7d632b870">
+	<property name="ireport.zoom" value="1.21000000000003"/>
+	<property name="ireport.x" value="0"/>
+	<property name="ireport.y" value="0"/>
+	<style name="宋体" fontName="宋体" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H" isPdfEmbedded="true"/>
+	<style name="微软雅黑(细)" fontName="微软雅黑 Light" isBold="false" isStrikeThrough="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+	<style name="微软雅黑(粗)" fontName="微软雅黑" isBold="false" isItalic="true" isStrikeThrough="false" pdfFontName="STSong-Light" pdfEncoding="UniGB-UCS2-H"/>
+	<subDataset name="dataset1" uuid="aaff8ed9-4142-4e9f-93fb-a647af2cb96d"/>
+	<parameter name="sqlStr" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="TIMELINE" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="VMTYPE" class="java.lang.String">
+		<defaultValueExpression><![CDATA[]]></defaultValueExpression>
+	</parameter>
+	<parameter name="TIMELINENEXT" class="java.lang.String"/>
+	<parameter name="SERVERNAME" class="java.lang.String"/>
+	<parameter name="SERVERPORT" class="java.lang.String"/>
+	<parameter name="CONTEXTPATH" class="java.lang.String"/>
+	<parameter name="sqlStrForPic" class="java.lang.String">
+		<defaultValueExpression><![CDATA["select * from app_du"]]></defaultValueExpression>
+	</parameter>
+	<parameter name="SUBREPORT_DIR" class="java.lang.String" isForPrompting="false">
+		<defaultValueExpression><![CDATA["E:\\jasper_ireport\\"]]></defaultValueExpression>
+	</parameter>
+	<queryString>
+		<![CDATA[$P!{sqlStr}]]>
+	</queryString>
+	<field name="APP_ID" class="java.lang.String">
+		<fieldDescription><![CDATA[]]></fieldDescription>
+	</field>
+	<field name="appName" class="java.lang.String"/>
+	<field name="vmRemain" class="java.lang.Long"/>
+	<field name="vmSupply" class="java.lang.Long"/>
+	<field name="vmRecycle" class="java.lang.Long"/>
+	<field name="cpuRemain" class="java.math.BigDecimal"/>
+	<field name="cpuSupply" class="java.math.BigDecimal"/>
+	<field name="cpuRecycle" class="java.math.BigDecimal"/>
+	<field name="memRemain" class="java.math.BigDecimal"/>
+	<field name="memSupply" class="java.math.BigDecimal"/>
+	<field name="memRecycle" class="java.math.BigDecimal"/>
+	<field name="diskRemain" class="java.math.BigDecimal"/>
+	<field name="diskSupply" class="java.math.BigDecimal"/>
+	<field name="diskRecycle" class="java.math.BigDecimal"/>
+	<title>
+		<band height="43" splitType="Stretch">
+			<staticText>
+				<reportElement style="微软雅黑(粗)" x="262" y="0" width="229" height="43" uuid="1029f8fc-048f-4de6-8108-dabd0cef1ea4"/>
+				<textElement textAlignment="Center">
+					<font size="20" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[业务系统资源统计]]></text>
+			</staticText>
+			<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
+				<reportElement style="微软雅黑(细)" x="89" y="0" width="39" height="18" uuid="a4c87c53-9b70-4573-9007-0f7471cc9225"/>
+				<textElement>
+					<font size="8" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["PDF格式"]]></textFieldExpression>
+				<hyperlinkReferenceExpression><![CDATA["http://"+$P{SERVERNAME}+":"+$P{SERVERPORT}+$P{CONTEXTPATH}+"/pages/reports/appDevInfo/pdf.jsp?timeLine="+$P{TIMELINE}+"&timeLineNext="+$P{TIMELINENEXT}+"&queryvmType="+$P{VMTYPE}+""]]></hyperlinkReferenceExpression>
+			</textField>
+			<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
+				<reportElement style="微软雅黑(细)" x="38" y="0" width="51" height="18" uuid="b5931cb8-5b17-4ae1-a371-6942759d0ec6"/>
+				<textElement>
+					<font size="8" isItalic="false"/>
+				</textElement>
+				<textFieldExpression><![CDATA["EXCEL格式"]]></textFieldExpression>
+				<hyperlinkReferenceExpression><![CDATA["http://"+$P{SERVERNAME}+":"+$P{SERVERPORT}+$P{CONTEXTPATH}+"/pages/reports/appDevInfo/excel.jsp?timeLine="+$P{TIMELINE}+"&timeLineNext="+$P{TIMELINENEXT}+"&queryvmType="+$P{VMTYPE}+""]]></hyperlinkReferenceExpression>
+			</textField>
+			<textField isBlankWhenNull="false" hyperlinkType="Reference">
+				<reportElement style="微软雅黑(细)" x="0" y="0" width="38" height="18" uuid="b9f625b7-e5ee-420d-8e94-8cd4bad547a6"/>
+				<textElement>
+					<font size="12" isBold="true"/>
+				</textElement>
+				<textFieldExpression><![CDATA["返回"]]></textFieldExpression>
+				<hyperlinkReferenceExpression><![CDATA["http://"+$P{SERVERNAME}+":"+$P{SERVERPORT}+$P{CONTEXTPATH}+"/pages/reports/appDevInfo/html.jsp?timeLine="+$P{TIMELINE}+"&timeLineNext="+$P{TIMELINENEXT}+"&queryvmType="+$P{VMTYPE}+""]]></hyperlinkReferenceExpression>
+			</textField>
+			<textField hyperlinkType="Reference" hyperlinkTarget="Blank">
+				<reportElement style="微软雅黑(细)" x="128" y="0" width="47" height="18" uuid="4523a2f8-0e07-4419-9c57-ab9ee6856434"/>
+				<textElement>
+					<font size="8"/>
+				</textElement>
+				<textFieldExpression><![CDATA["WORD格式"]]></textFieldExpression>
+				<hyperlinkReferenceExpression><![CDATA["http://"+$P{SERVERNAME}+":"+$P{SERVERPORT}+$P{CONTEXTPATH}+"/pages/reports/appDevInfo/word.jsp?timeLine="+$P{TIMELINE}+"&timeLineNext="+$P{TIMELINENEXT}+"&queryvmType="+$P{VMTYPE}+""]]></hyperlinkReferenceExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="19" splitType="Stretch">
+			<staticText>
+				<reportElement style="微软雅黑(粗)" x="0" y="0" width="63" height="19" uuid="c81678ed-0fd0-4994-8a2b-473a4cd46d3b"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12"/>
+				</textElement>
+				<text><![CDATA[统计月份：]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="微软雅黑(粗)" x="63" y="0" width="66" height="19" uuid="baf65cfe-8040-46f7-bf4e-4f3afdeb9813"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{TIMELINE}]]></textFieldExpression>
+			</textField>
+			<staticText>
+				<reportElement style="微软雅黑(粗)" x="129" y="0" width="78" height="19" uuid="b7bd5c9c-867a-4432-85ea-916b2543673c"/>
+				<textElement textAlignment="Right" verticalAlignment="Middle">
+					<font size="12" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[虚拟机类型：]]></text>
+			</staticText>
+			<textField>
+				<reportElement style="微软雅黑(粗)" x="207" y="0" width="67" height="19" uuid="e99a60fd-d949-4402-9855-e1d9fa64b3dd"/>
+				<textElement verticalAlignment="Middle">
+					<font size="10"/>
+				</textElement>
+				<textFieldExpression><![CDATA[$P{VMTYPE}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageHeader>
+	<columnHeader>
+		<band height="34" splitType="Stretch">
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="13" y="0" width="60" height="34" backcolor="#808080" uuid="c283ce01-ed52-4696-a92d-2a58c764b5fa"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false" isUnderline="false" isStrikeThrough="false"/>
+				</textElement>
+				<text><![CDATA[业务系统]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="73" y="0" width="64" height="34" backcolor="#A9A9A9" uuid="00c585b4-6031-4e68-997f-ac1503254539"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false" isUnderline="false"/>
+				</textElement>
+				<text><![CDATA[上月留存虚拟机(台)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="201" y="0" width="64" height="34" backcolor="#A9A9A9" uuid="8cbc8ef7-05e5-41b6-aa41-38ab1ce3d434"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[回收虚拟机数量(台)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="265" y="0" width="45" height="34" backcolor="#808080" uuid="d6b8e33a-54e7-41da-9480-4bdc177577cb"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[留存cpu(核)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="137" y="0" width="64" height="34" backcolor="#808080" uuid="26ff4b36-5075-451a-ad4d-0c60ddc0d96a"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[供给虚拟机数量(台)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="310" y="0" width="45" height="34" backcolor="#A9A9A9" uuid="222312a9-a7df-4baa-8ae5-65b2a0ff0010"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[新增cpu(核)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="355" y="0" width="45" height="34" backcolor="#808080" uuid="ca63b59c-fa18-40ec-8cd3-6587358be4ca"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[回收cpu(核)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="400" y="0" width="51" height="34" backcolor="#A9A9A9" uuid="9ec7ad51-af42-4b33-ac29-dbaa13f4fc9a"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[留存内存(G)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="451" y="0" width="51" height="34" backcolor="#808080" uuid="3b7d628b-5f89-4544-9412-11a105e3dcb0"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[新增内存(G)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="502" y="0" width="51" height="34" backcolor="#A9A9A9" uuid="cb11e772-48e5-4dec-adf6-7f92bfef3a38"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[回收内存(G)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="553" y="0" width="51" height="34" backcolor="#808080" uuid="1e5513a1-8376-442f-89a8-75ce8d5afa4b"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[留存磁盘(G)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="604" y="0" width="51" height="34" backcolor="#A9A9A9" uuid="eedbf8ec-c30b-4830-a5cc-6dd60a950926"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[新增磁盘(G)]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" mode="Opaque" x="655" y="0" width="51" height="34" backcolor="#808080" uuid="79fbacf3-8118-4d67-a169-8a7a2b0ff621"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle">
+					<font size="12" isBold="false" isItalic="false"/>
+				</textElement>
+				<text><![CDATA[回收磁盘(G)]]></text>
+			</staticText>
+			<elementGroup>
+				<staticText>
+					<reportElement style="微软雅黑(细)" mode="Opaque" x="0" y="0" width="13" height="34" backcolor="#A9A9A9" uuid="21092654-0b1d-4bcc-994e-bf76ebd7a26f"/>
+					<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+						<pen lineWidth="0.25"/>
+						<topPen lineWidth="0.25"/>
+						<leftPen lineWidth="0.25"/>
+						<bottomPen lineWidth="0.25"/>
+						<rightPen lineWidth="0.25"/>
+					</box>
+					<textElement textAlignment="Center" verticalAlignment="Middle">
+						<font size="12"/>
+					</textElement>
+					<text><![CDATA[序号]]></text>
+				</staticText>
+			</elementGroup>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="36" splitType="Stretch">
+			<textField>
+				<reportElement style="宋体" mode="Transparent" x="13" y="0" width="60" height="36" backcolor="#800000" uuid="41743ce2-c455-4f93-90f4-c7d558c2c9b8"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{appName}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="73" y="0" width="64" height="36" backcolor="#800000" uuid="0d842de6-c245-48e7-a7c6-8af4cdedc693"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{vmRemain}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="201" y="0" width="64" height="36" backcolor="#800000" uuid="8fdcd1c8-2683-4af0-8840-2fb469ffbdb4"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{vmRecycle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="137" y="0" width="64" height="36" backcolor="#800000" uuid="c57a3944-0186-4d06-a808-35b15503fa0d"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{vmSupply}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="310" y="0" width="45" height="36" backcolor="#800000" uuid="ccfa3d1c-9cde-47bf-9363-e65d800e065c"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{cpuSupply}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="355" y="0" width="45" height="36" backcolor="#800000" uuid="b251176b-5a32-4afc-ba6a-bf9828b5b925"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{cpuRecycle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="400" y="0" width="51" height="36" backcolor="#800000" uuid="4140ff50-bfdd-4d71-ad3f-acd070a88f54"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{memRemain}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="502" y="0" width="51" height="36" backcolor="#800000" uuid="238121f4-863b-469a-b507-d835e6713f58"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{memRecycle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="553" y="0" width="51" height="36" backcolor="#800000" uuid="b884207f-c837-4e3d-8b56-527ac1b1158f"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{diskRemain}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="604" y="0" width="51" height="36" backcolor="#800000" uuid="716c6981-8ecb-4e47-8f59-ab8e877881d9"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{diskSupply}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="655" y="0" width="51" height="36" backcolor="#800000" uuid="600e19c9-df02-442b-b4a1-f8d73100ae82"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{diskRecycle}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="265" y="0" width="45" height="36" backcolor="#800000" uuid="18d68605-23dd-43a7-8ad3-5fe64c71fa3c"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{cpuRemain}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="451" y="0" width="51" height="36" backcolor="#800000" uuid="2c09160d-63ff-4f35-af37-9f3ebcce3730"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$F{memSupply}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement mode="Transparent" x="0" y="0" width="13" height="36" backcolor="#800000" uuid="4d0af0ce-b1cc-41cf-a9fa-1161e1ffe7cf"/>
+				<box topPadding="1" leftPadding="1" bottomPadding="1" rightPadding="1">
+					<pen lineWidth="0.25"/>
+					<topPen lineWidth="0.25"/>
+					<leftPen lineWidth="0.25"/>
+					<bottomPen lineWidth="0.25"/>
+					<rightPen lineWidth="0.25"/>
+				</box>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{COLUMN_COUNT}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<pageFooter>
+		<band height="22" splitType="Stretch">
+			<staticText>
+				<reportElement style="微软雅黑(细)" x="642" y="0" width="13" height="22" uuid="f414bd29-55b1-42df-9eae-8e53f663fd63"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[第]]></text>
+			</staticText>
+			<staticText>
+				<reportElement style="微软雅黑(细)" x="669" y="0" width="17" height="22" uuid="cefa769e-a6ee-438d-82c6-99191201a99c"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<text><![CDATA[页]]></text>
+			</staticText>
+			<textField>
+				<reportElement x="655" y="0" width="14" height="22" uuid="30c5cf96-6af9-4df1-a60e-42ed8ea8c3f5"/>
+				<textElement textAlignment="Center" verticalAlignment="Middle"/>
+				<textFieldExpression><![CDATA[$V{PAGE_NUMBER}]]></textFieldExpression>
+			</textField>
+		</band>
+	</pageFooter>
+	<summary>
+		<band height="340">
+			<subreport>
+				<reportElement x="0" y="0" width="706" height="340" uuid="0e4b080a-e11c-4879-b4bf-f2d374b4727b"/>
+				<subreportParameter name="sqlStrForPic">
+					<subreportParameterExpression><![CDATA[$P{sqlStrForPic}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="VMTYPE">
+					<subreportParameterExpression><![CDATA[$P{VMTYPE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<subreportParameter name="TIMELINE">
+					<subreportParameterExpression><![CDATA[$P{TIMELINE}]]></subreportParameterExpression>
+				</subreportParameter>
+				<connectionExpression><![CDATA[$P{REPORT_CONNECTION}]]></connectionExpression>
+				<subreportExpression><![CDATA[$P{SUBREPORT_DIR} + "sample.jasper"]]></subreportExpression>
+			</subreport>
+		</band>
+	</summary>
+</jasperReport>

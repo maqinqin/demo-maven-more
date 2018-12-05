@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE sqlMap PUBLIC "-//iBATIS.com//DTD SQL Map 2.0//EN"
+		"http://www.ibatis.com/dtd/ibatis-2-config.dtd">
+<sqlMap namespace="Shiro">
+	<typeAlias alias="sysUserPo" type="com.git.cloud.sys.model.po.SysUserPo" />
+	<typeAlias alias="sysMenu" type="com.git.cloud.sys.model.po.SysMenuPo" />
+	<typeAlias alias="certificate" type="com.git.cloud.shiro.model.CertificatePo" />
+
+	<resultMap id="sysMenuResult" class="sysMenu">
+		<result property="id" column="ID" />
+		<result property="menuName" column="MENU_NAME" />
+		<result property="menuCode" column="MENU_CODE" />
+		<result property="menuDesc" column="MENU_DESC" />
+		<result property="menuUrl" column="MENU_URL" />
+		<result property="parent.id" column="PARENT_ID" />
+		<result property="orderId" column="ORDER_ID" />
+		<result property="resourceType" column="RESOURCE_TYPE" />
+		<result property="isActive" column="IS_ACTIVE" />
+	</resultMap>
+
+	<!--获得用户信息 -->
+	<select id="Shiro.findUserByLoginName" parameterClass="java.lang.String"
+		resultClass="sysUserPo">
+		<![CDATA[
+		  select 
+		    us.user_id as userId,
+				us.org_id as orgId,
+				org.org_name as orgName,
+				us.first_name as firstName,
+				us.last_name as lastName,
+				us.login_name as loginName,
+				us.login_password  as loginPassword,
+				us.email as email,
+				us.phone as phone,
+				us.ip_address as ipAddress,
+				us.last_login as lastLogin,
+				us.user_type as userType,
+				us.create_user as createUser,
+				us.create_datetime as createDateTime,
+				us.plat_user as platUser		
+			from SYS_USER us left join SYS_ORGANIZATION org on us.org_id = org.org_id
+			where binary us.login_name = #loginName# and us.is_active = 'Y'
+		]]>
+	</select>
+
+	<select id="Shiro.userPermissions" resultMap="sysMenuResult"
+		parameterClass="java.lang.String">
+		SELECT a.*
+		FROM SYS_MENU a join SYS_MENU_ROLE b on a.id = b.MENU_ID 
+			join SYS_ROLE c on b.MENU_ID=c.ROLE_ID
+			join SYS_USER_ROLE d on c.ROLE_ID =d.ROLE_ID 
+			join SYS_USER e on d.USER_ID = e.USER_ID
+		where d.USER_ID = #userId#
+	</select>
+	 <select id="findAllTime"   resultClass="certificate">
+	  <![CDATA[ 
+	  SELECT  LAST_LOGIN_TIME FROM  SYS_CERTIFICATE_PARAM
+	   ]]>
+	  </select> 
+</sqlMap>

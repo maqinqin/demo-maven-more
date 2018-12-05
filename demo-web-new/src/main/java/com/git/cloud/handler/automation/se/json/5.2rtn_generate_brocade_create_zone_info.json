@@ -1,0 +1,12 @@
+HashMap
+
+key                  vaule
+
+HBA_SWITCHNAME        hashMap of hbawwn -> switchName
+HBA_VFNAME          hashMap of hbawwn -> VFName
+FAPORT_ALIAS        hashMap of fawwn  -> alias
+FAPORT_VFNAME      hashMap of FAwwn  -> VFName
+
+
+List
+"VF_NAME": [Fabric_CCB-TEST1,Fabric_CCB-TEST2]

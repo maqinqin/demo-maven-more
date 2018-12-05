@@ -1,0 +1,478 @@
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"
+          "http://struts.apache.org/dtds/struts-2.1.7.dtd">
+<struts>
+	<package name="cloud-service-package" extends="icms-package"
+		namespace="/cloud-service">
+	</package>
+	<package name="cloud-service-image" extends="cloud-service-package"
+		namespace="/cloud-service/image">
+		<!-- 镜像信息 -->
+		<action name="showImageAll" class="imageAction" method="showImageAll">
+			<result name="success">/pages/service/image/imageList.jsp</result>
+		</action>
+		
+		<action name="queryImageAll" class="imageAction" method="queryImageAll"></action>
+		<action name="insertImage" class="imageAction" method="insertImage"></action>
+		<action name="updateImage" class="imageAction" method="updateImage"></action>
+		<action name="deleteImage" class="imageAction" method="deleteImage"></action>
+		<action name="showImage" class="imageAction" method="showImage"></action>
+
+		<!-- 软件信息 -->
+		<action name="showSoft" class="softWareAction" method="showSoft">
+			<result name="success">/pages/service/image/softWareList.jsp</result>
+		</action>
+		<action name="showSoftWareAll" class="softWareAction"
+			method="showSoftWareAll"></action>
+		<action name="showSoftAll" class="softWareAction"
+			method="showSoftAll"></action>
+		<action name="showSoftWareVerAllBySoftWareId" class="softWareAction"
+			method="showSoftWareVerAllBySoftWareId"></action>
+		<action name="insertSoftWare" class="softWareAction"
+			method="insertSoftWare"></action>
+		<action name="showSoftWareBysoftWareId" class="softWareAction"
+			method="showSoftWareBysoftWareId"></action>
+		<action name="updateSoftWare" class="softWareAction"
+			method="updateSoftWare"></action>
+		<action name="deleteSoftWare" class="softWareAction"
+			method="deleteSoftWare"></action>
+		<action name="checkSoftwareNameAct" class="softWareAction"
+			method="checkSoftwareName"></action>
+		<!-- 软件版本 -->
+		<action name="showVerBysoftWareIdAll" class="softWareAction"
+			method="showVerBysoftWareIdAll">
+		</action>
+		<action name="showVerAllBySoftId" class="softWareAction"
+			method="showVerAllBySoftId"></action>
+		<action name="insertSoftWareVer" class="softWareAction"
+			method="insertSoftWareVer"></action>
+		<action name="showSoftWareVerUpdate" class="softWareAction"
+			method="showSoftWareVerUpdate"></action>
+		<action name="updateSoftWareVer" class="softWareAction"
+			method="updateSoftWareVer"></action>
+		<action name="deleteSoftWareVer" class="softWareAction"
+			method="deleteSoftWareVer"></action>
+		<action name="findSoftsByImageIdAct" class="softWareAction"
+			method="findSoftsByImageId"></action>
+		<action name="checkSoftwareVerNameAct" class="softWareAction"
+			method="checkSoftwareVerName"></action>
+	</package>
+	<!-- 脚本信息 -->
+	<package name="cloud-service-script" extends="cloud-service-package"
+		namespace="/cloud-service/script">
+		<action name="loadParam"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="load">
+			<result name="success">/pages/cloud/package/scriptParam-update.jsp
+			</result>
+		</action>
+		<action name="main"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="main">
+			<result name="success">/pages/cloud/package/main.jsp</result>
+		</action>
+		<action name="load"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="load">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="loadDict"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="loadDict">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="loadTree"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="loadTree">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					treeList.*
+				</param>
+			</result>
+		</action>
+		<action name="checkScriptPackageName"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="checkScriptPackageName">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="checkScriptModelName"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="checkScriptModelName">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="checkScriptName"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="checkScriptName">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="save"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="loadScriptParams"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="loadScriptParams">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="delete"
+			class="com.git.cloud.cloudservice.action.PackageDefAction" method="delete">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<!-- 新添加功能：删除前的验证 -->
+		<action name="modelValidate"
+		   class="com.git.cloud.cloudservice.action.PackageDefAction" method="modelValidate">
+		   <result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+	</package>
+        
+	<!-- 云服务定义信息 -->
+	<package name="cloud-service-servicedef" extends="cloud-service-package"
+		namespace="/cloud-service/servicedef">
+		<action name="index" class="cloudServiceAction" method="index">
+			<result name="success">/pages/cloud/service/main.jsp</result>
+		</action>
+		<action name="search"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="search">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					pagination.*
+				</param>
+			</result>
+		</action>
+		<action name="cloudleading" class="com.git.cloud.cloudservice.action.CloudServiceAction" method="cloudleading" />
+
+		<action name="queryVmType"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="queryVmType">
+		</action>
+		<action name="save"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					result.*
+				</param>
+			</result>
+		</action>
+		<action name="load"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="load">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServicePo.*
+				</param>
+			</result>
+		</action>
+		<action name="loadAll"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="loadAll">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceVo.*
+				</param>
+			</result>
+		</action>
+		<action name="delete"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="delete">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServicePo.*
+				</param>
+			</result>
+		</action>
+		<action name="stop"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="stop">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServicePo.*
+				</param>
+			</result>
+		</action>
+		<action name="start"
+			class="com.git.cloud.cloudservice.action.CloudServiceAction" method="stop">
+			<param name="pageParams['start']">1</param>
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServicePo.*
+				</param>
+			</result>
+		</action>
+		<action name="checkCloudServicesAct" class="cloudServiceAction" method="checkCloudServices"></action>
+		<action name="checkCloudTypeCode" class="cloudServiceAction" method="checkCloudTypeCode"></action>
+		<action name="getPowerVcFlavors" class="cloudServiceAction" method="getPowerVcFlavors"></action>
+	</package>
+
+	<!-- 服务流程信息 -->
+	<package name="cloud-service-serviceflowref" extends="struts-default,json-default"
+		namespace="/cloud-service/serviceflowref">
+		<action name="search"
+			class="com.git.cloud.cloudservice.action.CloudServiceFlowRefAction"
+			method="search">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					pagination.*
+				</param>
+			</result>
+		</action>
+		<action name="save"
+			class="com.git.cloud.cloudservice.action.CloudServiceFlowRefAction"
+			method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceFlowRefPo.*
+				</param>
+			</result>
+		</action>
+		<action name="load"
+			class="com.git.cloud.cloudservice.action.CloudServiceFlowRefAction"
+			method="load">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceFlowRefPo.*
+				</param>
+			</result>
+		</action>
+		<action name="delete"
+			class="com.git.cloud.cloudservice.action.CloudServiceFlowRefAction"
+			method="delete">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudserviceFlowRefPo.*
+				</param>
+			</result>
+		</action>
+		<action name="stop"
+			class="com.git.cloud.cloudservice.action.CloudServiceFlowRefAction"
+			method="stop">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudserviceFlowRefPo.*
+				</param>
+			</result>
+		</action>
+		<action name="checkCloudServiceFlowRefsAct" class="cloudServiceFlowRefAction" method="checkCloudServiceFlowRefs"></action>
+	</package>
+	<!-- 服务参数信息 -->
+	<package name="cloud-service-serviceattr" extends="struts-default,json-default"
+		namespace="/cloud-service/serviceattr">
+		<action name="search"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="search">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					pagination.*
+				</param>
+			</result>
+		</action>
+		<action name="save"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrPo.*
+				</param>
+			</result>
+		</action>
+		<!-- 添加属性信息 -->
+		<action name="saveAttr"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="saveAttr">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrPo.*
+				</param>
+			</result>
+		</action>
+		<!-- 更新属性信息 -->
+		<action name="updateAttr"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="updateAttr">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrPo.*
+				</param>
+			</result>
+		</action>
+		<action name="load"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="load">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrPo.*
+				</param>
+			</result>
+		</action>
+		<action name="delete"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="delete">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrPo.*
+				</param>
+			</result>
+		</action>
+		<action name="stop"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="stop">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrPo.*
+				</param>
+			</result>
+		</action>
+		<!-- 查询listSql -->
+		<action name="queryDynamicSql"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrAction"
+			method="queryDynamicSql">
+		</action>
+		<action name="checkCloudServiceAttrsAct" class="cloudServiceAttrAction" method="checkCloudServiceAttrs"></action>
+	</package>
+	<package name="cloud-service-serviceattrsel" extends="struts-default,json-default"
+		namespace="/cloud-service/serviceattrsel">
+		<action name="search"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="search">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					pagination.*
+				</param>
+			</result>
+		</action>
+		<action name="save"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="save">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrSelPo.*
+				</param>
+			</result>
+		</action>
+		<action name="saveOption"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="saveOption">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrSelPo.*
+				</param>
+			</result>
+		</action>
+		<action name="deleteOption"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="deleteOption">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrSelPo.*
+				</param>
+			</result>
+		</action>
+		<action name="load"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="load">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrSelPo.*
+				</param>
+			</result>
+		</action>
+		<action name="delete"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="delete">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrSelPo.*
+				</param>
+			</result>
+		</action>
+		<action name="stop"
+			class="com.git.cloud.cloudservice.action.CloudServiceAttrSelAction"
+			method="stop">
+			<result name="success" type="json">
+				<param name="ignoreHierarchy">false</param>
+				<param name="includeProperties">
+					cloudServiceAttrSelPo.*
+				</param>
+			</result>
+		</action>
+	</package>
+	
+	<!-- 要注意Struts2默认文件上传最大为2M即便你设置了<param name="maximumSize">5242880</param>
+          当上传的文件大于2M时候也会出错的这时要设置，另外一个常量
+    <constant name="struts.multipart.maxSize" value="1000000000"/> -->
+    
+    <package name="service-file" extends="icms-package" namespace="/service/file">
+
+        <action name="uploads" class="com.git.cloud.cloudservice.action.CloudServiceAction" method="uploads">
+            <!-- 指定（限制）上传文件的类型，定义局部拦截器，修改默认拦截器的属性 
+                "fileUpload.maximumSize" ：限制上传最大的文件大小。 
+                "fileUpload.allowedTypes"：允许上传文件的类型。 
+                "fileUpload.allowedExtensions"：允许上传文件的可扩展文件类型。 -->
+            <!-- <interceptor-ref name="defaultStack">
+                <param name="fileUpload.maximumSize">500000000</param>
+                <param name="fileUpload.allowedTypes">text/plain,application/vnd.ms-powerpoint</param>
+                <param name="fileUpload.allowedExtensions">.txt,.ppt</param>
+            </interceptor-ref> -->
+
+            <!-- <result>/success.jsp</result>
+            出现错误自动会返回input结果，进入结果视图
+            <result name="input" >/error.jsp</result> -->
+        </action>
+    </package>
+</struts>
