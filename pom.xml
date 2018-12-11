@@ -14,57 +14,76 @@
 		<!-- <java.home>${env.JAVA_HOME}</java.home> -->
 	</properties>
 	
-	<repositories>
-		<repository>
-			<id>icms-server-public</id>
-			<name>Team Nexus Repository</name>
-			<url>http://10.220.8.114:8081/nexus/content/groups/public</url>
-		</repository>
-		<repository>
-			<id>icms-server-release</id>
-			<name>Team Nexus Repository</name>
-			<url>http://10.220.8.114:8081/nexus/content/repositories/releases</url>
-		</repository>
-		<repository>
-			<id>icms-server-snapshots</id>
-			<name>Team Nexus Repository</name>
-			<url>http://10.220.8.114:8081/nexus/content/repositories/snapshots</url>
-		</repository>
-		<repository>
-			<id>icms-server-thirdparty</id>
-			<name>Team Nexus Repository</name>
-			<url>http://10.220.8.114:8081/nexus/content/repositories/thirdparty</url>
-		</repository>
-		<repository>
-			<id>icms-server-central</id>
-			<name>Team Nexus Repository</name>
-			<url>http://10.220.8.114:8081/nexus/content/repositories/central</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<id>icms-server-public</id>
-			<name>Team Nexus Repository</name>
-			<url>http://10.220.8.114:8081/nexus/content/groups/public</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
+<!-- ================================资源库配置============================================================= -->
+    <repositories>
+        <repository>
+            <id>icms-server-public</id>
+            <name>Team Nexus Repository</name>
+            <url>http://10.220.8.114:8081/nexus/content/groups/public</url>
+        </repository>
+        <repository>
+            <id>icms-server-release</id>
+            <name>Team Nexus Repository</name>
+            <url>http://10.220.8.114:8081/nexus/content/repositories/releases</url>
+        </repository>
+        <repository>
+            <id>icms-server-snapshots</id>
+            <name>Team Nexus Repository</name>
+            <url>http://10.220.8.114:8081/nexus/content/repositories/snapshots</url>
+        </repository>
+        <repository>
+            <id>icms-server-thirdparty</id>
+            <name>Team Nexus Repository</name>
+            <url>http://10.220.8.114:8081/nexus/content/repositories/thirdparty</url>
+        </repository>
+        <repository>
+            <id>icms-server-central</id>
+            <name>Team Nexus Repository</name>
+            <url>http://10.220.8.114:8081/nexus/content/repositories/central</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>Central</id>            
+            <url>http://repo1.maven.org/maven2</url>            
 		</pluginRepository>
-	</pluginRepositories>
-	<distributionManagement>
-		<repository>
-			<id>user-releases</id>
-			<name>User Project Release</name>
-			<url>http://10.220.8.114:8081/nexus/content/repositories/releases/</url>
-		</repository>
-		<snapshotRepository>
-			<id>user-snapshots</id>
-			<name>User Project SNAPSHOTS</name>
-			<url>http://10.220.8.114:8081/nexus/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+		<pluginRepository>
+            <id>icms-server-public</id>
+            <name>Team Nexus Repository</name>
+            <url>http://10.220.8.114:8081/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </pluginRepository>                    
+    </pluginRepositories>
+    <distributionManagement>
+        <repository>
+            <id>user-releases</id>
+            <name>User Project Release</name>
+            <url>http://10.220.8.114:8081/nexus/content/repositories/releases/</url>
+        </repository>
+        <snapshotRepository>
+            <id>user-snapshots</id>
+            <name>User Project SNAPSHOTS</name>
+            <url>http://10.220.8.114:8081/nexus/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+	
 
+<dependencyManagement>
 	<dependencies>
+				<!-- 引入自己的模块 -->
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>demo-common-case</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>demo-web-new</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 		<dependency>
 			<groupId>javax.jms</groupId>
 			<artifactId>javax.jms-api</artifactId>
@@ -935,19 +954,21 @@
 			<version>3.3.3-2</version>
 		</dependency>
 	</dependencies>
-	
+	</dependencyManagement>
 	<build>
 		<plugins>
 			<!-- 编译插件 -->
 			<plugin>  
-                <groupId>org.apache.maven.plugins</groupId>  
                 <artifactId>maven-compiler-plugin</artifactId>  
-                <version>3.7.0</version>  
                 <configuration>  
                     <source>1.8</source>  
                     <target>1.8</target>  
                 </configuration>  
             </plugin>  
+            <!-- 编译插件 -->
+			<plugin>  
+                <artifactId>maven-install-plugin</artifactId>  
+            </plugin>
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
